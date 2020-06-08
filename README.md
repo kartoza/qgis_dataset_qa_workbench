@@ -7,7 +7,7 @@ A QGIS3 plugin for checking checklists
 This plugin uses [pipenv] and [paver] for development.
 
 An easy way to get started is to (fork and) clone this repo, install pipenv 
-and `pipenv install` it!
+and `pipenv install --dev` it!
 
 
 ### Deploying locally

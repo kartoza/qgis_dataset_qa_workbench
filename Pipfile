@@ -9,6 +9,7 @@ paver = "*"
 [packages]
 pyqt5 = "*"
 sip = "*"
+pyqt5-stubs = "*"
 
 [requires]
 python_version = "3.8"
