@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/checklist_checker" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
