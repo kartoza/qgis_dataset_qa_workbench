@@ -1,19 +1,15 @@
+import json
 import typing
+import uuid
 from enum import Enum
+
+import qgis.core
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtCore import Qt
 
-
-class DatasetType(Enum):
-    DOCUMENT = "document"
-    RASTER = "raster"
-    VECTOR = "vector"
-
-
-class ValidationArtifactType(Enum):
-    DATASET = "dataset"
-    METADATA = "metadata"
-    STYLE = "style"
+from . import utils
+from .utils import log_message
+from .constants import DatasetType, ValidationArtifactType
 
 
 class ChecklistItem:
@@ -34,6 +30,7 @@ class ChecklistItem:
 
 
 class Checklist:
+    identifier: uuid.UUID
     name: str
     description: str
     dataset_types: typing.List[DatasetType]
@@ -47,6 +44,7 @@ class Checklist:
             dataset_types: typing.Optional[typing.List[DatasetType]] = None,
             validation_artifact_types: typing.Optional[typing.List[ValidationArtifactType]] = None
     ):
+        self.identifier = uuid.uuid4()
         self.name = name
         self.description = description
         self.dataset_types = list(dataset_types) if dataset_types is not None else list(DatasetType)
@@ -117,3 +115,20 @@ class ChecklistModel(QStandardItemModel):
     def add_check(self, check):
         pass
 
+
+def load_checklists() -> typing.List[Checklist]:
+    directory = utils.get_checklists_dir()
+    result = []
+    for item in directory.iterdir():
+        if item.is_file():
+            try:
+                with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
+                    raw_data = json.load(fh)
+                    try:
+                        checklist = Checklist.from_dict(raw_data)
+                    except ValueError as exc:
+                        log_message(f'Could not generate checklist from {str(item)!r} because: {exc}')
+                    result.append(checklist)
+            except IOError as err:
+                log_message(err)
+    return result

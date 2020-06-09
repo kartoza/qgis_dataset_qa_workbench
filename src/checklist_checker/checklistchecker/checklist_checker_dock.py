@@ -1,5 +1,5 @@
 import typing
-from enum import Enum
+import uuid
 from pathlib import Path
 
 from qgis.gui import QgsFileWidget
@@ -14,21 +14,20 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from . import models
-from .checklist_picker import ChecklistPicker
 from . import utils
+from .checklist_picker import ChecklistPicker
+from .constants import (
+    ChecklistModelColumn,
+    DatasetType,
+    TabPages,
+    ValidationArtifactType,
+)
 from .utils import log_message
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 UI_DIR = Path(__file__).parents[1] / "ui"
 FORM_CLASS, _ = uic.loadUiType(
     str(UI_DIR / 'checklist_checker_dock.ui'))
-
-
-class TabPages(Enum):
-
-    CHOOSE = 0
-    VALIDATE = 1
-    REPORT = 2
 
 
 class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
@@ -77,24 +76,31 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         #validation_page = self.tab_pages[TabPages.VALIDATE.value]
 
     def get_checklists(self):
-        checklists_dir = utils.get_checklists_dir()
-        checklists = utils.load_checklists(checklists_dir)
+        checklists = models.load_checklists()
         return checklists
 
     def load_checklist(self):
-        log_message('inside load_checklist method')
         selected_indexes = self.checklist_picker_dlg.checklists_tv.selectedIndexes()
         if any(selected_indexes):
-            index: QtCore.QModelIndex = selected_indexes[0]
-            model: QtGui.QStandardItemModel = index.model()
-            item: QtGui.QStandardItem = model.itemFromIndex(index)
-            log_message(f'item_data: {item.data(QtCore.Qt.DisplayRole)}')
-            self.reset_loaded_checklist()
-            selected_checklist = self.checklists[selected_indexes[0].row()]  # FIXME
+            selected_checklist = self.get_selected_checklist(selected_indexes[0])
             log_message(f'the selected checklist is: {selected_checklist.name}')
+            self.reset_loaded_checklist()
             self.load_checklist_elements(selected_checklist)
         else:
             log_message('no checklist was selected')
+
+    def get_selected_checklist(self, index: QtCore.QModelIndex) -> models.Checklist:
+        model = index.model()
+        identifier_item = model.item(index.row(), ChecklistModelColumn.IDENTIFIER.value)
+        log_message(f'item_data: {identifier_item.data(QtCore.Qt.DisplayRole)}')
+        checklist_id = uuid.UUID(identifier_item.data(QtCore.Qt.DisplayRole))
+        for checklist in self.checklists:
+            if checklist.identifier == checklist_id:
+                result = checklist
+                break
+        else:
+            result = None
+        return result
 
     def load_checklist_elements(self, checklist: models.Checklist):
         self.checklist_name_le.setEnabled(True)
@@ -105,6 +111,30 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.checklist_artifacts_le.setText(', '.join(i.value for i in checklist.validation_artifact_types))
         self.checklist_types_le.setText(', '.join(i.value for i in checklist.dataset_types))
         self.checklist_description_te.setText(checklist.description)
+
+        file_based_artifacts = [
+            ValidationArtifactType.METADATA,
+            ValidationArtifactType.STYLE
+        ]
+        file_based_dataset_types = [
+            DatasetType.DOCUMENT,
+        ]
+        # artifact_is_file_based = False
+        # dataset_type_is_file_based = False
+        # for validation_artifact in checklist.validation_artifact_types:
+        #     if validation_artifact in file_based_artifacts:
+        #         artifact_is_file_based = True
+        #         break
+        # for dataset_type in checklist.dataset_types:
+        #     if dataset_type in file_based_dataset_types:
+        #         dataset_type_is_file_based = True
+        #         break
+        # if artifact_is_file_based or dataset_type_is_file_based:
+        #     self.validate_file_rb.setEnabled(True)
+        #     self.validate_file_rb.setChecked(True)
+        #     self.file_chooser.setEnabled(True)
+
+        # TODO - Check logic of switcher
         if models.DatasetType.DOCUMENT in checklist.dataset_types:
             self.validate_file_rb.setEnabled(True)
             self.validate_file_rb.setChecked(True)

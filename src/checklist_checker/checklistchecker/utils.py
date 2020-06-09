@@ -1,10 +1,9 @@
-import json
 import typing
 from pathlib import Path
 
 import qgis.core
 
-from . import models
+from .constants import DatasetType
 
 
 def log_message(message, level=None):
@@ -20,26 +19,12 @@ def get_checklists_dir() -> Path:
     return checklists_dir
 
 
-def load_checklists(directory: Path) -> typing.List[models.Checklist]:
-    result = []
-    for item in directory.iterdir():
-        if item.is_file():
-            try:
-                with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
-                    raw_data = json.load(fh)
-                    checklist = models.Checklist.from_dict(raw_data)
-                    result.append(checklist)
-            except IOError as err:
-                log_message(err)
-    return result
-
-
 def get_profile_base_path() -> Path:
     return Path(qgis.core.QgsApplication.qgisSettingsDirPath())
 
 
-def match_maplayer_type(type_: qgis.core.QgsMapLayerType) -> typing.Optional[models.DatasetType]:
+def match_maplayer_type(type_: qgis.core.QgsMapLayerType) -> typing.Optional[DatasetType]:
     return {
-        qgis.core.QgsMapLayerType.VectorLayer: models.DatasetType.VECTOR,
-        qgis.core.QgsMapLayerType.RasterLayer: models.DatasetType.RASTER,
+        qgis.core.QgsMapLayerType.VectorLayer: DatasetType.VECTOR,
+        qgis.core.QgsMapLayerType.RasterLayer: DatasetType.RASTER,
     }.get(type_)
