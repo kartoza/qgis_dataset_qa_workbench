@@ -68,7 +68,6 @@ class ChecklistChecker:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Checklist Checker')
-        self.toolbar = self.iface.addToolBar('Checklist Checker')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -198,7 +197,6 @@ class ChecklistChecker:
                 self.tr(u'&Checklist Checker'),
                 action)
             self.iface.removeToolBarIcon(action)
-        del self.toolbar
 
 
     def run(self, checked: bool):
