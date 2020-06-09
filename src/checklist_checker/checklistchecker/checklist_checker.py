@@ -33,8 +33,6 @@ from PyQt5.QtWidgets import QAction
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .checklist_checker_dialog import ChecklistCheckerDialog
-#from .checklist_checker_dock import ChecklistCheckerDock
 from .checklist_checker_dock2 import ChecklistCheckerDock
 from .utils import log_message
 from . import models
