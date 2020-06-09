@@ -20,12 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 """
-import json
 import os.path
-import typing
-from pathlib import Path
 
-import qgis.core
 from PyQt5.QtCore import QSettings, QTranslator, QCoreApplication, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction
@@ -35,7 +31,6 @@ from .resources import *
 # Import the code for the dialog
 from .checklist_checker_dock import ChecklistCheckerDock
 from .utils import log_message
-from . import models
 
 
 class ChecklistChecker:
@@ -203,65 +198,12 @@ class ChecklistChecker:
         """Run method that performs all the real work"""
 
         log_message(f'inside run method - checked: {checked}')
-        checklists = self.get_checklists()
         if checked:
             self.plugin_is_active = True
             if self.dock_widget is None:
-                self.dock_widget = ChecklistCheckerDock(checklists)
+                self.dock_widget = ChecklistCheckerDock()
             self.dock_widget.closingPlugin.connect(self.on_close_plugin)
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
             self.dock_widget.show()
         else:
             self.dock_widget.hide()
-
-        # if not self.plugin_is_active:
-        #     self.plugin_is_active = True
-        #     if self.dock_widget is None:
-        #         self.dock_widget = ChecklistCheckerDock(checklists)
-        #     self.dock_widget.closingPlugin.connect(self.on_close_plugin)
-        #     self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
-        #     self.dock_widget.show()
-
-        # # Create the dialog with elements (after translation) and keep reference
-        # # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        # if self.first_start == True:
-        #     self.first_start = False
-        #     self.dlg = ChecklistCheckerDialog()
-        #
-        # # show the dialog
-        # self.dlg.show()
-        # # Run the dialog event loop
-        # result = self.dlg.exec_()
-        # # See if OK was pressed
-        # if result:
-        #     # Do something useful here - delete the line containing pass and
-        #     # substitute with your code.
-        #     pass
-
-    def get_checklists(self):
-        checklists_dir = get_checklists_dir(Path(qgis.core.QgsApplication.qgisSettingsDirPath()))
-        checklists = load_checklists(checklists_dir)
-        return checklists
-
-
-def get_checklists_dir(profile_base_dir: Path) -> Path:
-    checklists_dir = profile_base_dir / 'checklists'
-    if not checklists_dir.is_dir():
-        log_message(f'Creating checklists directory at {checklists_dir}...')
-        checklists_dir.mkdir(parents=True, exist_ok=True)
-    return checklists_dir
-
-
-def load_checklists(directory: Path) -> typing.List[models.Checklist]:
-    result = []
-    for item in directory.iterdir():
-        if item.is_file():
-            try:
-                with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
-                    raw_data = json.load(fh)
-                    checklist = models.Checklist.from_dict(raw_data)
-                    result.append(checklist)
-            except IOError as err:
-                log_message(err)
-    return result
-

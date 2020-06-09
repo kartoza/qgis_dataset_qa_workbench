@@ -2,20 +2,27 @@ import typing
 from enum import Enum
 from pathlib import Path
 
+from qgis.gui import QgsFileWidget
+from qgis.core import (
+    QgsMapLayer,
+    QgsMapLayerType,
+    QgsProject,
+)
 from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-import qgis.gui
 
 from . import models
 from .checklist_picker import ChecklistPicker
+from . import utils
 from .utils import log_message
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 UI_DIR = Path(__file__).parents[1] / "ui"
 FORM_CLASS, _ = uic.loadUiType(
     str(UI_DIR / 'checklist_checker_dock.ui'))
+
 
 class TabPages(Enum):
 
@@ -25,10 +32,20 @@ class TabPages(Enum):
 
 
 class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
+    tab_widget: QtWidgets.QTabWidget
+    checklist_picker_dlg: ChecklistPicker
+    checklist_name_le: QtWidgets.QLineEdit
+    checklist_artifacts_le: QtWidgets.QLineEdit
+    checklist_types_le: QtWidgets.QLineEdit
+    checklist_description_te: QtWidgets.QTextEdit
+    validate_file_rb: QtWidgets.QRadioButton
+    validate_layer_rb: QtWidgets.QRadioButton
+    layer_chooser_lv: QtWidgets.QListView
+    file_chooser: QgsFileWidget
 
     closingPlugin = QtCore.pyqtSignal()
 
-    def __init__(self, checklists: typing.List[models.Checklist], parent=None):
+    def __init__(self, parent=None):
         """Constructor."""
         super(ChecklistCheckerDock, self).__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.
@@ -37,31 +54,104 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.checklists = checklists
+        self.checklists = []
         self.tab_widget: QtWidgets.QTabWidget
         self.tab_widget.setTabEnabled(TabPages.CHOOSE.value, True)
         self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, False)
         self.tab_widget.setTabEnabled(TabPages.REPORT.value, False)
         self.tab_pages = [self.tab_widget.widget(i.value) for i in TabPages]
         self.choose_checklist_pb.clicked.connect(self.show_checklist_picker)
+        self.layer_chooser_lv.clicked.connect(self.enable_validation_page)
 
     def show_checklist_picker(self):
+        self.checklists = self.get_checklists()
         self.checklist_picker_dlg = ChecklistPicker(self.checklists)
         self.checklist_picker_dlg.button_box.accepted.connect(self.load_checklist)
+        self.checklist_picker_dlg.setModal(True)
         self.checklist_picker_dlg.show()
-        result = self.checklist_picker_dlg.exec_()
-        if result:
-            log_message('checklist picker has a result')
-            try:
-                selected_idx = self.checklist_picker_dlg.checklists_tv.selectedIndexes()[0]
-                selected_checklist = self.checklists[selected_idx.row()]
-                log_message(f'the selected checklist is: {selected_checklist.name}')
-            except IndexError:
-                pass
+        self.checklist_picker_dlg.exec_()
+
+    def enable_validation_page(self, model_index: QtCore.QModelIndex):
+        log_message(f'inside enable_validation_page - model_index: {model_index}')
+        self.tab_widget.setTabEnabled(TabPages.VALIDATE.value)
+        #validation_page = self.tab_pages[TabPages.VALIDATE.value]
+
+    def get_checklists(self):
+        checklists_dir = utils.get_checklists_dir()
+        checklists = utils.load_checklists(checklists_dir)
+        return checklists
 
     def load_checklist(self):
         log_message('inside load_checklist method')
+        selected_indexes = self.checklist_picker_dlg.checklists_tv.selectedIndexes()
+        if any(selected_indexes):
+            index: QtCore.QModelIndex = selected_indexes[0]
+            model: QtGui.QStandardItemModel = index.model()
+            item: QtGui.QStandardItem = model.itemFromIndex(index)
+            log_message(f'item_data: {item.data(QtCore.Qt.DisplayRole)}')
+            self.reset_loaded_checklist()
+            selected_checklist = self.checklists[selected_indexes[0].row()]  # FIXME
+            log_message(f'the selected checklist is: {selected_checklist.name}')
+            self.load_checklist_elements(selected_checklist)
+        else:
+            log_message('no checklist was selected')
+
+    def load_checklist_elements(self, checklist: models.Checklist):
+        self.checklist_name_le.setEnabled(True)
+        self.checklist_artifacts_le.setEnabled(True)
+        self.checklist_types_le.setEnabled(True)
+        self.checklist_description_te.setEnabled(True)
+        self.checklist_name_le.setText(checklist.name)
+        self.checklist_artifacts_le.setText(', '.join(i.value for i in checklist.validation_artifact_types))
+        self.checklist_types_le.setText(', '.join(i.value for i in checklist.dataset_types))
+        self.checklist_description_te.setText(checklist.description)
+        if models.DatasetType.DOCUMENT in checklist.dataset_types:
+            self.validate_file_rb.setEnabled(True)
+            self.validate_file_rb.setChecked(True)
+            self.file_chooser.setEnabled(True)
+        if models.DatasetType.VECTOR in checklist.dataset_types or models.DatasetType.RASTER in checklist.dataset_types:
+            self.validate_layer_rb.setEnabled(True)
+            self.validate_layer_rb.setChecked(True)
+            self.layer_chooser_lv.setEnabled(True)
+            model = get_list_view_layers(checklist.dataset_types)
+            self.layer_chooser_lv.setModel(model)
+
+    def reset_loaded_checklist(self):
+        self.checklist_name_le.setEnabled(False)
+        self.checklist_artifacts_le.setEnabled(False)
+        self.checklist_types_le.setEnabled(False)
+        self.checklist_description_te.setEnabled(False)
+        self.validate_layer_rb.setEnabled(False)
+        self.validate_file_rb.setEnabled(False)
+        self.file_chooser.setEnabled(False)
+        self.layer_chooser_lv.setEnabled(False)
+
+        self.checklist_name_le.clear()
+        self.checklist_artifacts_le.clear()
+        self.checklist_types_le.clear()
+        self.checklist_description_te.clear()
+        self.validate_layer_rb.setChecked(False)
+        self.validate_file_rb.setChecked(False)
+        # TODO: clear loaded layers list view
+        # TODO: clear file chooser
+
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         self.closingPlugin.emit()
         event.accept()
+
+
+def get_list_view_layers(dataset_types: typing.List[models.DatasetType]) -> QtGui.QStandardItemModel:
+    legal_layers = get_legal_layers(dataset_types)
+    result = QtGui.QStandardItemModel(len(legal_layers), 1)
+    for index, (id_, layer) in enumerate(legal_layers.items()):
+        result.setItem(index, QtGui.QStandardItem(layer.name()))
+    return result
+
+def get_legal_layers(dataset_types: typing.List[models.DatasetType]) -> typing.Dict[str, QgsMapLayer]:
+    project = QgsProject.instance()
+    result = {}
+    for id_, layer in project.mapLayers().items():
+        if utils.match_maplayer_type(layer.type()) in dataset_types:
+            result[id_] = layer
+    return result
