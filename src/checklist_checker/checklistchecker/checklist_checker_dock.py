@@ -15,7 +15,7 @@ from .utils import log_message
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 UI_DIR = Path(__file__).parents[1] / "ui"
 FORM_CLASS, _ = uic.loadUiType(
-    str(UI_DIR / 'checklist_checker_dock_base2.ui'))
+    str(UI_DIR / 'checklist_checker_dock.ui'))
 
 class TabPages(Enum):
 
