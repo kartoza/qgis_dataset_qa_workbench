@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tab_widget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="choose_checklist_tab">
        <attribute name="title">
@@ -165,7 +165,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="QTreeView" name="checklist_checks_tv"/>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -183,7 +183,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="clear_checks_pb">
             <property name="text">
              <string>Clear all checks</string>
             </property>

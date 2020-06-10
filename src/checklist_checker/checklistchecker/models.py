@@ -28,6 +28,16 @@ class ChecklistItem:
         self.automation = automation
         self.notes = ''
 
+    @classmethod
+    def from_dict(cls, raw: typing.Dict):
+        instance = cls(
+            name=raw['name'],
+            description=raw.get('description', ''),
+            guide=raw.get('guide', ''),
+            automation=raw.get('automation', '')
+        )
+        return instance
+
 
 # TODO - In order to simplify things, a single checklist will only be applicable to one dataset type and one validation artifact
 class Checklist:
@@ -65,12 +75,7 @@ class Checklist:
             raise
         for raw_check in raw.get('checks', []):
             try:
-                check = ChecklistItem(
-                    name=raw_check['name'],
-                    description=raw_check.get('description', ''),
-                    guide=raw_check.get('guide', ''),
-                    automation=raw_check.get('automation'),
-                )
+                check = ChecklistItem.from_dict(raw_check)
             except KeyError:
                 raise
             instance.checks.append(check)
@@ -118,15 +123,13 @@ def load_checklists() -> typing.List[Checklist]:
     directory = utils.get_checklists_dir()
     result = []
     for item in directory.iterdir():
+        log_message(f'loading file {item}...')
         if item.is_file():
-            try:
-                with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
+            with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
+                try:
                     raw_data = json.load(fh)
-                    try:
-                        checklist = Checklist.from_dict(raw_data)
-                    except ValueError as exc:
-                        log_message(f'Could not generate checklist from {str(item)!r} because: {exc}')
+                    checklist = Checklist.from_dict(raw_data)
                     result.append(checklist)
-            except IOError as err:
-                log_message(err)
+                except (UnicodeDecodeError, ValueError, KeyError) as exc:
+                    log_message(f'Could not generate checklist from {str(item)!r} because: {exc}')
     return result

@@ -33,6 +33,7 @@ FORM_CLASS, _ = uic.loadUiType(
 
 class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     tab_widget: QtWidgets.QTabWidget
+    checklist_checks_tv: QtWidgets.QTreeView
     checklist_picker_dlg: ChecklistPicker
     checklist_name_le: QtWidgets.QLineEdit
     checklist_artifacts_le: QtWidgets.QLineEdit
@@ -42,6 +43,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     validate_layer_rb: QtWidgets.QRadioButton
     layer_chooser_lv: QtWidgets.QListView
     file_chooser: QgsFileWidget
+    selected_checklist: typing.Optional[models.Checklist]
 
     closingPlugin = QtCore.pyqtSignal()
 
@@ -55,13 +57,13 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.checklists = []
+        self.selected_checklist = None
         self.tab_widget: QtWidgets.QTabWidget
         self.tab_widget.setTabEnabled(TabPages.CHOOSE.value, True)
         self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, False)
         self.tab_widget.setTabEnabled(TabPages.REPORT.value, False)
         self.tab_pages = [self.tab_widget.widget(i.value) for i in TabPages]
         self.choose_checklist_pb.clicked.connect(self.show_checklist_picker)
-        self.layer_chooser_lv.clicked.connect(self.enable_validation_page)
 
     def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
         # This does not get called when list item is deselected
@@ -70,37 +72,61 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         log_message(f'previous type: {type(previous)}')
         log_message(f'current row: {current.row()}')
         log_message(f'previous row: {previous.row()}')
+        layer_model = self.layer_chooser_lv.model()
+        layer_model: QtCore.QAbstractItemModel
+        layer_id = layer_model.data(current, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
+        project = QgsProject.instance()
+        layer = project.mapLayers()[layer_id]
+        self.load_checklist_steps(current, previous)
 
-    def selected_layer_selection_changed(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection):
-        log_message(f'inside selected_layer_selection_changed - locals: {locals()} selected: {selected!r} - deselected: {deselected!r}')
-        log_message(f'selected type: {type(selected)}')
-        log_message(f'deselected type: {type(deselected)}')
-        log_message(f'number of selected_indexes: {len(selected.indexes())}')
+    def load_checklist_steps(
+            self,
+            current: QtCore.QModelIndex,
+            previous: QtCore.QModelIndex
+    ):
+        layer_model = self.layer_chooser_lv.model()
+        layer_id = layer_model.data(
+            current, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
+        project = QgsProject.instance()
+        layer = project.mapLayers()[layer_id]
+        checks_model = QtGui.QStandardItemModel()
+        for check in self.selected_checklist.checks:
+            name_item = QtGui.QStandardItem(check.name)
+            valid_item = QtGui.QStandardItem(check.validated)
+            description_item = QtGui.QStandardItem(check.description)
+            guide_item = QtGui.QStandardItem(check.guide)
+            name_item.appendRows([valid_item, description_item, guide_item])
+            checks_model.appendRow(name_item)
+        self.checklist_checks_tv.setModel(checks_model)
+
+    def selected_layer_selection_changed(
+            self,
+            selected: QtCore.QItemSelection,
+            deselected: QtCore.QItemSelection
+    ):
+        if len(selected.indexes()) == 0:
+            self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, False)
+            self.tab_widget.setTabEnabled(TabPages.REPORT.value, False)
+            # TODO: clear the checklist steps on the VALIDATE page
+        else:
+            self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, True)
 
     def show_checklist_picker(self):
-        self.checklists = self.get_checklists()
+        self.checklists = models.load_checklists()
         self.checklist_picker_dlg = ChecklistPicker(self.checklists)
         self.checklist_picker_dlg.button_box.accepted.connect(self.load_checklist)
         self.checklist_picker_dlg.setModal(True)
         self.checklist_picker_dlg.show()
         self.checklist_picker_dlg.exec_()
 
-    def enable_validation_page(self, model_index: QtCore.QModelIndex):
-        log_message(f'inside enable_validation_page - model_index: {model_index}')
-        self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, True)
-        #validation_page = self.tab_pages[TabPages.VALIDATE.value]
-
-    def get_checklists(self):
-        checklists = models.load_checklists()
-        return checklists
-
     def load_checklist(self):
         selected_indexes = self.checklist_picker_dlg.checklists_tv.selectedIndexes()
         if any(selected_indexes):
-            selected_checklist = self.get_selected_checklist(selected_indexes[0])
-            log_message(f'the selected checklist is: {selected_checklist.name}')
+            self.selected_checklist = self.get_selected_checklist(
+                selected_indexes[0])
+            log_message(f'the selected checklist is: {self.selected_checklist.name}')
             self.reset_loaded_checklist()
-            self.load_checklist_elements(selected_checklist)
+            self.load_checklist_elements(self.selected_checklist)
         else:
             log_message('no checklist was selected')
 
@@ -148,6 +174,38 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.validate_layer_rb.setChecked(True)
             self.layer_chooser_lv.setEnabled(True)
             model = get_list_view_layers(checklist.dataset_type)
+            self.layer_chooser_lv.setModel(model)
+            selection_model: QtCore.QItemSelectionModel = self.layer_chooser_lv.selectionModel()
+            log_message(f'selection_model: {selection_model}')
+            selection_model.currentChanged.connect(self.selected_layer_changed)
+            selection_model.selectionChanged.connect(self.selected_layer_selection_changed)
+
+    def enable_dataset_chooser_elements(
+            self,
+            dataset_type: DatasetType,
+            validation_artifact_type: ValidationArtifactType
+    ):
+        enable_layer_chooser = False
+        enable_file_chooser = False
+        if dataset_type in (DatasetType.VECTOR, DatasetType.RASTER):
+            if validation_artifact_type == ValidationArtifactType.DATASET:
+                enable_layer_chooser = True
+            elif validation_artifact_type == ValidationArtifactType.STYLE:
+                enable_layer_chooser = True
+                enable_file_chooser = True
+            else:
+                enable_file_chooser = True
+        else:
+            enable_file_chooser = True
+        if enable_file_chooser:
+            self.validate_file_rb.setEnabled(True)
+            self.validate_file_rb.setChecked(True)
+            self.file_chooser.setEnabled(True)
+        if enable_layer_chooser:
+            self.validate_layer_rb.setEnabled(True)
+            self.validate_layer_rb.setChecked(True)
+            self.layer_chooser_lv.setEnabled(True)
+            model = get_list_view_layers(dataset_type)
             self.layer_chooser_lv.setModel(model)
             selection_model: QtCore.QItemSelectionModel = self.layer_chooser_lv.selectionModel()
             log_message(f'selection_model: {selection_model}')
