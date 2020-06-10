@@ -72,7 +72,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
 
     def enable_validation_page(self, model_index: QtCore.QModelIndex):
         log_message(f'inside enable_validation_page - model_index: {model_index}')
-        self.tab_widget.setTabEnabled(TabPages.VALIDATE.value)
+        self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, True)
         #validation_page = self.tab_pages[TabPages.VALIDATE.value]
 
     def get_checklists(self):
@@ -135,6 +135,10 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         #     self.file_chooser.setEnabled(True)
 
         # TODO - Check logic of switcher
+        # -  for vector and raster datasets we want to enable only the layer chooser
+        # -  for document datasets we want to enable only the file chooser
+        # -  for vector, raster and document metadata we want to enable only the file chooser
+        # -  for vector and raster styles we want to enable both the layer and file chooser
         if models.DatasetType.DOCUMENT in checklist.dataset_types:
             self.validate_file_rb.setEnabled(True)
             self.validate_file_rb.setChecked(True)
