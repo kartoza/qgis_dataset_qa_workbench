@@ -19,6 +19,7 @@ from .checklist_picker import ChecklistPicker
 from .constants import (
     ChecklistModelColumn,
     DatasetType,
+    LayerChooserDataRole,
     TabPages,
     ValidationArtifactType,
 )
@@ -61,6 +62,20 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.tab_pages = [self.tab_widget.widget(i.value) for i in TabPages]
         self.choose_checklist_pb.clicked.connect(self.show_checklist_picker)
         self.layer_chooser_lv.clicked.connect(self.enable_validation_page)
+
+    def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
+        # This does not get called when list item is deselected
+        log_message(f'inside selected_layer_changed - locals: {locals()} current: {current!r} - previous: {previous!r}')
+        log_message(f'current type: {type(current)}')
+        log_message(f'previous type: {type(previous)}')
+        log_message(f'current row: {current.row()}')
+        log_message(f'previous row: {previous.row()}')
+
+    def selected_layer_selection_changed(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection):
+        log_message(f'inside selected_layer_selection_changed - locals: {locals()} selected: {selected!r} - deselected: {deselected!r}')
+        log_message(f'selected type: {type(selected)}')
+        log_message(f'deselected type: {type(deselected)}')
+        log_message(f'number of selected_indexes: {len(selected.indexes())}')
 
     def show_checklist_picker(self):
         self.checklists = self.get_checklists()
@@ -108,49 +123,41 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.checklist_types_le.setEnabled(True)
         self.checklist_description_te.setEnabled(True)
         self.checklist_name_le.setText(checklist.name)
-        self.checklist_artifacts_le.setText(', '.join(i.value for i in checklist.validation_artifact_types))
-        self.checklist_types_le.setText(', '.join(i.value for i in checklist.dataset_types))
+        self.checklist_artifacts_le.setText(checklist.validation_artifact_type.value)
+        self.checklist_types_le.setText(checklist.dataset_type.value)
         self.checklist_description_te.setText(checklist.description)
 
-        file_based_artifacts = [
-            ValidationArtifactType.METADATA,
-            ValidationArtifactType.STYLE
-        ]
-        file_based_dataset_types = [
-            DatasetType.DOCUMENT,
-        ]
-        # artifact_is_file_based = False
-        # dataset_type_is_file_based = False
-        # for validation_artifact in checklist.validation_artifact_types:
-        #     if validation_artifact in file_based_artifacts:
-        #         artifact_is_file_based = True
-        #         break
-        # for dataset_type in checklist.dataset_types:
-        #     if dataset_type in file_based_dataset_types:
-        #         dataset_type_is_file_based = True
-        #         break
-        # if artifact_is_file_based or dataset_type_is_file_based:
-        #     self.validate_file_rb.setEnabled(True)
-        #     self.validate_file_rb.setChecked(True)
-        #     self.file_chooser.setEnabled(True)
-
-        # TODO - Check logic of switcher
-        # -  for vector and raster datasets we want to enable only the layer chooser
-        # -  for document datasets we want to enable only the file chooser
-        # -  for vector, raster and document metadata we want to enable only the file chooser
-        # -  for vector and raster styles we want to enable both the layer and file chooser
-        if models.DatasetType.DOCUMENT in checklist.dataset_types:
+        enable_layer_chooser = False
+        enable_file_chooser = False
+        if checklist.dataset_type in (DatasetType.VECTOR, DatasetType.RASTER):
+            if checklist.validation_artifact_type == ValidationArtifactType.DATASET:
+                enable_layer_chooser = True
+            elif checklist.validation_artifact_type == ValidationArtifactType.STYLE:
+                enable_layer_chooser = True
+                enable_file_chooser = True
+            else:
+                enable_file_chooser = True
+        else:
+            enable_file_chooser = True
+        if enable_file_chooser:
             self.validate_file_rb.setEnabled(True)
             self.validate_file_rb.setChecked(True)
             self.file_chooser.setEnabled(True)
-        if models.DatasetType.VECTOR in checklist.dataset_types or models.DatasetType.RASTER in checklist.dataset_types:
+        if enable_layer_chooser:
             self.validate_layer_rb.setEnabled(True)
             self.validate_layer_rb.setChecked(True)
             self.layer_chooser_lv.setEnabled(True)
-            model = get_list_view_layers(checklist.dataset_types)
+            model = get_list_view_layers(checklist.dataset_type)
             self.layer_chooser_lv.setModel(model)
+            selection_model: QtCore.QItemSelectionModel = self.layer_chooser_lv.selectionModel()
+            log_message(f'selection_model: {selection_model}')
+            selection_model.currentChanged.connect(self.selected_layer_changed)
+            selection_model.selectionChanged.connect(self.selected_layer_selection_changed)
 
     def reset_loaded_checklist(self):
+        self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, False)
+        self.tab_widget.setTabEnabled(TabPages.REPORT.value, False)
+
         self.checklist_name_le.setEnabled(False)
         self.checklist_artifacts_le.setEnabled(False)
         self.checklist_types_le.setEnabled(False)
@@ -175,17 +182,25 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         event.accept()
 
 
-def get_list_view_layers(dataset_types: typing.List[models.DatasetType]) -> QtGui.QStandardItemModel:
-    legal_layers = get_legal_layers(dataset_types)
-    result = QtGui.QStandardItemModel(len(legal_layers), 1)
-    for index, (id_, layer) in enumerate(legal_layers.items()):
-        result.setItem(index, QtGui.QStandardItem(layer.name()))
+def get_list_view_layers(dataset_type: models.DatasetType) -> QtGui.QStandardItemModel:
+    project = QgsProject.instance()
+    result = QtGui.QStandardItemModel()
+    for index, (id_, layer) in enumerate(project.mapLayers().items()):
+        if utils.match_maplayer_type(layer.type()) == dataset_type:
+            item = QtGui.QStandardItem(layer.name())
+            item.setData(id_, LayerChooserDataRole.LAYER_IDENTIFIER.value)
+            result.setItem(index, item)
+            log_message(
+                f'retrieving layer id from the '
+                f'item: {item.data(LayerChooserDataRole.LAYER_IDENTIFIER.value)}'
+            )
     return result
 
-def get_legal_layers(dataset_types: typing.List[models.DatasetType]) -> typing.Dict[str, QgsMapLayer]:
+
+def get_legal_layers(dataset_type: models.DatasetType) -> typing.Dict[str, QgsMapLayer]:
     project = QgsProject.instance()
     result = {}
     for id_, layer in project.mapLayers().items():
-        if utils.match_maplayer_type(layer.type()) in dataset_types:
+        if utils.match_maplayer_type(layer.type()) == dataset_type:
             result[id_] = layer
     return result

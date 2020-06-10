@@ -1,5 +1,6 @@
 from enum import Enum
 
+from PyQt5.QtCore import Qt
 
 class DatasetType(Enum):
     DOCUMENT = "document"
@@ -27,3 +28,6 @@ class ChecklistModelColumn(Enum):
     DATASET_TYPES = 3
     APPLICABLE_TO = 4
 
+
+class LayerChooserDataRole(Enum):
+    LAYER_IDENTIFIER = Qt.UserRole + 1

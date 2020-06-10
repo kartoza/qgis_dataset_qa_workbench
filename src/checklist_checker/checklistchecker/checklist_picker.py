@@ -42,19 +42,15 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
                 row_index, ChecklistModelColumn.NAME.value, QtGui.QStandardItem(checklist.name))
             self.model.setItem(
                 row_index, ChecklistModelColumn.DESCRIPTION.value, QtGui.QStandardItem(checklist.description))
-            dataset_types = [i.value for i in checklist.dataset_types]
-            dataset_types.sort()
-            validation_artifact_types = [i.value for i in checklist.validation_artifact_types]
-            validation_artifact_types.sort()
             self.model.setItem(
                 row_index,
                 ChecklistModelColumn.DATASET_TYPES.value,
-                QtGui.QStandardItem(', '.join(i for i in dataset_types))
+                QtGui.QStandardItem(checklist.dataset_type.value)
             )
             self.model.setItem(
                 row_index,
                 ChecklistModelColumn.APPLICABLE_TO.value,
-                QtGui.QStandardItem(', '.join(i for i in validation_artifact_types))
+                QtGui.QStandardItem(checklist.validation_artifact_type.value)
             )
         self.checklists_tv: QtWidgets.QTreeView
         self.checklists_tv.setModel(self.model)

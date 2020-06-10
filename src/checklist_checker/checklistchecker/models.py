@@ -29,39 +29,37 @@ class ChecklistItem:
         self.notes = ''
 
 
+# TODO - In order to simplify things, a single checklist will only be applicable to one dataset type and one validation artifact
 class Checklist:
     identifier: uuid.UUID
     name: str
     description: str
-    dataset_types: typing.List[DatasetType]
-    validation_artifact_types: typing.List[ValidationArtifactType]
+    dataset_type: DatasetType
+    validation_artifact_type: ValidationArtifactType
     checks: typing.List[ChecklistItem]
 
     def __init__(
             self,
             name: str,
             description: str,
-            dataset_types: typing.Optional[typing.List[DatasetType]] = None,
-            validation_artifact_types: typing.Optional[typing.List[ValidationArtifactType]] = None
+            dataset_type: DatasetType,
+            validation_artifact_type: ValidationArtifactType
     ):
         self.identifier = uuid.uuid4()
         self.name = name
         self.description = description
-        self.dataset_types = list(dataset_types) if dataset_types is not None else list(DatasetType)
-        self.validation_artifact_types = list(
-            validation_artifact_types) if validation_artifact_types is not None else list(ValidationArtifactType)
+        self.dataset_type = dataset_type
+        self.validation_artifact_type = validation_artifact_type
         self.checks = []
 
     @classmethod
     def from_dict(cls, raw: typing.Dict):
-        dataset_types = [DatasetType(i) for i in raw.get('dataset_types', [])]
-        validation_artifact_types = [ValidationArtifactType(i) for i in raw.get('validation_artifact_types', [])]
         try:
             instance = cls(
                 name=raw['name'],
                 description=raw.get('description', ''),
-                dataset_types=dataset_types,
-                validation_artifact_types=validation_artifact_types
+                dataset_type=DatasetType(raw['dataset_type']),
+                validation_artifact_type=ValidationArtifactType(raw['validation_artifact_type'])
             )
         except KeyError:
             raise
