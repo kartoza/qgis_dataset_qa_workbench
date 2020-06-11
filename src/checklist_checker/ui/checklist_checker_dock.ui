@@ -11,14 +11,14 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>DockWidget</string>
+   <string>Checklist checker</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTabWidget" name="tab_widget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="choose_checklist_tab">
        <attribute name="title">
@@ -208,7 +208,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QgsFileWidget" name="mQgsFileWidget_2"/>
+           <widget class="QgsFileWidget" name="save_report_fw">
+            <property name="storageMode">
+             <enum>QgsFileWidget::SaveFile</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -226,7 +230,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="generate_report_pb">
           <property name="text">
            <string>Generate report</string>
           </property>

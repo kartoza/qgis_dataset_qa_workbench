@@ -44,6 +44,8 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     layer_chooser_lv: QtWidgets.QListView
     file_chooser: QgsFileWidget
     selected_checklist: typing.Optional[models.Checklist]
+    save_report_fw: QgsFileWidget
+    generate_report_pb: QtWidgets.QPushButton
 
     closingPlugin = QtCore.pyqtSignal()
 
@@ -64,6 +66,16 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.tab_widget.setTabEnabled(TabPages.REPORT.value, False)
         self.tab_pages = [self.tab_widget.widget(i.value) for i in TabPages]
         self.choose_checklist_pb.clicked.connect(self.show_checklist_picker)
+        self.generate_report_pb.clicked.connect(self.save_report)
+
+    def save_report(self):
+        # -  access current checklist
+        # -  access current checks model
+        # -  generate the report in json format
+        # -  access the contents of the file save dialog and get the save target path
+        # -  convert to a string using a template (python)
+        # -  save the report
+        pass
 
     def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
         # This does not get called when list item is deselected
@@ -90,13 +102,22 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         project = QgsProject.instance()
         layer = project.mapLayers()[layer_id]
         checks_model = QtGui.QStandardItemModel()
+        checks_model.setColumnCount(2)
         for check in self.selected_checklist.checks:
             name_item = QtGui.QStandardItem(check.name)
+            name_item.setColumnCount(2)
+
             valid_item = QtGui.QStandardItem(check.validated)
+            valid_item.setCheckable(True)
+
             description_item = QtGui.QStandardItem(check.description)
             guide_item = QtGui.QStandardItem(check.guide)
-            name_item.appendRows([valid_item, description_item, guide_item])
-            checks_model.appendRow(name_item)
+
+            #name_item.appendRow([QtGui.QStandardItem('Valid'), valid_item])
+            name_item.appendRow([QtGui.QStandardItem('Description'), description_item])
+            name_item.appendRow([QtGui.QStandardItem('Validation guide'), guide_item])
+            # name_item.appendRows([valid_item, description_item, guide_item])
+            checks_model.appendRow([name_item, valid_item])
         self.checklist_checks_tv.setModel(checks_model)
 
     def selected_layer_selection_changed(
@@ -110,6 +131,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             # TODO: clear the checklist steps on the VALIDATE page
         else:
             self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, True)
+            self.tab_widget.setTabEnabled(TabPages.REPORT.value, True)
 
     def show_checklist_picker(self):
         self.checklists = models.load_checklists()

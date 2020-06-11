@@ -1,9 +1,11 @@
+import datetime as dt
 import json
 import typing
 import uuid
 from enum import Enum
 
 import qgis.core
+from PyQt5 import QtCore
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtCore import Qt
 
@@ -20,7 +22,7 @@ class ChecklistItem:
     automation = None
     notes: str
 
-    def __init__(self, name: str, description: str, guide: str, automation=None):
+    def __init__(self, name: str, description: str = '', guide: str = '', automation=None):
         self.name = name
         self.description = description
         self.guide = guide
@@ -39,7 +41,6 @@ class ChecklistItem:
         return instance
 
 
-# TODO - In order to simplify things, a single checklist will only be applicable to one dataset type and one validation artifact
 class Checklist:
     identifier: uuid.UUID
     name: str
@@ -80,6 +81,200 @@ class Checklist:
                 raise
             instance.checks.append(check)
         return instance
+
+
+class ValidationReport:
+    checklist: Checklist
+    validation_checks: typing.List[ChecklistItem]
+
+    def __init__(self, checklist: Checklist, validation_checks: typing.List[ChecklistItem]):
+        self.checklist = checklist
+        self.validation_checks = validation_checks
+
+    @classmethod
+    def from_checks_model(cls, checklist: Checklist, checks_model: QStandardItemModel):
+        for check in checks_model:
+            pass
+
+
+class ChecklistChecksModel(QtCore.QAbstractItemModel):
+    DATA_COLUMN_ROW: int = 1
+    OWN_ID_SEPARATOR: str = '*'
+    PARENT_ID_SEPARATOR: str = '-'
+    CHECK_ID_ROLE: int = Qt.UserRole + 1
+
+    def __init__(self, checklist: Checklist, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.checklist = checklist
+        # root = self.invisibleRootItem()
+        # for check in self.checklist.checks:
+        #     name_item = QStandardItem(check.name)
+        #     root.appendRow('Name', name_item)
+        #     valid_item = QStandardItem(check.validated)
+        #     root.appendRow('Valid', valid_item)
+        #
+        #     name_item.appendRow()
+        #
+        #     description_item = QStandardItem(check.description)
+        #     root.appendRow('Description', description_item)
+
+    #  ---- readonly reimplementation methods
+
+    def index(self, row: int, column: int, parent: QtCore.QModelIndex = QtCore.QModelIndex()) -> QtCore.QModelIndex:
+        if parent.isValid():
+            parent_pointer = parent.internalPointer()
+            own_pointer = f'{parent_pointer}{self.PARENT_ID_SEPARATOR}{row}{self.OWN_ID_SEPARATOR}{column}'
+        else:
+            own_pointer = f'{row}{self.OWN_ID_SEPARATOR}{column}'
+        log_message(f'own_pointer: {own_pointer}')
+        return self.createIndex(row, column, own_pointer)
+
+    def parent(self, child: QtCore.QModelIndex) -> QtCore.QModelIndex:
+        log_message('inside parent() method')
+        if not child.isValid():
+            result = QtCore.QModelIndex()
+        else:
+            child_pointer: str = str(child.internalPointer())
+            log_message(f'child_pointer: {child_pointer}')
+            parent_pointer = child_pointer.rpartition(self.PARENT_ID_SEPARATOR)[0]
+            log_message(f'parent_pointer: {parent_pointer}')
+            grandparent_pointer, parent_coords = parent_pointer.rpartition(self.PARENT_ID_SEPARATOR)[::2]
+            log_message(f'grandparent_pointer: {grandparent_pointer}')
+            log_message(f'parent_coords: {parent_coords}')
+            parent_row, parent_column = [int(i) for i in parent_coords]
+            if grandparent_pointer == '':
+                result = self.createIndex(parent_row, parent_column)
+            else:
+                result = self.createIndex(parent_row, parent_column, grandparent_pointer)
+        return result
+
+    def rowCount(self, parent: QtCore.QModelIndex = ...) -> int:
+        # one row for the name of the check
+        # one row for the validation checkbox
+        if parent.isValid():
+            # parent represents a check, so it has one row for each of (description, guide, automation)
+            # it may have three rows (guide, description, result)
+            # or it may have four rows (guide, description, automation, result)
+            check_index = parent.data(role=self.CHECK_ID_ROLE)
+            current_check = self.checklist.checks[check_index]
+            if current_check.automation:
+                result = 4
+            else:
+                result = 3
+        else:
+            # parent is not valid so we are at the first hierarchy level,
+            # in this case there are as many rows as there are checks in the checklist
+            result = len(self.checklist.checks)
+        return result
+
+    def columnCount(self, parent: QtCore.QModelIndex = ...) -> int:
+        return 2
+
+    def _get_current_check(self, hierarchy_level: int, index: QtCore.QModelIndex) -> ChecklistItem:
+        if hierarchy_level == 1:
+            current_check_index = index.row()
+        elif hierarchy_level == 2:
+            current_check_index = index.parent().row()
+        else:
+            raise RuntimeError(f'Invalid hierarchy_level: {hierarchy_level}')
+        return self.checklist.checks[current_check_index]
+
+    def _get_first_level_info(self, index:QtCore.QModelIndex, current_check: ChecklistItem):
+        if index.column() == 0:
+            result = current_check.name
+        elif index.column() == 1:
+            result = current_check.validated
+        else:
+            raise RuntimeError(f'Invalid column requested: {index.column()}')
+        return result
+
+    def _get_second_level_info(self, index: QtCore.QModelIndex, current_check: ChecklistItem):
+        row = index.row()
+        col = index.column()
+        if col == 0:
+            if row == 0:
+                result = 'Description'
+            elif row == 1:
+                result = 'Guide'
+            elif row == 2:
+                if current_check.automation:
+                    result = 'Automation'
+                else:
+                    result = 'Result'
+            elif row == 3:
+                if current_check.automation:
+                    result = 'Result'
+                else:
+                    raise RuntimeError(f'Invalid row requested: {index.row()}')
+            else:
+                raise RuntimeError(f'Invalid row requested: {index.row()}')
+        elif col == 1:
+            if row == 0:
+                result = current_check.description
+            elif row == 1:
+                result = current_check.guide
+            elif row == 2:
+                if current_check.automation:
+                    result = current_check.automation
+                else:
+                    result = current_check.notes
+            elif row == 3:
+                if current_check.automation:
+                    result = 'Result'
+                else:
+                    raise RuntimeError(f'Invalid row requested: {index.row()}')
+            else:
+                raise RuntimeError(f'Invalid row requested: {index.row()}')
+        else:
+            raise RuntimeError(f'Invalid column requested: {index.column()}')
+        return result
+
+    def _get_hierarchy_level(self, index: QtCore.QModelIndex) -> int:
+        return 2 if index.parent().isValid() else 1
+
+    def data(self, index: QtCore.QModelIndex, role: int = Qt.DisplayRole) -> typing.Any:
+        result = None
+        log_message(f'valid index: {index.isValid()}')
+        if index.isValid():
+            if role == Qt.DisplayRole:
+                hierarchy_level = self._get_hierarchy_level(index)
+                log_message(f'hierarchy_level: {hierarchy_level}')
+                current_check = self._get_current_check(hierarchy_level, index)
+                log_message(f'current_check name: {current_check.name}')
+                if hierarchy_level == 1:
+                    result = self._get_first_level_info(index, current_check)
+                elif hierarchy_level == 2:
+                    result = self._get_second_level_info(index, current_check)
+                else:
+                    raise RuntimeError(f'Invalid hierarchy level: {hierarchy_level}')
+                log_message(f'result: {result}')
+        return result
+
+    # ----
+
+    # ---- read/write reimplementation methods
+
+    def setData(self, index: QtCore.QModelIndex, value: typing.Any, role: int = ...) -> bool:
+        # must reimplement this
+        # REMEMBER to emit the `dataChanged()` signal inside this method
+        try:
+            current_check = self.checklist.checks[index.row()]
+        except IndexError:
+            current_check = ChecklistItem(
+                name=f'check {len(self.checklist.checks) + 1}',
+                description='',
+                guide=''
+            )
+        if role == Qt.EditRole and index.column() == self.DATA_COLUMN_ROW:
+            # yes, this may be editable. but where are we?
+            if index.parent() == self.invisibleRootItem():
+                pass
+            else:
+                pass
+
+    def flags(self, index: QtCore.QModelIndex) -> Qt.ItemFlags:
+        pass  # must reimplement this
+
 
 
 class ChecklistModel(QStandardItemModel):
