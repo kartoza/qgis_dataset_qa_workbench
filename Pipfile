@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 paver = "*"
+jupyter = "*"
 
 [packages]
 pyqt5 = "*"

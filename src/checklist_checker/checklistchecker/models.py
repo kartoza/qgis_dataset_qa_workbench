@@ -121,31 +121,29 @@ class ChecklistChecksModel(QtCore.QAbstractItemModel):
     #  ---- readonly reimplementation methods
 
     def index(self, row: int, column: int, parent: QtCore.QModelIndex = QtCore.QModelIndex()) -> QtCore.QModelIndex:
+        own_pointer = self.OWN_ID_SEPARATOR.join((str(row), str(column)))
         if parent.isValid():
             parent_pointer = parent.internalPointer()
-            own_pointer = f'{parent_pointer}{self.PARENT_ID_SEPARATOR}{row}{self.OWN_ID_SEPARATOR}{column}'
+            full_pointer = self.PARENT_ID_SEPARATOR.join((parent_pointer, own_pointer))
         else:
-            own_pointer = f'{row}{self.OWN_ID_SEPARATOR}{column}'
-        log_message(f'own_pointer: {own_pointer}')
-        return self.createIndex(row, column, own_pointer)
+            full_pointer = own_pointer
+        log_message(f'full_pointer: {full_pointer}')
+        return self.createIndex(row, column, str(full_pointer))
 
     def parent(self, child: QtCore.QModelIndex) -> QtCore.QModelIndex:
         log_message('inside parent() method')
+        invalid_index = QtCore.QModelIndex()
         if not child.isValid():
-            result = QtCore.QModelIndex()
+            result = invalid_index
         else:
-            child_pointer: str = str(child.internalPointer())
-            log_message(f'child_pointer: {child_pointer}')
-            parent_pointer = child_pointer.rpartition(self.PARENT_ID_SEPARATOR)[0]
-            log_message(f'parent_pointer: {parent_pointer}')
-            grandparent_pointer, parent_coords = parent_pointer.rpartition(self.PARENT_ID_SEPARATOR)[::2]
-            log_message(f'grandparent_pointer: {grandparent_pointer}')
-            log_message(f'parent_coords: {parent_coords}')
-            parent_row, parent_column = [int(i) for i in parent_coords]
-            if grandparent_pointer == '':
-                result = self.createIndex(parent_row, parent_column)
+            full_child_pointer: str = str(child.internalPointer())
+            *ancestors_coords, child_own_pointer = full_child_pointer.split(self.PARENT_ID_SEPARATOR)
+            if len(ancestors_coords) == 0:
+                result = invalid_index
             else:
-                result = self.createIndex(parent_row, parent_column, grandparent_pointer)
+                parent_full_pointer = self.PARENT_ID_SEPARATOR.join(ancestors_coords)
+                parent_row, parent_col = ancestors_coords[-1].split(self.OWN_ID_SEPARATOR)
+                result = self.createIndex(int(parent_row), int(parent_col), str(parent_full_pointer))
         return result
 
     def rowCount(self, parent: QtCore.QModelIndex = ...) -> int:
