@@ -20,7 +20,8 @@ FORM_CLASS, _ = uic.loadUiType(
 class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
     checklist_save_path_la: QtWidgets.QLabel
 
-    def __init__(self, checklists: typing.List[models.Checklist], parent=None):
+    def __init__(self, checklists: typing.List[models.NewCheckList], parent=None):
+    # def __init__(self, checklists: typing.List[models.Checklist], parent=None):
         """Constructor."""
         super(ChecklistPicker, self).__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.

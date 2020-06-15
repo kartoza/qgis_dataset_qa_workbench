@@ -103,22 +103,26 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         layer = project.mapLayers()[layer_id]
         checks_model = QtGui.QStandardItemModel()
         checks_model.setColumnCount(2)
-        for check in self.selected_checklist.checks:
-            name_item = QtGui.QStandardItem(check.name)
-            name_item.setColumnCount(2)
 
-            valid_item = QtGui.QStandardItem(check.validated)
-            valid_item.setCheckable(True)
+        checklist_checks_model = models.CheckListItemsModel(self.selected_checklist.checks)
 
-            description_item = QtGui.QStandardItem(check.description)
-            guide_item = QtGui.QStandardItem(check.guide)
-
-            #name_item.appendRow([QtGui.QStandardItem('Valid'), valid_item])
-            name_item.appendRow([QtGui.QStandardItem('Description'), description_item])
-            name_item.appendRow([QtGui.QStandardItem('Validation guide'), guide_item])
-            # name_item.appendRows([valid_item, description_item, guide_item])
-            checks_model.appendRow([name_item, valid_item])
-        self.checklist_checks_tv.setModel(checks_model)
+        # for check in self.selected_checklist.checks:
+        #     name_item = QtGui.QStandardItem(check.name)
+        #     name_item.setColumnCount(2)
+        #
+        #     valid_item = QtGui.QStandardItem(check.validated)
+        #     valid_item.setCheckable(True)
+        #
+        #     description_item = QtGui.QStandardItem(check.description)
+        #     guide_item = QtGui.QStandardItem(check.guide)
+        #
+        #     #name_item.appendRow([QtGui.QStandardItem('Valid'), valid_item])
+        #     name_item.appendRow([QtGui.QStandardItem('Description'), description_item])
+        #     name_item.appendRow([QtGui.QStandardItem('Validation guide'), guide_item])
+        #     # name_item.appendRows([valid_item, description_item, guide_item])
+        #     checks_model.appendRow([name_item, valid_item])
+        # self.checklist_checks_tv.setModel(checks_model)
+        self.checklist_checks_tv.setModel(checklist_checks_model)
 
     def selected_layer_selection_changed(
             self,
@@ -134,7 +138,8 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.tab_widget.setTabEnabled(TabPages.REPORT.value, True)
 
     def show_checklist_picker(self):
-        self.checklists = models.load_checklists()
+        # self.checklists = models.load_checklists()
+        self.checklists = models.new_load_checklists()
         self.checklist_picker_dlg = ChecklistPicker(self.checklists)
         self.checklist_picker_dlg.button_box.accepted.connect(self.load_checklist)
         self.checklist_picker_dlg.setModal(True)
