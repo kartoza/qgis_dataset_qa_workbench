@@ -182,12 +182,6 @@ class ChecklistItemHead:
     name: str
     validated: bool
     check_properties: typing.List
-    PROPERTY_NAMES: typing.List[str] = [
-        'description',
-        'guide',
-        'automation',
-        'notes'
-    ]
 
     def __init__(self, name: str, check_properties: typing.List[ChecklistItemProperty]):
         self.name = name
@@ -196,11 +190,12 @@ class ChecklistItemHead:
 
     @classmethod
     def from_dict(cls, raw: typing.Dict):
-        check_properties = []
-        for check_property_name in cls.PROPERTY_NAMES:
-            check_property = ChecklistItemProperty(
-                check_property_name, raw[check_property_name])
-            check_properties.append(check_property)
+        check_properties = [
+            ChecklistItemProperty('description', raw.get('description')),
+            ChecklistItemProperty('guide', raw.get('guide')),
+            ChecklistItemProperty('automation', raw.get('automation')),
+            ChecklistItemProperty('notes', ''),
+        ]
         return cls(raw['name'], check_properties)
 
 
@@ -289,19 +284,20 @@ class ChecklistItemHeadNode(TreeNode):
 
 
 class CheckListItemsModel(TreeModel):
+    root_nodes: typing.List[ChecklistItemHead]
 
-    def __init__(self, root_elements: typing.List[ChecklistItemHeadNode]):
-        self.root_nodes = root_elements
+    def __init__(self, root_elements: typing.List[ChecklistItemHead]):
+        self.root_elements = root_elements
         super().__init__()
 
     def _get_root_nodes(self):
         result = []
-        for index, check_head in enumerate(self.root_nodes):
+        for index, check_head in enumerate(self.root_elements):
             check_head_node = ChecklistItemHeadNode(check_head, None, index)
             result.append(check_head_node)
         return result
 
-    def columnCount(self, parent: QtCore.QModelIndex) -> int:
+    def columnCount(self, parent: QtCore.QModelIndex = QtCore.QModelIndex()) -> int:
         return 2
 
     def data(self, index: QtCore.QModelIndex, role: Qt = Qt.DisplayRole) -> typing.Any:
@@ -318,7 +314,7 @@ class CheckListItemsModel(TreeModel):
                     else:
                         raise RuntimeError(f'Invalid column: {index.column()}')
             else:  # it is a checklist property
-                check_property: ChecklistItemProperty
+                check_property: ChecklistItemProperty = node.ref
                 if role == Qt.DisplayRole:
                     if index.column() == 0:
                         result = check_property.name
@@ -330,6 +326,52 @@ class CheckListItemsModel(TreeModel):
 
     def headerData(self, section: int, orientation: Qt.Orientation, role: Qt = Qt.DisplayRole) -> typing.Any:
         result = None
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole and section == 0:
-            result = 'Check'
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            if section == 0:
+                result = 'Check'
+            elif section == 1:
+                result = 'Validated'
         return result
+
+    def flags(self, index: QtCore.QModelIndex) -> QtCore.Qt.ItemFlags:
+        result = super().flags(index)
+        if index.isValid():
+            node = index.internalPointer()
+            if index.parent() == QtCore.QModelIndex():
+                checklist_head: ChecklistItemHead = node.ref
+                if index.column() == 0:
+                    result = result | Qt.ItemIsEditable
+                elif index.column() == 1:
+                    result = result | Qt.ItemIsUserCheckable
+            else:
+                checklist_property: ChecklistItemProperty = node.ref
+                if index.column() == 1:
+                    result = result | Qt.ItemIsEditable
+        return result
+
+    def setData(self, index: QtCore.QModelIndex, value: typing.Any, role: int) -> bool:
+        result = False
+        if index.isValid():
+            node = index.internalPointer()
+            if index.parent() == QtCore.QModelIndex():
+                checklist_head: ChecklistItemHead = node.ref
+                if index.column() == 0 and role == Qt.EditRole:
+                    checklist_head.name = value
+                    self.dataChanged.emit(index, index, [role])
+                    result = True
+        return result
+
+
+class ChecklistItemsModelDelegate(QtWidgets.QStyledItemDelegate):
+
+    def paint(
+        self,
+        painter: QtGui.QPainter,
+        option: 'QStyleOptionViewItem',
+        index: QtCore.QModelIndex
+    ) -> None:
+        if index.isValid():
+            if not index.parent().isValid():
+                checklist_item_head: ChecklistItemHead = index.internalPointer()
+                if index.column() == 1:
+                    pass
