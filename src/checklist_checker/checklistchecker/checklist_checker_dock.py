@@ -1,9 +1,14 @@
+import json
 import typing
 import uuid
 from pathlib import Path
 
-from qgis.gui import QgsFileWidget
+from qgis.gui import (
+    QgsFileWidget,
+    QgisInterface,
+)
 from qgis.core import (
+    Qgis,
     QgsMapLayer,
     QgsMapLayerType,
     QgsProject,
@@ -17,6 +22,7 @@ from . import models
 from . import utils
 from .checklist_picker import ChecklistPicker
 from .constants import (
+    ChecklistItemPropertyColumn,
     ChecklistModelColumn,
     DatasetType,
     LayerChooserDataRole,
@@ -32,6 +38,7 @@ FORM_CLASS, _ = uic.loadUiType(
 
 
 class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
+    iface: QgisInterface
     tab_widget: QtWidgets.QTabWidget
     checklist_checks_tv: QtWidgets.QTreeView
     checklist_picker_dlg: ChecklistPicker
@@ -43,13 +50,15 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     validate_layer_rb: QtWidgets.QRadioButton
     layer_chooser_lv: QtWidgets.QListView
     file_chooser: QgsFileWidget
-    selected_checklist: typing.Optional[models.Checklist]
+    selected_checklist: typing.Optional[models.NewCheckList]
+    report_te: QtWidgets.QTextEdit
     save_report_fw: QgsFileWidget
-    generate_report_pb: QtWidgets.QPushButton
+    save_report_pb: QtWidgets.QPushButton
+    tab_widget: QtWidgets.QTabWidget
 
     closingPlugin = QtCore.pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, iface: QgisInterface, parent=None):
         """Constructor."""
         super(ChecklistCheckerDock, self).__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.
@@ -58,24 +67,50 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.save_report_pb.setDisabled(True)
+        self.iface = iface
         self.checklists = []
         self.selected_checklist = None
-        self.tab_widget: QtWidgets.QTabWidget
+        self.tab_widget.currentChanged.connect(self.update_tab_page)
         self.tab_widget.setTabEnabled(TabPages.CHOOSE.value, True)
         self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, False)
         self.tab_widget.setTabEnabled(TabPages.REPORT.value, False)
         self.tab_pages = [self.tab_widget.widget(i.value) for i in TabPages]
         self.choose_checklist_pb.clicked.connect(self.show_checklist_picker)
-        self.generate_report_pb.clicked.connect(self.save_report)
+        self.save_report_fw.fileChanged.connect(self.toggle_save_report_button)
+        self.save_report_pb.clicked.connect(self.save_report)
+
+    def update_tab_page(self, index: int):
+        if index == TabPages.REPORT.value:
+            self.update_report()
+
+    def update_report(self):
+        report = self.generate_report()
+        serialized = serialize_report(report)
+        self.report_te.setText(serialized)
+
+    def generate_report(self):
+        checklist_model = self.checklist_checks_tv.model()
+        return get_report_contents(checklist_model)
+
+    def toggle_save_report_button(self, current_path: str):
+        if current_path:
+            self.save_report_pb.setDisabled(False)
+        else:
+            self.save_report_pb.setDisabled(True)
 
     def save_report(self):
-        # -  access current checklist
-        # -  access current checks model
-        # -  generate the report in json format
-        # -  access the contents of the file save dialog and get the save target path
-        # -  convert to a string using a template (python)
-        # -  save the report
-        pass
+        raw_output = self.save_report_fw.filePath()
+        output = Path(raw_output).resolve()
+        log_message(f'output: {raw_output}')
+        # TODO: Append the correct extension to file
+        # TODO: Use QGIS encoding
+        try:
+            output.write_text(self.report_te.toPlainText(), encoding='utf-8')
+        except OSError as exc:
+            self.iface.messageBar().pushMessage('Error', f'Could not save validation report: {exc}', level=Qgis.Critical)
+        else:
+            self.iface.messageBar().pushMessage('Success', 'Validation report saved!', level=Qgis.Info)
 
     def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
         # This does not get called when list item is deselected
@@ -103,8 +138,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         layer = project.mapLayers()[layer_id]
         checks_model = QtGui.QStandardItemModel()
         checks_model.setColumnCount(2)
-
-        checklist_checks_model = models.CheckListItemsModel(self.selected_checklist.checks)
+        checklist_checks_model = models.CheckListItemsModel(self.selected_checklist)
 
         # for check in self.selected_checklist.checks:
         #     name_item = QtGui.QStandardItem(check.name)
@@ -289,3 +323,34 @@ def get_legal_layers(dataset_type: models.DatasetType) -> typing.Dict[str, QgsMa
         if utils.match_maplayer_type(layer.type()) == dataset_type:
             result[id_] = layer
     return result
+
+
+def get_report_contents(checklist_items: models.CheckListItemsModel) -> typing.Dict:
+    result = {
+        'name': 'Validation report',
+        'item': '',
+        'item_is_valid': checklist_items.result,
+        'checklist': checklist_items.checklist.name,
+        'dataset_type': checklist_items.checklist.dataset_type.value,
+        'artifact_type': checklist_items.checklist.validation_artifact_type.value,
+        'description': checklist_items.checklist.description,
+        'checks': []
+    }
+    for row in range(checklist_items.rowCount()):
+        name_idx = checklist_items.index(row, 0)
+        node = name_idx.internalPointer()
+        checklist_head: models.ChecklistItemHead = node.ref
+        description_prop: models.ChecklistItemProperty = checklist_head.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]
+        notes_prop: models.ChecklistItemProperty = checklist_head.check_properties[ChecklistItemPropertyColumn.VALIDATION_NOTES.value]
+        check = {
+            'name': checklist_head.name,
+            'validated': True if checklist_head.validated == QtCore.Qt.Checked else False,
+            description_prop.name: description_prop.value,
+            notes_prop.name: notes_prop.value,
+        }
+        result['checks'].append(check)
+    return result
+
+
+def serialize_report(report: typing.Dict) -> str:
+    return json.dumps(report, indent=2)

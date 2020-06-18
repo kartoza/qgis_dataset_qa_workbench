@@ -201,7 +201,7 @@ class ChecklistChecker:
         if checked:
             self.plugin_is_active = True
             if self.dock_widget is None:
-                self.dock_widget = ChecklistCheckerDock()
+                self.dock_widget = ChecklistCheckerDock(self.iface)
             self.dock_widget.closingPlugin.connect(self.on_close_plugin)
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
             self.dock_widget.show()

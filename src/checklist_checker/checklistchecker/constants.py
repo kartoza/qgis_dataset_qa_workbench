@@ -29,5 +29,12 @@ class ChecklistModelColumn(Enum):
     APPLICABLE_TO = 4
 
 
+class ChecklistItemPropertyColumn(Enum):
+    DESCRIPTION = 0
+    GUIDE = 1
+    AUTOMATION = 2
+    VALIDATION_NOTES = 3
+
+
 class LayerChooserDataRole(Enum):
     LAYER_IDENTIFIER = Qt.UserRole + 1
