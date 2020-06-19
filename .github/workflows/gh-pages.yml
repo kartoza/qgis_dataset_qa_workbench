@@ -18,7 +18,8 @@ jobs:
 
       - name: Package plugin
         uses: VaultVulp/action-pipenv@v2.0.1
-        run: run paver deploy_local_repo
+        with:
+          command: run paver deploy_local_repo
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
