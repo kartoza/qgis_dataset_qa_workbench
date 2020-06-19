@@ -24,3 +24,12 @@ TBD
 
 [pipenv]: https://pipenv.pypa.io/en/latest/
 [paver]: https://pythonhosted.org/Paver/index.html
+
+
+## Attribution
+
+This plugin uses icons from the [Font Awesome] project. Icons are used as-is, without any modification, 
+in accordance with their [license]
+
+[Font Awesome]: https://fontawesome.com/
+[license]: https://fontawesome.com/license

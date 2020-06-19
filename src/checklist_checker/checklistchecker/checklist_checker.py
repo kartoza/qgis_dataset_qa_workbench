@@ -170,7 +170,7 @@ class ChecklistChecker:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         log_message('inside initGui...')
-        icon_path = ':/plugins/checklist_checker/icon.png'
+        icon_path = ':/plugins/checklist_checker/clipboard-check-solid.svg'
         self.add_action(
             icon_path,
             text=self.tr(u'Perform QA/QC checks'),
