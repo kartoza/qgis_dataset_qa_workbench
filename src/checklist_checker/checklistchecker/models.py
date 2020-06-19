@@ -18,6 +18,15 @@ from .constants import (
 from .utils import log_message
 
 
+class ChecklistServer:
+    name: str
+    url: str
+
+    def __init__(self, name: str, url: str):
+        self.name = name
+        self.url = url
+
+
 class ChecklistItem:
     name: str
     description: str

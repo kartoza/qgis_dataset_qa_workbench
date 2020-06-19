@@ -9,6 +9,7 @@ from PyQt5 import QtWidgets
 
 from . import models
 from . import utils
+from .checklist_downloader import ChecklistDownloader
 from .constants import ChecklistModelColumn
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -19,6 +20,8 @@ FORM_CLASS, _ = uic.loadUiType(
 
 class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
     checklist_save_path_la: QtWidgets.QLabel
+    download_checklist_pb: QtWidgets.QPushButton
+    checklist_downloader_dlg: ChecklistDownloader
 
     def __init__(self, checklists: typing.List[models.NewCheckList], parent=None):
     # def __init__(self, checklists: typing.List[models.Checklist], parent=None):
@@ -30,6 +33,7 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.download_checklist_pb.clicked.connect(self.show_checklist_downloader)
         self.checklist_save_path_la.setText(f'Checklists are loaded from {utils.get_checklists_dir()}')
         self.checklists = checklists
         self.model = QtGui.QStandardItemModel(len(checklists), 3)
@@ -58,3 +62,13 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
         self.checklists_tv.setColumnHidden(ChecklistModelColumn.IDENTIFIER.value, True)
         self.checklists_tv.setSortingEnabled(True)
         self.checklists_tv.sortByColumn(ChecklistModelColumn.DATASET_TYPES.value, QtCore.Qt.DescendingOrder)
+
+    def show_checklist_downloader(self):
+        self.checklist_downloader_dlg = ChecklistDownloader()
+        self.checklist_downloader_dlg.button_box.accepted.connect(self.load_checklist)
+        self.checklist_downloader_dlg.setModal(True)
+        self.checklist_downloader_dlg.show()
+        self.checklist_downloader_dlg.exec_()
+
+    def load_checklist(self):
+        utils.log_message(f'load_checklist called')

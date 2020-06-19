@@ -6,65 +6,58 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>663</width>
-    <height>396</height>
+    <width>573</width>
+    <height>470</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Choose Checklist</string>
+   <string>Download checklist</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTreeView" name="checklists_tv">
-     <attribute name="headerShowSortIndicator" stdset="0">
-      <bool>true</bool>
-     </attribute>
-    </widget>
+    <widget class="QComboBox" name="current_server_cb"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="connect_to_server_pb">
        <property name="text">
-        <string>Create new checklist...</string>
+        <string>Connect</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="download_checklist_pb">
+      <widget class="QPushButton" name="new_server_pb">
        <property name="text">
-        <string>Download checklist...</string>
+        <string>New</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QPushButton" name="edit_server_pb">
+       <property name="text">
+        <string>Edit</string>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="remove_server_pb">
        <property name="text">
-        <string>Delete selected checklist</string>
+        <string>Remove</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="add_default_servers_pb">
+       <property name="text">
+        <string>Add default servers</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="checklist_save_path_la">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
+    <widget class="QListWidget" name="available_checklist_servers_lw"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="button_box">
