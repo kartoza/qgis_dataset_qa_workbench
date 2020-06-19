@@ -19,7 +19,7 @@ from paver.easy import (
 # TODO: - Replace paver with click
 
 LOCAL_ROOT_DIR = Path(__file__).parent.resolve()
-SRC_NAME = LOCAL_ROOT_DIR.name.replace('qgis_', '')
+SRC_NAME = 'checklist_checker'
 PACKAGE_NAME = SRC_NAME.replace('_', '')
 
 
