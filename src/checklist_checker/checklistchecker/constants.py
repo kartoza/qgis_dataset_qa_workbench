@@ -2,6 +2,9 @@ from enum import Enum
 
 from PyQt5.QtCore import Qt
 
+SETTINGS_GROUP = 'PythonPlugins/checklist_checker'
+
+
 class DatasetType(Enum):
     DOCUMENT = "document"
     RASTER = "raster"
@@ -24,9 +27,11 @@ class TabPages(Enum):
 class ChecklistModelColumn(Enum):
     IDENTIFIER = 0
     NAME = 1
-    DESCRIPTION = 2
-    DATASET_TYPES = 3
-    APPLICABLE_TO = 4
+    # DESCRIPTION = 2
+    # DATASET_TYPES = 3
+    # APPLICABLE_TO = 4
+    DATASET_TYPES = 2
+    APPLICABLE_TO = 3
 
 
 class ChecklistItemPropertyColumn(Enum):
@@ -38,3 +43,8 @@ class ChecklistItemPropertyColumn(Enum):
 
 class LayerChooserDataRole(Enum):
     LAYER_IDENTIFIER = Qt.UserRole + 1
+
+
+class CustomDataRoles(Enum):
+    LAYER_CHOOSER_LAYER_IDENTIFIER = Qt.UserRole + 1
+    CHECKLIST_DOWNLOADER_IDENTIFIER = Qt.UserRole + 2

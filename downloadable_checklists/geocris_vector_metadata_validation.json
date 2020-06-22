@@ -1,0 +1,7 @@
+{
+  "name": "GeoCRIS vector metadata validation checklist",
+  "description": "This checklist is used to perform validation of GeoCRIS vector metadata",
+  "dataset_type": "vector",
+  "validation_artifact_type": "metadata",
+  "checks": []
+}

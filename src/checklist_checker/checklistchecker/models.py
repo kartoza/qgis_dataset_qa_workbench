@@ -18,6 +18,15 @@ from .constants import (
 from .utils import log_message
 
 
+class ChecklistServer:
+    name: str
+    url: str
+
+    def __init__(self, name: str, url: str):
+        self.name = name
+        self.url = url
+
+
 class ChecklistItem:
     name: str
     description: str
@@ -188,14 +197,31 @@ class ChecklistItemHead:
         self.validated = Qt.Unchecked
         self.check_properties = check_properties
 
+    def to_dict(self, include_notes: bool = True, include_result: bool = True):
+        result = {
+            'name': self.name,
+        }
+        for item_property in self.check_properties:
+            if item_property.name == self._decode_notes_column_name():
+                if include_notes:
+                    result[item_property.name] = item_property.value
+            else:
+                result[item_property.name] = item_property.value
+        if include_result:
+            result['validated'] = bool(self.validated)
+        return result
+
+    @staticmethod
+    def _decode_notes_column_name():
+        return ChecklistItemPropertyColumn.VALIDATION_NOTES.name.replace('_', ' ').capitalize()
+
     @classmethod
     def from_dict(cls, raw: typing.Dict):
-        validation_notes = ChecklistItemPropertyColumn.VALIDATION_NOTES.name.replace('_', ' ').capitalize()
         check_properties = [
-            ChecklistItemProperty(ChecklistItemPropertyColumn.DESCRIPTION.name.capitalize(), raw.get('description')),
-            ChecklistItemProperty(ChecklistItemPropertyColumn.GUIDE.name.capitalize(), raw.get('guide')),
-            ChecklistItemProperty(ChecklistItemPropertyColumn.AUTOMATION.name.capitalize(), raw.get('automation')),
-            ChecklistItemProperty(validation_notes, ''),
+            ChecklistItemProperty(ChecklistItemPropertyColumn.DESCRIPTION.name.lower(), raw.get('description')),
+            ChecklistItemProperty(ChecklistItemPropertyColumn.GUIDE.name.lower(), raw.get('guide')),
+            ChecklistItemProperty(ChecklistItemPropertyColumn.AUTOMATION.name.lower(), raw.get('automation')),
+            ChecklistItemProperty(ChecklistItemPropertyColumn.VALIDATION_NOTES.name.lower(), ''),
         ]
         return cls(raw['name'], check_properties)
 
@@ -221,6 +247,21 @@ class NewCheckList:
         self.dataset_type = dataset_type
         self.validation_artifact_type = validation_artifact_type
         self.checks = []
+
+    def to_dict(self, include_check_notes: bool = True, include_check_results: bool = True):
+        result = {
+            'identifier': str(self.identifier),
+            'name': self.name,
+            'description': self.description,
+            'dataset_type': self.dataset_type.value,
+            'validation_artifact_type': self.validation_artifact_type.value,
+            'checks': []
+        }
+        for check in self.checks:
+            check_dict = check.to_dict(include_notes=include_check_notes, include_result=include_check_results)
+            result['checks'].append(check_dict)
+        return result
+
 
     @classmethod
     def from_dict(cls, raw: typing.Dict):
@@ -372,15 +413,5 @@ class CheckListItemsModel(TreeModel):
 
 
 class ChecklistItemsModelDelegate(QtWidgets.QStyledItemDelegate):
+    pass
 
-    def paint(
-        self,
-        painter: QtGui.QPainter,
-        option: 'QStyleOptionViewItem',
-        index: QtCore.QModelIndex
-    ) -> None:
-        if index.isValid():
-            if not index.parent().isValid():
-                checklist_item_head: ChecklistItemHead = index.internalPointer()
-                if index.column() == 1:
-                    pass

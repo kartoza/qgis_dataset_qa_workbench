@@ -1,5 +1,6 @@
 import configparser
 import datetime as dt
+import json
 import shlex
 import shutil
 import subprocess
@@ -105,7 +106,23 @@ def deploy_local_repo(options):
     contents = contents_template.format(**context)
     repo_index = repo_base_dir / 'plugins.xml'
     repo_index.write_text(contents, encoding='utf-8')
+    checklists_response = generate_checklists_response()
+    checklists_endpoint = LOCAL_ROOT_DIR / 'docs/checklists/checklists.json'
+    checklists_endpoint.parent.mkdir(parents=True, exist_ok=True)
+    checklists_endpoint.write_text(checklists_response, encoding='utf-8')
     shutil.rmtree(temp_dir)
+
+
+@task
+def generate_checklists_response() -> str:
+    repo_checklists_dir = LOCAL_ROOT_DIR / 'downloadable_checklists'
+    all_checklists = []
+    for item in repo_checklists_dir.iterdir():
+        if item.is_file() and item.suffix == '.json':
+            # TODO: add a try block here
+            checklist_definition = json.loads(item.read_text())
+            all_checklists.append(checklist_definition)
+    return json.dumps(all_checklists, indent=2)
 
 
 @task
