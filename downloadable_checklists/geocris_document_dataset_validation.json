@@ -1,0 +1,7 @@
+{
+  "name": "GeoCRIS document dataset validation checklist",
+  "description": "This checklist is used to perform validation of GeoCRIS document datasets",
+  "dataset_type": "document",
+  "validation_artifact_type": "dataset",
+  "checks": []
+}

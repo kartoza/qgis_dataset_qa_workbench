@@ -24,13 +24,6 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Create new checklist...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="download_checklist_pb">
        <property name="text">
         <string>Download checklist...</string>
@@ -51,7 +44,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="delete_checklist_pb">
        <property name="text">
         <string>Delete selected checklist</string>
        </property>

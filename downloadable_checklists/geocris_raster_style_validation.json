@@ -1,0 +1,7 @@
+{
+  "name": "GeoCRIS raster style validation checklist",
+  "description": "This checklist is used to perform validation of GeoCRIS raster styles",
+  "dataset_type": "raster",
+  "validation_artifact_type": "style",
+  "checks": []
+}

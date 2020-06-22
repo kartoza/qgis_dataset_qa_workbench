@@ -57,7 +57,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QListWidget" name="available_checklist_servers_lw"/>
+    <widget class="QTreeView" name="downloaded_checklists_tv"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="button_box">

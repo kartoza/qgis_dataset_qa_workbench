@@ -24,6 +24,7 @@ from .checklist_picker import ChecklistPicker
 from .constants import (
     ChecklistItemPropertyColumn,
     ChecklistModelColumn,
+    CustomDataRoles,
     DatasetType,
     LayerChooserDataRole,
     TabPages,
@@ -138,25 +139,18 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         layer = project.mapLayers()[layer_id]
         checks_model = QtGui.QStandardItemModel()
         checks_model.setColumnCount(2)
+        utils.log_message(f'inside load_checklist_steps selected_checklist: {self.selected_checklist}')
+        utils.log_message(f'selected_checklist checks: {self.selected_checklist.checks}')
+        for head_check in self.selected_checklist.checks:
+            head_check: models.ChecklistItemHead
+            utils.log_message(f'check {head_check.name} description: {head_check.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]}')
         checklist_checks_model = models.CheckListItemsModel(self.selected_checklist)
-
-        # for check in self.selected_checklist.checks:
-        #     name_item = QtGui.QStandardItem(check.name)
-        #     name_item.setColumnCount(2)
-        #
-        #     valid_item = QtGui.QStandardItem(check.validated)
-        #     valid_item.setCheckable(True)
-        #
-        #     description_item = QtGui.QStandardItem(check.description)
-        #     guide_item = QtGui.QStandardItem(check.guide)
-        #
-        #     #name_item.appendRow([QtGui.QStandardItem('Valid'), valid_item])
-        #     name_item.appendRow([QtGui.QStandardItem('Description'), description_item])
-        #     name_item.appendRow([QtGui.QStandardItem('Validation guide'), guide_item])
-        #     # name_item.appendRows([valid_item, description_item, guide_item])
-        #     checks_model.appendRow([name_item, valid_item])
-        # self.checklist_checks_tv.setModel(checks_model)
         self.checklist_checks_tv.setModel(checklist_checks_model)
+        self.checklist_checks_tv.setTextElideMode(QtCore.Qt.ElideNone)
+        self.checklist_checks_tv.setAlternatingRowColors(True)
+        # self.checklist_checks_tv.setStyleSheet('QTreeView::item { padding: 10px }')
+        # delegate = models.ChecklistItemsModelDelegate()
+        # self.checklist_checks_tv.setItemDelegate(delegate)
 
     def selected_layer_selection_changed(
             self,
@@ -172,9 +166,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.tab_widget.setTabEnabled(TabPages.REPORT.value, True)
 
     def show_checklist_picker(self):
-        # self.checklists = models.load_checklists()
-        self.checklists = models.new_load_checklists()
-        self.checklist_picker_dlg = ChecklistPicker(self.checklists)
+        self.checklist_picker_dlg = ChecklistPicker()
         self.checklist_picker_dlg.button_box.accepted.connect(self.load_checklist)
         self.checklist_picker_dlg.setModal(True)
         self.checklist_picker_dlg.show()
@@ -194,14 +186,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     def get_selected_checklist(self, index: QtCore.QModelIndex) -> models.Checklist:
         model = index.model()
         identifier_item = model.item(index.row(), ChecklistModelColumn.IDENTIFIER.value)
-        log_message(f'item_data: {identifier_item.data(QtCore.Qt.DisplayRole)}')
-        checklist_id = uuid.UUID(identifier_item.data(QtCore.Qt.DisplayRole))
-        for checklist in self.checklists:
-            if checklist.identifier == checklist_id:
-                result = checklist
-                break
-        else:
-            result = None
+        result = identifier_item.data(role=CustomDataRoles.CHECKLIST_DOWNLOADER_IDENTIFIER.value)
         return result
 
     def load_checklist_elements(self, checklist: models.Checklist):
