@@ -1,6 +1,7 @@
 import json
 import typing
 import uuid
+from functools import partialmethod
 from pathlib import Path
 
 from qgis.gui import (
@@ -20,6 +21,7 @@ from PyQt5 import QtWidgets
 
 from . import models
 from . import utils
+from .automation import AutomationButtonsWidget
 from .checklist_picker import ChecklistPicker
 from .constants import (
     ChecklistItemPropertyColumn,
@@ -41,7 +43,8 @@ FORM_CLASS, _ = uic.loadUiType(
 class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     iface: QgisInterface
     tab_widget: QtWidgets.QTabWidget
-    checklist_checks_tv: QtWidgets.QTreeView
+    # checklist_checks_tv: QtWidgets.QTreeView
+    checklist_checks_tv: models.MyTreeView
     checklist_picker_dlg: ChecklistPicker
     checklist_name_le: QtWidgets.QLineEdit
     checklist_artifacts_le: QtWidgets.QLineEdit
@@ -92,7 +95,11 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
 
     def generate_report(self):
         checklist_model = self.checklist_checks_tv.model()
-        return get_report_contents(checklist_model)
+        if checklist_model is not None:
+            result = get_report_contents(checklist_model)
+        else:
+            result = None
+        return result
 
     def toggle_save_report_button(self, current_path: str):
         if current_path:
@@ -114,12 +121,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.iface.messageBar().pushMessage('Success', 'Validation report saved!', level=Qgis.Info)
 
     def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
-        # This does not get called when list item is deselected
-        log_message(f'inside selected_layer_changed - locals: {locals()} current: {current!r} - previous: {previous!r}')
-        log_message(f'current type: {type(current)}')
-        log_message(f'previous type: {type(previous)}')
-        log_message(f'current row: {current.row()}')
-        log_message(f'previous row: {previous.row()}')
+        # NOTE: This method does not get called when list item is deselected
         layer_model = self.layer_chooser_lv.model()
         layer_model: QtCore.QAbstractItemModel
         layer_id = layer_model.data(current, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
@@ -146,11 +148,35 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             utils.log_message(f'check {head_check.name} description: {head_check.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]}')
         checklist_checks_model = models.CheckListItemsModel(self.selected_checklist)
         self.checklist_checks_tv.setModel(checklist_checks_model)
+        self.checklist_checks_tv.resized.connect(self.force_model_update)
         self.checklist_checks_tv.setTextElideMode(QtCore.Qt.ElideNone)
+        self.checklist_checks_tv.setWordWrap(True)
         self.checklist_checks_tv.setAlternatingRowColors(True)
-        # self.checklist_checks_tv.setStyleSheet('QTreeView::item { padding: 10px }')
-        # delegate = models.ChecklistItemsModelDelegate()
-        # self.checklist_checks_tv.setItemDelegate(delegate)
+        self.add_automation_widgets(layer)
+        delegate = models.ChecklistItemsModelDelegate(self.checklist_checks_tv)
+        self.checklist_checks_tv.setItemDelegate(delegate)
+
+    def add_automation_widgets(self, dataset: typing.Union[QgsMapLayer, str]):
+        model = self.checklist_checks_tv.model()
+        for head_row in range(model.rowCount()):
+            head_index = model.index(head_row, 0)
+            item_head: models.ChecklistItemHead = head_index.internalPointer().ref
+            automation_prop: models.ChecklistItemProperty = item_head.check_properties[
+                ChecklistItemPropertyColumn.AUTOMATION.value]
+            if automation_prop.value:
+                automation_index = model.index(ChecklistItemPropertyColumn.AUTOMATION.value, 1, head_index)
+                automation_widget = AutomationButtonsWidget(
+                    checklist_items_model=model, index=head_index, dataset=dataset)
+                # automation_btn = QtWidgets.QPushButton('Automate...')
+                self.checklist_checks_tv.setIndexWidget(automation_index, automation_widget)
+
+    def force_model_update(self):
+        model = self.checklist_checks_tv.model()
+        for row in range(model.rowCount()):
+            parent = model.index(row, 0)
+            for property_row in (ChecklistItemPropertyColumn.DESCRIPTION.value, ChecklistItemPropertyColumn.GUIDE.value, ChecklistItemPropertyColumn.VALIDATION_NOTES.value):
+                property_index = model.index(property_row, 1, parent)
+                model.dataChanged.emit(property_index, property_index)
 
     def selected_layer_selection_changed(
             self,

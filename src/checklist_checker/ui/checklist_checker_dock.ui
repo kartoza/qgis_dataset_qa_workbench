@@ -165,7 +165,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="checklist_checks_tv"/>
+         <widget class="MyTreeView" name="checklist_checks_tv"/>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -252,19 +252,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </item>
        </layout>
@@ -279,6 +266,11 @@
    <class>QgsFileWidget</class>
    <extends>QWidget</extends>
    <header>qgsfilewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MyTreeView</class>
+   <extends>QTreeView</extends>
+   <header>checklist_checker.checklistchecker.models.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

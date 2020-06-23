@@ -99,9 +99,9 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
     def add_default_servers(self):
         default_servers = [
             models.ChecklistServer(
-                'Kartoza checklists for GeoCRIS and DomiNode', 'http://localhost:8000/checklists/checklists.json'),
-            models.ChecklistServer(
-                'Another', 'http://localhost:8000/checklists/checklists.json'),
+                'Kartoza checklists for GeoCRIS and DomiNode',
+                'https://kartoza.github.io/qgis_checklist_checker/checklists/checklists.json'
+            ),
         ]
         settings = QgsSettings()
         settings.beginGroup('PythonPlugins/checklist_checker/checklist_servers')

@@ -371,6 +371,22 @@ class CheckListItemsModel(TreeModel):
                         result = check_property.value
                     else:
                         raise RuntimeError(f'Invalid column: {index.column()}')
+                # elif role == Qt.SizeHintRole:
+                #     if index.parent() != QtCore.QModelIndex() and index.column() == 1:
+                # elif role == Qt.SizeHintRole:
+                #     if index.column() == 1 and index.row() == ChecklistItemPropertyColumn.GUIDE.value:
+                #         to_display = super().data(index, Qt.DisplayRole)
+                #         base_size: QtCore.QSize = super().data(index, role)
+                #         utils.log_message(f'to_display: {to_display}')
+                #         utils.log_message(f'base_size: {base_size}')
+                #         metrics: QtGui.QFontMetrics = super().data(index, Qt.FontRole).value()
+                #         out_rect: QtCore.QRect = metrics.boundingRect(
+                #             QtCore.QRect(QtCore.QPoint(0, 0), base_size),
+                #             Qt.AlignLeft,
+                #             to_display
+                #         )
+                #         base_size.setHeight(out_rect.height())
+                #         result = base_size
         return result
 
     def headerData(self, section: int, orientation: Qt.Orientation, role: Qt = Qt.DisplayRole) -> typing.Any:
@@ -413,5 +429,49 @@ class CheckListItemsModel(TreeModel):
 
 
 class ChecklistItemsModelDelegate(QtWidgets.QStyledItemDelegate):
-    pass
+    gui_view: QtWidgets.QTreeView
 
+    def __init__(self, gui_view: QtWidgets.QTreeView, *args, **kwargs):
+        self.gui_view = gui_view
+        super().__init__(*args, **kwargs)
+
+    def sizeHint(
+            self,
+            option: QtWidgets.QStyleOptionViewItem,
+            index: QtCore.QModelIndex
+    ) -> QtCore.QSize:
+        is_first_level = index.parent() == QtCore.QModelIndex()
+        multiline_columns = (
+            ChecklistItemPropertyColumn.DESCRIPTION.value,
+            ChecklistItemPropertyColumn.GUIDE.value,
+            ChecklistItemPropertyColumn.VALIDATION_NOTES.value,
+        )
+        is_multiline = index.row() in multiline_columns
+        if not is_first_level and is_multiline and index.column() == 1:
+            check_property: ChecklistItemProperty = index.internalPointer().ref
+            text_to_draw = check_property.value
+            base_width = self.gui_view.columnWidth(1)
+            base_height = 10000  # some ridiculous high value just for initialization
+            base_size = QtCore.QSize(base_width, base_height)
+
+            metrics = QtGui.QFontMetrics(option.font)
+            out_rect: QtCore.QRect = metrics.boundingRect(
+                QtCore.QRect(QtCore.QPoint(0, 0), base_size),
+                Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap,
+                text_to_draw
+            )
+            base_size.setHeight(out_rect.height())
+            utils.log_message(f'final base_size height: {base_size.height()}')
+            result = base_size
+        else:
+            result = super().sizeHint(option, index)
+        return result
+
+
+class MyTreeView(QtWidgets.QTreeView):
+
+    resized = QtCore.pyqtSignal()
+
+    def resizeEvent(self, e: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(e)
+        self.resized.emit()
