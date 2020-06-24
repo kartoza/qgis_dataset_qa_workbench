@@ -6,6 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.3.0] - 2020-06-24
+
+### Added
+
+-  Allow configuration of automation in the checklist definition file
+-  Processing algorithm for checking a layer's CRS against a target CRS
+
+### Fixed
+
+-  Checklist definition file no longer contains `validation_notes`
+
+
+## [0.2.1] - 2020-06-23
+
+### Fixed
+
+-  Fix typo in workflow file that prevented build to finish correctly
+
 ## [0.2.0] - 2020-06-23
 
 ### Added
@@ -20,4 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.2.0...master
+[0.3.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.3.0
+[0.2.1]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.2.1
 [0.2.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.2.0
