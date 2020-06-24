@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.3.1] - 2020-06-24
+
+### Fixed
+
+-  Change the version to match tag name
+
+
 ## [0.3.0] - 2020-06-24
 
 ### Added
@@ -39,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.2.0...master
+[0.3.1]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.3.1
 [0.3.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.3.0
 [0.2.1]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.2.1
 [0.2.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.2.0
