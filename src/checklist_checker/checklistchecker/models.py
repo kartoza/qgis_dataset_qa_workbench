@@ -67,7 +67,7 @@ class ChecklistItemHead:
             ChecklistItemProperty(ChecklistItemPropertyColumn.DESCRIPTION.name.lower(), raw.get('description')),
             ChecklistItemProperty(ChecklistItemPropertyColumn.GUIDE.name.lower(), raw.get('guide')),
             ChecklistItemProperty(ChecklistItemPropertyColumn.AUTOMATION.name.lower(), raw.get('automation')),
-            ChecklistItemProperty(ChecklistItemPropertyColumn.VALIDATION_NOTES.name.lower(), ''),
+            ChecklistItemProperty(cls._decode_notes_column_name(), ''),
         ]
         return cls(raw['name'], check_properties)
 
