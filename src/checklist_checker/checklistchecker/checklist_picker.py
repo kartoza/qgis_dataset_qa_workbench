@@ -43,7 +43,7 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
         self.delete_checklist_pb.setEnabled(False)
         self.delete_checklist_pb.clicked.connect(self.delete_checklist)
         self.checklist_save_path_la.setText(f'Checklists are loaded from {utils.get_checklists_dir()}')
-        checklists = models.new_load_checklists()
+        checklists = models.load_checklists()
         self.model = QtGui.QStandardItemModel(len(checklists), 3)
         self.model.setHorizontalHeaderLabels([i.name.replace('_', ' ').capitalize() for i in ChecklistModelColumn])
         self.model.rowsRemoved.connect(self.toggle_delete_checklist_button)
@@ -69,11 +69,11 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
             else:
                 model.removeRow(idx.row())
 
-    def load_checklists(self, checklists: typing.List[models.NewCheckList]):
+    def load_checklists(self, checklists: typing.List[models.CheckList]):
         self.model.clear()
         self.model.setHorizontalHeaderLabels([i.name.replace('_', ' ').capitalize() for i in ChecklistModelColumn])
         for row_index, checklist in enumerate(checklists):
-            checklist: models.NewCheckList
+            checklist: models.CheckList
             identifier_item = QtGui.QStandardItem(str(checklist.identifier))
             identifier_item.setData(checklist, role=CustomDataRoles.CHECKLIST_DOWNLOADER_IDENTIFIER.value)
             self.model.setItem(row_index, ChecklistModelColumn.IDENTIFIER.value, identifier_item)
@@ -114,7 +114,7 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
             target_path = utils.get_checklists_dir() / f'{sanitized_name}.json'
             # TODO: Add a try block
             save_checklist(checklist, target_path)
-        existing_checklists = models.new_load_checklists()
+        existing_checklists = models.load_checklists()
         self.load_checklists(existing_checklists)
 
 
@@ -122,7 +122,7 @@ def sanitize_checklist_name(name: str) -> str:
     return name.replace(' ', '_').lower()
 
 
-def save_checklist(checklist: models.NewCheckList, target_path: Path):
+def save_checklist(checklist: models.CheckList, target_path: Path):
     serialized = json.dumps(
         checklist.to_dict(include_check_notes=False, include_check_results=False),
         indent=2

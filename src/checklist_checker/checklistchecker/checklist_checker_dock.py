@@ -54,7 +54,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     validate_layer_rb: QtWidgets.QRadioButton
     layer_chooser_lv: QtWidgets.QListView
     file_chooser: QgsFileWidget
-    selected_checklist: typing.Optional[models.NewCheckList]
+    selected_checklist: typing.Optional[models.CheckList]
     report_te: QtWidgets.QTextEdit
     save_report_fw: QgsFileWidget
     save_report_pb: QtWidgets.QPushButton
@@ -209,13 +209,13 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         else:
             log_message('no checklist was selected')
 
-    def get_selected_checklist(self, index: QtCore.QModelIndex) -> models.Checklist:
+    def get_selected_checklist(self, index: QtCore.QModelIndex) -> models.CheckList:
         model = index.model()
         identifier_item = model.item(index.row(), ChecklistModelColumn.IDENTIFIER.value)
         result = identifier_item.data(role=CustomDataRoles.CHECKLIST_DOWNLOADER_IDENTIFIER.value)
         return result
 
-    def load_checklist_elements(self, checklist: models.Checklist):
+    def load_checklist_elements(self, checklist: models.CheckList):
         self.checklist_name_le.setEnabled(True)
         self.checklist_artifacts_le.setEnabled(True)
         self.checklist_types_le.setEnabled(True)

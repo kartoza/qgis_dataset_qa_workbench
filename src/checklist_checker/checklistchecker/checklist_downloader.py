@@ -133,19 +133,19 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
                 parsed_checklists = []
                 for raw_checklist in raw_checklists:
                     # TODO: add a try block here
-                    checklist = models.NewCheckList.from_dict(raw_checklist)
+                    checklist = models.CheckList.from_dict(raw_checklist)
                     parsed_checklists.append(checklist)
                 self.populate_downloaded_checklists_tree_view(parsed_checklists)
         else:
             utils.log_message(f'Received invalid response from {reply.url().toString()}: {reply_text}')
 
-    def populate_downloaded_checklists_tree_view(self, checklists: typing.List[models.NewCheckList]):
+    def populate_downloaded_checklists_tree_view(self, checklists: typing.List[models.CheckList]):
         # self.model.clear()
         # self.model.setHorizontalHeaderLabels([i.name.replace('_', ' ').capitalize() for i in ChecklistModelColumn])
         self.reset_tree_view()
         self.model.setRowCount(len(checklists))
         for row_index, checklist in enumerate(checklists):
-            checklist: models.NewCheckList
+            checklist: models.CheckList
             id_item = QtGui.QStandardItem(str(checklist.identifier))
             id_item.setData(checklist, role=CustomDataRoles.CHECKLIST_DOWNLOADER_IDENTIFIER.value)
             # self.model.setItem(

@@ -5,8 +5,7 @@ import uuid
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QStandardItemModel
-from PyQt5.QtCore import Qt, QAbstractItemModel
+from PyQt5.QtCore import Qt
 
 from . import utils
 from .constants import (
@@ -14,8 +13,6 @@ from .constants import (
     DatasetType,
     ValidationArtifactType,
 )
-
-from .utils import log_message
 
 
 class ChecklistServer:
@@ -25,157 +22,6 @@ class ChecklistServer:
     def __init__(self, name: str, url: str):
         self.name = name
         self.url = url
-
-
-class ChecklistItem:
-    name: str
-    description: str
-    guide: str
-    validated: bool = False
-    automation = None
-    notes: str
-
-    def __init__(self, name: str, description: str = '', guide: str = '', automation=None):
-        self.name = name
-        self.description = description
-        self.guide = guide
-        self.validated = False
-        self.automation = automation
-        self.notes = ''
-
-    @classmethod
-    def from_dict(cls, raw: typing.Dict):
-        instance = cls(
-            name=raw['name'],
-            description=raw.get('description', ''),
-            guide=raw.get('guide', ''),
-            automation=raw.get('automation', '')
-        )
-        return instance
-
-
-class Checklist:
-    identifier: uuid.UUID
-    name: str
-    description: str
-    dataset_type: DatasetType
-    validation_artifact_type: ValidationArtifactType
-    checks: typing.List[ChecklistItem]
-
-    def __init__(
-            self,
-            name: str,
-            description: str,
-            dataset_type: DatasetType,
-            validation_artifact_type: ValidationArtifactType
-    ):
-        self.identifier = uuid.uuid4()
-        self.name = name
-        self.description = description
-        self.dataset_type = dataset_type
-        self.validation_artifact_type = validation_artifact_type
-        self.checks = []
-
-    @classmethod
-    def from_dict(cls, raw: typing.Dict):
-        try:
-            instance = cls(
-                name=raw['name'],
-                description=raw.get('description', ''),
-                dataset_type=DatasetType(raw['dataset_type']),
-                validation_artifact_type=ValidationArtifactType(raw['validation_artifact_type'])
-            )
-        except KeyError:
-            raise
-        for raw_check in raw.get('checks', []):
-            try:
-                check = ChecklistItem.from_dict(raw_check)
-            except KeyError:
-                raise
-            instance.checks.append(check)
-        return instance
-
-
-class ValidationReport:
-    checklist: Checklist
-    validation_checks: typing.List[ChecklistItem]
-
-    def __init__(self, checklist: Checklist, validation_checks: typing.List[ChecklistItem]):
-        self.checklist = checklist
-        self.validation_checks = validation_checks
-
-    @classmethod
-    def from_checks_model(cls, checklist: Checklist, checks_model: QStandardItemModel):
-        for check in checks_model:
-            pass
-
-
-def load_checklists() -> typing.List[Checklist]:
-    directory = utils.get_checklists_dir()
-    result = []
-    for item in directory.iterdir():
-        log_message(f'loading file {item}...')
-        if item.is_file():
-            with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
-                try:
-                    raw_data = json.load(fh)
-                    checklist = Checklist.from_dict(raw_data)
-                    result.append(checklist)
-                except (UnicodeDecodeError, ValueError, KeyError) as exc:
-                    log_message(f'Could not generate checklist from {str(item)!r} because: {exc}')
-    return result
-
-
-class TreeNode:
-
-    def __init__(self, parent, row):
-        self.parent = parent
-        self.row = row
-        self.sub_nodes = self._get_children()
-
-    def _get_children(self):
-        raise NotImplementedError
-
-
-class TreeModel(QAbstractItemModel):
-
-    def __init__(self):
-        super().__init__()
-        self.root_nodes = self._get_root_nodes()
-
-    def _get_root_nodes(self):
-        raise NotImplementedError
-
-    def index(self, row: int, column: int, parent: typing.Optional[QtCore.QModelIndex] = QtCore.QModelIndex()):
-        if not parent.isValid():
-            result = self.createIndex(row, column, self.root_nodes[row])
-        else:
-            parent_node: TreeNode = parent.internalPointer()
-            result = self.createIndex(row, column, parent_node.sub_nodes[row])
-        return result
-
-    def parent(self, index: QtCore.QModelIndex):
-        if not index.isValid():
-            result = QtCore.QModelIndex()
-        else:
-            node: TreeNode = index.internalPointer()
-            if node.parent is None:
-                result = QtCore.QModelIndex()
-            else:
-                result = self.createIndex(node.parent.row, 0, node.parent)
-        return result
-
-    def reset(self):
-        self.root_nodes = self._get_root_nodes()
-        super().reset()
-
-    def rowCount(self, parent: QtCore.QModelIndex = QtCore.QModelIndex()) -> int:
-        if not parent.isValid():
-            result = len(self.root_nodes)
-        else:
-            node: TreeNode = parent.internalPointer()
-            result = len(node.sub_nodes)
-        return result
 
 
 class ChecklistItemProperty:
@@ -226,7 +72,7 @@ class ChecklistItemHead:
         return cls(raw['name'], check_properties)
 
 
-class NewCheckList:
+class CheckList:
     identifier: uuid.UUID
     name: str
     description: str
@@ -283,23 +129,7 @@ class NewCheckList:
         return instance
 
 
-def new_load_checklists() -> typing.List[NewCheckList]:
-    directory = utils.get_checklists_dir()
-    result = []
-    for item in directory.iterdir():
-        log_message(f'loading file {item}...')
-        if item.is_file():
-            with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
-                try:
-                    raw_data = json.load(fh)
-                    checklist = NewCheckList.from_dict(raw_data)
-                    result.append(checklist)
-                except (UnicodeDecodeError, ValueError, KeyError) as exc:
-                    log_message(f'Could not generate checklist from {str(item)!r} because: {exc}')
-    return result
-
-
-class ChecklistItemPropertyNode(TreeNode):
+class ChecklistItemPropertyNode(utils.TreeNode):
     ref: ChecklistItemProperty
 
     def __init__(self, ref: ChecklistItemProperty, parent, row):
@@ -310,7 +140,7 @@ class ChecklistItemPropertyNode(TreeNode):
         return []
 
 
-class ChecklistItemHeadNode(TreeNode):
+class ChecklistItemHeadNode(utils.TreeNode):
     ref: ChecklistItemHead
 
     def __init__(self, ref: ChecklistItemHead, parent, row):
@@ -325,11 +155,11 @@ class ChecklistItemHeadNode(TreeNode):
         return result
 
 
-class CheckListItemsModel(TreeModel):
-    checklist: NewCheckList
+class CheckListItemsModel(utils.TreeModel):
+    checklist: CheckList
     root_nodes: typing.List[ChecklistItemHead]
 
-    def __init__(self, checklist: NewCheckList):
+    def __init__(self, checklist: CheckList):
         self.checklist = checklist
         super().__init__()
 
@@ -377,8 +207,8 @@ class CheckListItemsModel(TreeModel):
                 #     if index.column() == 1 and index.row() == ChecklistItemPropertyColumn.GUIDE.value:
                 #         to_display = super().data(index, Qt.DisplayRole)
                 #         base_size: QtCore.QSize = super().data(index, role)
-                #         utils.log_message(f'to_display: {to_display}')
-                #         utils.log_message(f'base_size: {base_size}')
+                #         utils.utils.log_message(f'to_display: {to_display}')
+                #         utils.utils.log_message(f'base_size: {base_size}')
                 #         metrics: QtGui.QFontMetrics = super().data(index, Qt.FontRole).value()
                 #         out_rect: QtCore.QRect = metrics.boundingRect(
                 #             QtCore.QRect(QtCore.QPoint(0, 0), base_size),
@@ -475,3 +305,19 @@ class MyTreeView(QtWidgets.QTreeView):
     def resizeEvent(self, e: QtGui.QResizeEvent) -> None:
         super().resizeEvent(e)
         self.resized.emit()
+
+
+def load_checklists() -> typing.List[CheckList]:
+    directory = utils.get_checklists_dir()
+    result = []
+    for item in directory.iterdir():
+        utils.log_message(f'loading file {item}...')
+        if item.is_file():
+            with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
+                try:
+                    raw_data = json.load(fh)
+                    checklist = CheckList.from_dict(raw_data)
+                    result.append(checklist)
+                except (UnicodeDecodeError, ValueError, KeyError) as exc:
+                    utils.log_message(f'Could not generate checklist from {str(item)!r} because: {exc}')
+    return result
