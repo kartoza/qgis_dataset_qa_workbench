@@ -139,8 +139,6 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             current, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
         project = QgsProject.instance()
         layer = project.mapLayers()[layer_id]
-        checks_model = QtGui.QStandardItemModel()
-        checks_model.setColumnCount(2)
         utils.log_message(f'inside load_checklist_steps selected_checklist: {self.selected_checklist}')
         utils.log_message(f'selected_checklist checks: {self.selected_checklist.checks}')
         for head_check in self.selected_checklist.checks:
@@ -161,13 +159,9 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         for head_row in range(model.rowCount()):
             head_index = model.index(head_row, 0)
             item_head: models.ChecklistItemHead = head_index.internalPointer().ref
-            automation_prop: models.ChecklistItemProperty = item_head.check_properties[
-                ChecklistItemPropertyColumn.AUTOMATION.value]
-            if automation_prop.value:
+            if item_head.automation is not None:
                 automation_index = model.index(ChecklistItemPropertyColumn.AUTOMATION.value, 1, head_index)
-                automation_widget = AutomationButtonsWidget(
-                    checklist_items_model=model, index=head_index, dataset=dataset)
-                # automation_btn = QtWidgets.QPushButton('Automate...')
+                automation_widget = AutomationButtonsWidget(checklist_item_head_index=head_index, dataset=dataset)
                 self.checklist_checks_tv.setIndexWidget(automation_index, automation_widget)
 
     def force_model_update(self):

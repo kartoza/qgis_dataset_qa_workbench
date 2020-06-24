@@ -22,10 +22,12 @@
 """
 import os.path
 
+from qgis.core import QgsApplication
 from PyQt5.QtCore import QSettings, QTranslator, QCoreApplication, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction
 
+from ..processing_provider.provider import ChecklistCheckerProvider
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
@@ -166,10 +168,16 @@ class ChecklistChecker:
 
         return action
 
+    def initProcessing(self):
+        self.processing_provider = ChecklistCheckerProvider()
+        processing_registry = QgsApplication.processingRegistry()
+        processing_registry.addProvider(self.processing_provider)
+
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         log_message('inside initGui...')
+        self.initProcessing()
         icon_path = ':/plugins/checklist_checker/clipboard-check-solid.svg'
         self.add_action(
             icon_path,
@@ -187,6 +195,8 @@ class ChecklistChecker:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
+        processing_registry = QgsApplication.processingRegistry()
+        processing_registry.removeProvider(self.processing_provider)
         for action in self.actions:
             self.iface.removePluginMenu(
                 self.tr(u'&Checklist Checker'),

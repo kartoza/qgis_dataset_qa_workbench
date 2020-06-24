@@ -124,7 +124,11 @@ def sanitize_checklist_name(name: str) -> str:
 
 def save_checklist(checklist: models.CheckList, target_path: Path):
     serialized = json.dumps(
-        checklist.to_dict(include_check_notes=False, include_check_results=False),
+        checklist.to_dict(
+            include_check_notes=False,
+            include_check_results=False,
+            include_check_automation=True
+        ),
         indent=2
     )
     target_path.parent.mkdir(parents=True, exist_ok=True)

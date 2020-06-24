@@ -8,19 +8,22 @@
       "name": "CRS is EPSG:4326",
       "description": "Layer's Coordinate Reference System is lat-lon on WGS84 datum (i.e. EPSG code 4326)",
       "guide": "Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'CRS' field has a value of 'EPSG:4326 - WGS84 - Geographic'",
-      "automation": ""
+      "automation": {
+        "algorithm_id": "checklist_checker:checklistchecker",
+        "extra_parameters": {
+          "INPUT CRS": "EPSG:4326"
+        }
+      }
     },
     {
       "name": "geometry has the correct type",
       "description": "Layer's geometry is of the expected type, according to the thematic content of the dataset. For example, a roads layer should not have a geometry of type 'Point'.",
-      "guide": "Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'Geometry' shows an acceptable value.",
-      "automation": ""
+      "guide": "Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'Geometry' shows an acceptable value."
     },
     {
       "name": "geometry is valid",
       "description": "Layer's geometry does not have invalid geometries.",
-      "guide": "Navigate to Vector -> Geometry tools -> Check Validity... and run the validity analysis tool. Afterwards check that there are no features on the `invalid output` layer",
-      "automation": ""
+      "guide": "Navigate to Vector -> Geometry tools -> Check Validity... and run the validity analysis tool. Afterwards check that there are no features on the `invalid output` layer"
     }
   ]
 }

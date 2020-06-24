@@ -244,5 +244,6 @@ def _get_config() -> configparser.ConfigParser:
         'icon': source_general.get('icon', ''),
         'experimental': source_general.getboolean('experimental', True),
         'deprecated': source_general.getboolean('deprecated', False),
+        'hasProcessingProvider': source_general.get('hasProcessingProvider', 'no')
     }
     return config
