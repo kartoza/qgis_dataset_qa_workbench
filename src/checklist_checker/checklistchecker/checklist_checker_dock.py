@@ -151,6 +151,8 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.checklist_checks_tv.setWordWrap(True)
         self.checklist_checks_tv.setAlternatingRowColors(True)
         self.add_automation_widgets(layer)
+        header = self.checklist_checks_tv.header()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         delegate = models.ChecklistItemsModelDelegate(self.checklist_checks_tv)
         self.checklist_checks_tv.setItemDelegate(delegate)
 
@@ -186,7 +188,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.tab_widget.setTabEnabled(TabPages.REPORT.value, True)
 
     def show_checklist_picker(self):
-        self.checklist_picker_dlg = ChecklistPicker()
+        self.checklist_picker_dlg = ChecklistPicker(self.iface)
         self.checklist_picker_dlg.button_box.accepted.connect(self.load_checklist)
         self.checklist_picker_dlg.setModal(True)
         self.checklist_picker_dlg.show()

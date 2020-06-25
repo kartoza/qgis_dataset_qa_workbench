@@ -27,10 +27,7 @@ class TabPages(Enum):
 class ChecklistModelColumn(Enum):
     IDENTIFIER = 0
     NAME = 1
-    # DESCRIPTION = 2
-    # DATASET_TYPES = 3
-    # APPLICABLE_TO = 4
-    DATASET_TYPES = 2
+    DATASET_TYPE = 2
     APPLICABLE_TO = 3
 
 

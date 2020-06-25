@@ -4,9 +4,11 @@ import uuid
 from pathlib import Path
 
 from qgis.core import (
+    Qgis,
     QgsNetworkAccessManager,
     QgsSettings,
 )
+from qgis.gui import QgsMessageBar
 from PyQt5 import uic
 from PyQt5 import (
     QtCore,
@@ -32,6 +34,7 @@ CHECKLIST_SERVERS_KEY = f'{SETTINGS_GROUP}/checklist_servers'
 
 
 class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
+    button_box: QtWidgets.QDialogButtonBox
     current_server_cb: QtWidgets.QComboBox
     connect_to_server_pb: QtWidgets.QPushButton
     new_server_pb: QtWidgets.QPushButton
@@ -40,8 +43,9 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
     add_default_servers_pb: QtWidgets.QPushButton
     downloaded_checklists_tv: QtWidgets.QTreeView
     model: QtGui.QStandardItemModel
+    message_bar: QgsMessageBar
 
-    def __init__(self, parent=None):
+    def __init__(self, iface, parent=None):
         super().__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.
         # After self.setupUi() you can access any designer object by doing
@@ -49,11 +53,17 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.message_bar = QgsMessageBar()
+        self.message_bar.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        self.layout().insertWidget(0, self.message_bar)
+        self.iface = iface
+        self.button_box.button(self.button_box.Ok).setEnabled(False)
         self.checklist_editor_dlg = ChecklistEditor()
         self.checklist_editor_dlg.setModal(True)
         self.model = QtGui.QStandardItemModel()
         self.model.setColumnCount(3)
         self.downloaded_checklists_tv.setModel(self.model)
+        self.downloaded_checklists_tv.selectionModel().selectionChanged.connect(self.toggle_ok_button)
         self.reset_tree_view()
         self.new_server_pb.clicked.connect(self.show_new_server_dialog)
         self.edit_server_pb.clicked.connect(self.show_edit_existing_server_dialog)
@@ -67,7 +77,13 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
         self.connect_to_server_pb.clicked.connect(self.download_checklists)
         self.remove_server_pb.clicked.connect(self.remove_server)
 
+    def toggle_ok_button(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection):
+        button = self.button_box.button(self.button_box.Ok)
+        button.setEnabled(bool(len(selected.indexes())))
+
     def reset_tree_view(self):
+        self.downloaded_checklists_tv.selectionModel().select(
+            QtCore.QItemSelection(), QtCore.QItemSelectionModel.Clear)
         self.model.clear()
         self.model.setHorizontalHeaderLabels([i.name.replace('_', ' ').capitalize() for i in ChecklistModelColumn])
         self.downloaded_checklists_tv.setColumnHidden(ChecklistModelColumn.IDENTIFIER.value, True)
@@ -161,6 +177,11 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
                     parsed_checklists.append(checklist)
                 self.populate_downloaded_checklists_tree_view(parsed_checklists)
         else:
+            self.message_bar.pushMessage(
+                'Error',
+                f'Received invalid response from {reply.url().toString()}: {reply_text}',
+                level=Qgis.Critical
+            )
             utils.log_message(f'Received invalid response from {reply.url().toString()}: {reply_text}')
 
     def populate_downloaded_checklists_tree_view(self, checklists: typing.List[models.CheckList]):

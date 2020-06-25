@@ -22,14 +22,14 @@ FORM_CLASS, _ = uic.loadUiType(
 
 
 class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
-    checklist_save_path_la: QtWidgets.QLabel
-    download_checklist_pb: QtWidgets.QPushButton
-    delete_checklist_pb: QtWidgets.QPushButton
+    button_box: QtWidgets.QDialogButtonBox
     checklist_downloader_dlg: ChecklistDownloader
+    checklist_save_path_la: QtWidgets.QLabel
     checklists_tv: QtWidgets.QTreeView
+    delete_checklist_pb: QtWidgets.QPushButton
+    download_checklist_pb: QtWidgets.QPushButton
 
-    def __init__(self, parent=None):
-    # def __init__(self, checklists: typing.List[models.NewCheckList], parent=None):
+    def __init__(self, iface, parent=None):
         """Constructor."""
         super(ChecklistPicker, self).__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.
@@ -38,19 +38,24 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.iface = iface
         self.download_checklist_pb.clicked.connect(self.show_checklist_downloader)
-        self.checklists_tv.clicked.connect(self.enable_checklist_deletion)
         self.delete_checklist_pb.setEnabled(False)
         self.delete_checklist_pb.clicked.connect(self.delete_checklist)
         self.checklist_save_path_la.setText(f'Checklists are loaded from {utils.get_checklists_dir()}')
         checklists = models.load_checklists()
         self.model = QtGui.QStandardItemModel(len(checklists), 3)
         self.model.setHorizontalHeaderLabels([i.name.replace('_', ' ').capitalize() for i in ChecklistModelColumn])
+        self.checklists_tv.setModel(self.model)
+        self.checklists_tv.selectionModel().selectionChanged.connect(self.enable_checklist_actions)
         self.model.rowsRemoved.connect(self.toggle_delete_checklist_button)
+        self.button_box.button(self.button_box.Ok).setEnabled(False)
         self.load_checklists(checklists)
 
-    def enable_checklist_deletion(self, index: QtCore.QModelIndex):
-        self.delete_checklist_pb.setEnabled(True)
+    def enable_checklist_actions(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection):
+        button = self.button_box.button(self.button_box.Ok)
+        button.setEnabled(bool(len(selected.indexes())))
+        self.delete_checklist_pb.setEnabled(bool(len(selected.indexes())))
 
     def toggle_delete_checklist_button(self, parent: QtCore.QModelIndex, first: int, last: int):
         self.delete_checklist_pb.setEnabled(self.model.rowCount() != 0)
@@ -70,6 +75,7 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
                 model.removeRow(idx.row())
 
     def load_checklists(self, checklists: typing.List[models.CheckList]):
+        self.checklists_tv.selectionModel().select(QtCore.QItemSelection(), QtCore.QItemSelectionModel.Clear)
         self.model.clear()
         self.model.setHorizontalHeaderLabels([i.name.replace('_', ' ').capitalize() for i in ChecklistModelColumn])
         for row_index, checklist in enumerate(checklists):
@@ -81,7 +87,7 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
                 row_index, ChecklistModelColumn.NAME.value, QtGui.QStandardItem(checklist.name))
             self.model.setItem(
                 row_index,
-                ChecklistModelColumn.DATASET_TYPES.value,
+                ChecklistModelColumn.DATASET_TYPE.value,
                 QtGui.QStandardItem(checklist.dataset_type.value)
             )
             self.model.setItem(
@@ -89,13 +95,16 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
                 ChecklistModelColumn.APPLICABLE_TO.value,
                 QtGui.QStandardItem(checklist.validation_artifact_type.value)
             )
-        self.checklists_tv.setModel(self.model)
+        # self.checklists_tv.setModel(self.model)
         self.checklists_tv.setColumnHidden(ChecklistModelColumn.IDENTIFIER.value, True)
-        self.checklists_tv.setSortingEnabled(True)
-        self.checklists_tv.sortByColumn(ChecklistModelColumn.DATASET_TYPES.value, QtCore.Qt.DescendingOrder)
+        header = self.checklists_tv.header()
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+
+        # self.checklists_tv.setSortingEnabled(True)
+        # self.checklists_tv.sortByColumn(ChecklistModelColumn.DATASET_TYPES.value, QtCore.Qt.DescendingOrder)
 
     def show_checklist_downloader(self):
-        self.checklist_downloader_dlg = ChecklistDownloader()
+        self.checklist_downloader_dlg = ChecklistDownloader(self.iface)
         self.checklist_downloader_dlg.button_box.accepted.connect(self.load_checklist)
         self.checklist_downloader_dlg.setModal(True)
         self.checklist_downloader_dlg.show()
