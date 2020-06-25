@@ -16,12 +16,14 @@ from .constants import (
 
 
 class ChecklistServer:
+    identifier: uuid.UUID
     name: str
     url: str
 
-    def __init__(self, name: str, url: str):
+    def __init__(self, name: str, url: str, identifier: typing.Optional[uuid.UUID] = None):
         self.name = name
         self.url = url
+        self.identifier = identifier or uuid.uuid4()
 
 
 class ChecklistItemProperty:
