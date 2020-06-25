@@ -213,6 +213,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="add_report_to_layer_metadata_pb">
+          <property name="text">
+           <string>Add validation report to layer metadata</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
            <widget class="QLabel" name="label_6">

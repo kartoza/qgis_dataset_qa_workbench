@@ -359,7 +359,6 @@ class ChecklistItemsModelDelegate(QtWidgets.QStyledItemDelegate):
                 text_to_draw
             )
             base_size.setHeight(out_rect.height())
-            utils.log_message(f'final base_size height: {base_size.height()}')
             result = base_size
         else:
             result = super().sizeHint(option, index)

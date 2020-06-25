@@ -1,7 +1,7 @@
+import datetime as dt
+import inspect
 import json
 import typing
-import uuid
-from functools import partialmethod
 from pathlib import Path
 
 from qgis.gui import (
@@ -10,7 +10,9 @@ from qgis.gui import (
 )
 from qgis.core import (
     Qgis,
+    QgsExpressionContextUtils,
     QgsMapLayer,
+    QgsLayerMetadata,
     QgsMapLayerType,
     QgsProject,
 )
@@ -41,9 +43,10 @@ FORM_CLASS, _ = uic.loadUiType(
 
 
 class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
+    add_report_to_layer_metadata_pb: QtWidgets.QPushButton
+    dataset: typing.Optional[typing.Union[QgsMapLayer, str]]
     iface: QgisInterface
     tab_widget: QtWidgets.QTabWidget
-    # checklist_checks_tv: QtWidgets.QTreeView
     checklist_checks_tv: models.MyTreeView
     checklist_picker_dlg: ChecklistPicker
     checklist_name_le: QtWidgets.QLineEdit
@@ -71,6 +74,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.dataset = None
         self.save_report_pb.setDisabled(True)
         self.iface = iface
         self.checklists = []
@@ -83,20 +87,31 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.choose_checklist_pb.clicked.connect(self.show_checklist_picker)
         self.save_report_fw.fileChanged.connect(self.toggle_save_report_button)
         self.save_report_pb.clicked.connect(self.save_report)
+        self.add_report_to_layer_metadata_pb.clicked.connect(self.add_report_to_layer_metadata)
 
     def update_tab_page(self, index: int):
         if index == TabPages.REPORT.value:
             self.update_report()
 
     def update_report(self):
-        report = self.generate_report()
+        if self.validate_layer_rb.isChecked():
+            current_layer_idx = self.layer_chooser_lv.currentIndex()
+            layer_model = self.layer_chooser_lv.model()
+            layer_id = layer_model.data(
+                current_layer_idx, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
+            project = QgsProject.instance()
+            layer = project.mapLayers()[layer_id]
+            dataset = layer
+        else:
+            dataset = None
+        report = self.generate_report(dataset)
         serialized = serialize_report(report)
         self.report_te.setText(serialized)
 
-    def generate_report(self):
+    def generate_report(self, dataset: typing.Union[QgsMapLayer, str]):
         checklist_model = self.checklist_checks_tv.model()
         if checklist_model is not None:
-            result = get_report_contents(checklist_model)
+            result = get_report_contents(checklist_model, dataset)
         else:
             result = None
         return result
@@ -120,13 +135,14 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         else:
             self.iface.messageBar().pushMessage('Success', 'Validation report saved!', level=Qgis.Info)
 
+    def add_report_to_layer_metadata(self):
+        report = self.generate_report(dataset=self.dataset)
+        add_report_to_layer(report, self.dataset)
+        self.iface.messageBar().pushMessage('Success', 'Validation report added to layer metadata!', level=Qgis.Info)
+
     def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
         # NOTE: This method does not get called when list item is deselected
-        layer_model = self.layer_chooser_lv.model()
-        layer_model: QtCore.QAbstractItemModel
-        layer_id = layer_model.data(current, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
-        project = QgsProject.instance()
-        layer = project.mapLayers()[layer_id]
+        self.dataset = self._get_current_layer()
         self.load_checklist_steps(current, previous)
 
     def load_checklist_steps(
@@ -134,11 +150,6 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             current: QtCore.QModelIndex,
             previous: QtCore.QModelIndex
     ):
-        layer_model = self.layer_chooser_lv.model()
-        layer_id = layer_model.data(
-            current, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
-        project = QgsProject.instance()
-        layer = project.mapLayers()[layer_id]
         utils.log_message(f'inside load_checklist_steps selected_checklist: {self.selected_checklist}')
         utils.log_message(f'selected_checklist checks: {self.selected_checklist.checks}')
         for head_check in self.selected_checklist.checks:
@@ -150,20 +161,20 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.checklist_checks_tv.setTextElideMode(QtCore.Qt.ElideNone)
         self.checklist_checks_tv.setWordWrap(True)
         self.checklist_checks_tv.setAlternatingRowColors(True)
-        self.add_automation_widgets(layer)
+        self.add_automation_widgets()
         header = self.checklist_checks_tv.header()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         delegate = models.ChecklistItemsModelDelegate(self.checklist_checks_tv)
         self.checklist_checks_tv.setItemDelegate(delegate)
 
-    def add_automation_widgets(self, dataset: typing.Union[QgsMapLayer, str]):
+    def add_automation_widgets(self):
         model = self.checklist_checks_tv.model()
         for head_row in range(model.rowCount()):
             head_index = model.index(head_row, 0)
             item_head: models.ChecklistItemHead = head_index.internalPointer().ref
             if item_head.automation is not None:
                 automation_index = model.index(ChecklistItemPropertyColumn.AUTOMATION.value, 1, head_index)
-                automation_widget = AutomationButtonsWidget(checklist_item_head_index=head_index, dataset=dataset)
+                automation_widget = AutomationButtonsWidget(checklist_item_head_index=head_index, dataset=self.dataset)
                 self.checklist_checks_tv.setIndexWidget(automation_index, automation_widget)
 
     def force_model_update(self):
@@ -182,10 +193,20 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         if len(selected.indexes()) == 0:
             self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, False)
             self.tab_widget.setTabEnabled(TabPages.REPORT.value, False)
-            # TODO: clear the checklist steps on the VALIDATE page
+            self.dataset = None
         else:
             self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, True)
             self.tab_widget.setTabEnabled(TabPages.REPORT.value, True)
+            self.dataset = self._get_current_layer()
+
+    def _get_current_layer(self):
+        current_layer_idx = self.layer_chooser_lv.currentIndex()
+        layer_model = self.layer_chooser_lv.model()
+        layer_id = layer_model.data(
+            current_layer_idx, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
+        project = QgsProject.instance()
+        layer = project.mapLayers()[layer_id]
+        return layer
 
     def show_checklist_picker(self):
         self.checklist_picker_dlg = ChecklistPicker(self.iface)
@@ -332,11 +353,21 @@ def get_legal_layers(dataset_type: models.DatasetType) -> typing.Dict[str, QgsMa
     return result
 
 
-def get_report_contents(checklist_items: models.CheckListItemsModel) -> typing.Dict:
+def get_report_contents(
+        checklist_items: models.CheckListItemsModel,
+        dataset: typing.Union[QgsMapLayer, str]
+) -> typing.Dict:
+    global_scope = QgsExpressionContextUtils.globalScope()
+    if isinstance(dataset, QgsMapLayer):
+        name = dataset.name()
+    else:
+        name = dataset
     result = {
         'name': 'Validation report',
-        'item': '',
-        'item_is_valid': checklist_items.result,
+        'validator': global_scope.variable('user_full_name'),
+        'generated': dt.datetime.now(dt.timezone.utc).isoformat(),
+        'dataset': name,
+        'dataset_is_valid': checklist_items.result,
         'checklist': checklist_items.checklist.name,
         'dataset_type': checklist_items.checklist.dataset_type.value,
         'artifact_type': checklist_items.checklist.validation_artifact_type.value,
@@ -352,8 +383,8 @@ def get_report_contents(checklist_items: models.CheckListItemsModel) -> typing.D
         check = {
             'name': checklist_head.name,
             'validated': True if checklist_head.validated == QtCore.Qt.Checked else False,
-            description_prop.name: description_prop.value,
-            notes_prop.name: notes_prop.value,
+            'description': checklist_head.description,
+            'notes': checklist_head.validation_notes,
         }
         result['checks'].append(check)
     return result
@@ -361,3 +392,36 @@ def get_report_contents(checklist_items: models.CheckListItemsModel) -> typing.D
 
 def serialize_report(report: typing.Dict) -> str:
     return json.dumps(report, indent=2)
+
+
+def add_report_to_layer(report: typing.Dict, layer: QgsMapLayer):
+    history_msg = f'{report["generated"]} - Validation report: {"Valid" if report["dataset_is_valid"] else "Invalid"}'
+    abstract_msg = f'''
+    # VALIDATION REPORT
+
+    RESULT: {"Dataset is valid" if report["dataset_is_valid"] else "Dataset is not valid"}
+    VALIDATED ON: {report["generated"]}
+    VALIDATOR: {report["validator"]}
+    CHECKLIST: {report["checklist"]}
+    CHECKLIST_DESCRIPTION: {report["description"]}
+
+    ## VALIDATION_CHECKS
+
+    '''
+    for check in report['checks']:
+        check_msg = f'''
+        ### {check["name"]}
+        RESULT: {"Check is valid" if check["validated"] else "Check is not valid"}
+        DESCRIPTION: {check["description"]}
+        VALIDATION_NOTES: {check["notes"]}
+        '''
+        abstract_msg = '\n'.join((abstract_msg, check_msg))
+    abstract_msg = inspect.cleandoc(abstract_msg)
+    metadata: QgsLayerMetadata = layer.metadata()
+    history: typing.List = metadata.history()
+    history.append(history_msg)
+    abstract: str = metadata.abstract()
+    abstract = '\n'.join((abstract, abstract_msg))
+    metadata.setAbstract(abstract)
+    metadata.setHistory(history)
+    layer.setMetadata(metadata)

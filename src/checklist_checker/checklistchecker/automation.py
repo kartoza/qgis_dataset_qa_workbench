@@ -33,6 +33,7 @@ class AutomationButtonsWidget(QtWidgets.QWidget):
     ):
         super().__init__(*args, **kwargs)
         self.checklist_item_head_index = checklist_item_head_index
+        utils.log_message(f'dataset type: {type(dataset)}')
         self.dataset = dataset
         layout = QtWidgets.QHBoxLayout()
         self.run_pb = QtWidgets.QPushButton('Run', parent=self)

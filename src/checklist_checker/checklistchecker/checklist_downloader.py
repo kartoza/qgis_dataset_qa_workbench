@@ -201,7 +201,7 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
                 row_index, ChecklistModelColumn.NAME.value, QtGui.QStandardItem(checklist.name))
             self.model.setItem(
                 row_index,
-                ChecklistModelColumn.DATASET_TYPES.value,
+                ChecklistModelColumn.DATASET_TYPE.value,
                 QtGui.QStandardItem(checklist.dataset_type.value)
             )
             self.model.setItem(
@@ -209,7 +209,7 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
                 ChecklistModelColumn.APPLICABLE_TO.value,
                 QtGui.QStandardItem(checklist.validation_artifact_type.value)
             )
-        self.downloaded_checklists_tv.sortByColumn(ChecklistModelColumn.DATASET_TYPES.value, QtCore.Qt.DescendingOrder)
+        self.downloaded_checklists_tv.sortByColumn(ChecklistModelColumn.DATASET_TYPE.value, QtCore.Qt.DescendingOrder)
 
     def show_new_server_dialog(self):
         self.checklist_editor_dlg.setWindowTitle('Create new checklist server')
