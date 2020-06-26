@@ -10,6 +10,8 @@
       "guide": "Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'CRS' field has a value of 'EPSG:4326 - WGS84 - Geographic'",
       "automation": {
         "algorithm_id": "checklist_checker:crschecker",
+        "artifact_parameter_name": "INPUT_LAYER",
+        "output_name": "OUTPUT",
         "extra_parameters": {
           "INPUT CRS": "EPSG:4326"
         }
@@ -23,7 +25,12 @@
     {
       "name": "geometry is valid",
       "description": "Layer's geometry does not have invalid geometries.",
-      "guide": "Navigate to Vector -> Geometry tools -> Check Validity... and run the validity analysis tool. Afterwards check that there are no features on the `invalid output` layer"
-    }
+      "guide": "Navigate to Vector -> Geometry tools -> Check Validity... and run the validity analysis tool. Afterwards check that there are no features on the `invalid output` layer",
+      "automation": {
+        "algorithm_id": "qgis:checkvalidity",
+        "artifact_parameter_name": "INPUT_LAYER",
+        "output_name": "INVALID_COUNT",
+        "negate_output": true
+    },
   ]
 }

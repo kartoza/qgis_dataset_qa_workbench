@@ -37,18 +37,34 @@ class ChecklistItemProperty:
 
 class ChecklistAutomationProperty(ChecklistItemProperty):
     algorithm_id: str
+    artifact_parameter_name: str
     extra_parameters: typing.Dict[str, str]
+    output_name: str
+    negate_output: bool
 
-    def __init__(self, name: str, value: typing.Optional[typing.Dict] = None):
+    def __init__(
+            self,
+            name: str,
+            value: typing.Optional[typing.Dict] = None,
+            artifact_parameter_name: typing.Optional[str] = 'INPUT_LAYER',
+            output_name: typing.Optional[str] = 'OUTPUT',
+            negate_output: typing.Optional[bool] = False,
+    ):
         super().__init__(name, value)
         automation_info = dict(value) if value is not None else {}
         self.algorithm_id = automation_info.get('algorithm_id')
+        self.artifact_parameter_name = artifact_parameter_name
+        self.output_name = output_name
+        self.negate_output = negate_output
         self.extra_parameters = automation_info.get('extra_parameters', {})
 
     def to_dict(self):
         if self.algorithm_id is not None:
             result = {
                 'algorithm_id': self.algorithm_id,
+                'artifact_parameter_name': self.artifact_parameter_name,
+                'output_name': self.output_name,
+                'negate_output': self.negate_output,
                 'extra_parameters': self.extra_parameters
             }
         else:
@@ -79,7 +95,7 @@ class ChecklistItemHead:
             result = prop.value
         elif item == ChecklistItemPropertyColumn.AUTOMATION.name.lower():
             prop: ChecklistAutomationProperty = self.check_properties[ChecklistItemPropertyColumn.AUTOMATION.value]
-            result = prop.to_dict()
+            result = prop
         elif item == ChecklistItemPropertyColumn.VALIDATION_NOTES.name.lower():
             prop: ChecklistItemProperty = self.check_properties[ChecklistItemPropertyColumn.VALIDATION_NOTES.value]
             result = prop.value
@@ -101,7 +117,7 @@ class ChecklistItemHead:
         if include_notes:
             result[self._decode_notes_column_name()] = self.validation_notes
         if include_automation:
-            result[ChecklistItemPropertyColumn.AUTOMATION.name.lower()] = self.automation
+            result[ChecklistItemPropertyColumn.AUTOMATION.name.lower()] = self.automation.to_dict()
         if include_result:
             result['validated'] = bool(self.validated)
         return result
