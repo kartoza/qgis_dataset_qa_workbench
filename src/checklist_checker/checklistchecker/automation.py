@@ -58,8 +58,12 @@ class AutomationButtonsWidget(QtWidgets.QWidget):
 
     def store_result(self, execution_result: typing.Dict):
         automation = self.get_automation_configuration()
+        utils.log_message(f'automation.output_name: {automation.output_name}')
+        utils.log_message(f'automation.negate_output: {automation.negate_output}')
         raw_result = execution_result.get(automation.output_name, False)
+        utils.log_message(f'raw_result: {raw_result}')
         result = bool(raw_result) if not automation.negate_output else not bool(raw_result)
+        utils.log_message(f'result: {result}')
         utils.log_message(f'execution_result: {execution_result}')
         model = self.checklist_item_head_index.model()
         validated_idx = self.checklist_item_head_index.siblingAtColumn(1)

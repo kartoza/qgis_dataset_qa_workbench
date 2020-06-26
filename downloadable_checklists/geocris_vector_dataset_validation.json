@@ -13,7 +13,7 @@
         "artifact_parameter_name": "INPUT_LAYER",
         "output_name": "OUTPUT",
         "extra_parameters": {
-          "INPUT CRS": "EPSG:4326"
+          "INPUT_CRS": "EPSG:4326"
         }
       }
     },
@@ -31,6 +31,7 @@
         "artifact_parameter_name": "INPUT_LAYER",
         "output_name": "INVALID_COUNT",
         "negate_output": true
-    },
+      }
+    }
   ]
 }

@@ -46,16 +46,14 @@ class ChecklistAutomationProperty(ChecklistItemProperty):
             self,
             name: str,
             value: typing.Optional[typing.Dict] = None,
-            artifact_parameter_name: typing.Optional[str] = 'INPUT_LAYER',
-            output_name: typing.Optional[str] = 'OUTPUT',
-            negate_output: typing.Optional[bool] = False,
     ):
         super().__init__(name, value)
         automation_info = dict(value) if value is not None else {}
         self.algorithm_id = automation_info.get('algorithm_id')
-        self.artifact_parameter_name = artifact_parameter_name
-        self.output_name = output_name
-        self.negate_output = negate_output
+        self.artifact_parameter_name = automation_info.get(
+            'artifact_parameter_name', 'INPUT_LAYER')
+        self.output_name = automation_info.get('output_name', 'OUTPUT')
+        self.negate_output = automation_info.get('negate_output', False)
         self.extra_parameters = automation_info.get('extra_parameters', {})
 
     def to_dict(self):
