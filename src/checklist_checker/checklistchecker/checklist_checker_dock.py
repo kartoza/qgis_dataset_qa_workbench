@@ -54,6 +54,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     checklist_artifacts_le: QtWidgets.QLineEdit
     checklist_types_le: QtWidgets.QLineEdit
     checklist_description_te: QtWidgets.QTextEdit
+    clear_checks_pb: QtWidgets.QPushButton
     validate_file_rb: QtWidgets.QRadioButton
     validate_layer_rb: QtWidgets.QRadioButton
     layer_chooser_lv: QtWidgets.QListView
@@ -89,6 +90,27 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.save_report_fw.fileChanged.connect(self.toggle_save_report_button)
         self.save_report_pb.clicked.connect(self.save_report)
         self.add_report_to_layer_metadata_pb.clicked.connect(self.add_report_to_layer_metadata)
+        self.clear_checks_pb.clicked.connect(self.clear_all_checks)
+        self.automate_all_checks_pb.clicked.connect(self.automate_all_checks)
+
+    def clear_all_checks(self):
+        utils.log_message(f'clear_all_checks_called')
+        model = self.checklist_checks_tv.model()
+        for row_index in range(model.rowCount()):
+            utils.log_message(f'Unchecking row {row_index}...')
+            checkbox_index = model.index(row_index, 1)
+            model.setData(checkbox_index, QtCore.Qt.Unchecked, role=QtCore.Qt.CheckStateRole)
+
+    def automate_all_checks(self):
+        utils.log_message(f'automate_all_checks_called')
+        model = self.checklist_checks_tv.model()
+        for row_index in range(model.rowCount()):
+            item_head_index = model.index(row_index, 0)
+            automation_index = model.index(ChecklistItemPropertyColumn.AUTOMATION.value, 1, parent=item_head_index)
+            automation_widget = self.checklist_checks_tv.indexWidget(automation_index)
+            if automation_widget:
+                automation_widget.perform_automation()
+
 
     def update_tab_page(self, index: int):
         if index == TabPages.REPORT.value:
@@ -106,8 +128,9 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         else:
             dataset = None
         report = self.generate_report(dataset)
-        serialized = serialize_report_to_html(report)
-        self.report_te.setDocument(serialized)
+        if report:
+            serialized = serialize_report_to_html(report)
+            self.report_te.setDocument(serialized)
 
     def generate_report(self, dataset: typing.Union[QgsMapLayer, str]):
         checklist_model = self.checklist_checks_tv.model()
