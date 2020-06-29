@@ -1,4 +1,7 @@
-from PyQt5 import QtCore
+from PyQt5 import (
+    QtCore,
+    QtGui,
+)
 from qgis.core import (
     QgsFeatureSink,
     QgsProcessing,
@@ -104,6 +107,9 @@ class CrsCheckerAlgorithm(QgsProcessingAlgorithm):
 
     def tr(self, string):
         return QtCore.QCoreApplication.translate('Processing', string)
+
+    def icon(self):
+        return QtGui.QIcon(':/plugins/checklist_checker/clipboard-check-solid.svg')
 
     def createInstance(self):
         return CrsCheckerAlgorithm()

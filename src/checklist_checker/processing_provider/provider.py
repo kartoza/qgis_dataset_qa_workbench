@@ -1,6 +1,7 @@
 import typing
 
 from qgis.core import QgsProcessingProvider
+from PyQt5 import QtGui
 
 from . import algorithms
 
@@ -18,5 +19,5 @@ class ChecklistCheckerProvider(QgsProcessingProvider):
         return self.IDENTIFIER.replace('_', ' ').capitalize()
 
     def icon(self):
-        return super().icon()
+        return QtGui.QIcon(':/plugins/checklist_checker/clipboard-check-solid.svg')
 
