@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://kartoza.github.io/checklist_checker/schema.json",
+  "type": "object",
+  "title": "Schema for checklist definition files for the QGIS Checklist Checker plugin",
+  "description": "This schema can be used to validate new checklists created for using with the QGIS ChecklistChecker plugin",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name of the checklist",
+      "description": "Identifier used for the checklist in the QGIS UI"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description of the checklist",
+      "description": "A short text explaining what the current checklist is about"
+    },
+    "dataset_type": {
+      "type": "string",
+      "title": "Type of dataset being validated",
+      "description": "The type of dataset that this checklist operates on",
+      "enum": [
+        "document",
+        "raster",
+        "vector"
+      ]
+    },
+    "validation_artifact_type": {
+      "type": "string",
+      "title": "Artifact type being validated",
+      "description": "The type of artifact that this checklist operates on",
+      "enum": [
+        "dataset",
+        "metadata",
+        "style"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "title": "Checklist checks",
+      "description": "A list of checks that are part of this checlist",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name of this check",
+            "description": "Name of this check in the checklist"
+          },
+          "description": {
+            "type": "string",
+            "title": "Check description",
+            "description": "Small text explaining what this check is about"
+          },
+          "guide": {
+            "type": "string",
+            "title": "Check operation guide",
+            "description": "Small text specifying how a human operator might go ahead and validate this check"
+          },
+          "automation": {
+            "type": "object",
+            "title": "Automation configuration for this check",
+            "description": "Configuration for the automated execution of this validation check",
+            "properties": {
+              "algorithm_id": {
+                "type": "string",
+                "title": "Processing identifier of the algorithm",
+                "description": "Identifier of the QGIS processing algorithm used to perform atomation",
+                "examples": ["qgis:checkvalidity"],
+                "pattern": "^[a-z_-]+:[a-z_-]+$"
+              },
+              "artifact_parameter_name": {
+                "type": "string",
+                "title": "Name for the algorithm parameter that specifies the artifact being validated",
+                "description": "Name of the algorithm parameter that specifies which of the algorithm's paramaters represents the artifact currently being validated",
+                "examples": ["INPUT_LAYER"]
+              },
+              "output_name": {
+                "type": "string",
+                "title": "Name of the algorithm parameter output where the result of this check will be gotten from",
+                "description": "Name of the algorithm parameter that specifies which one of the algorithm's outputs holds the result of the validation.",
+                "examples": ["INVALID_COUNT"]
+              },
+              "negate_output": {
+                "type": "boolean",
+                "title": "Whether to interpret a FALSE result from the processing algorithm as successful validation",
+                "description": "Whether to interpret a result of FALSE coming from the processing algorithm as a sign of success in the validation"
+              },
+              "extra_parameters": {
+                "type": "object",
+                "title": "Any additional parameters necessary for running the processing algorithm",
+                "description": "Any additional parameters necessary for running the processing algorithm"
+              }
+            },
+            "required": [
+              "algorithm_id"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "guide"
+        ]
+      }
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "dataset_type",
+    "validation_artifact_type"
+  ]
+}

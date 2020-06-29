@@ -20,7 +20,7 @@ plugin called `Checklist checker` and install it.
 This plugin uses [pipenv] and [paver] for development.
 
 An easy way to get started is to (fork and) clone this repo, install pipenv 
-and `pipenv install --dev` it!
+and `pipenv install` it!
 
 
 ### Installing locally
@@ -28,15 +28,25 @@ and `pipenv install --dev` it!
 Call the `install` task:
 
 ```
-
+pipenv run paver install
 ```
 
 ### Publishing a new version
 
 TBD
 
-[pipenv]: https://pipenv.pypa.io/en/latest/
-[paver]: https://pythonhosted.org/Paver/index.html
+### Validating checklists
+
+The `schemas/checklist-check.json` file is a [JSON Schema] file with the 
+definition of the checklist. It can be used to check if new checklists
+are correctly defined. Either use the `jsonschema` python package (
+which is pulled when doing a `pipenv install`) or use any online json schema
+validator. [Your IDE] might also support validating json files with a json schema.
+
+```
+# validating checklist with local jsonschema package
+pipenv run jsonschema -i checklist-file.json schemas/checklist-check.json
+```
 
 
 ## Attribution
@@ -46,3 +56,7 @@ in accordance with their [license]
 
 [Font Awesome]: https://fontawesome.com/
 [license]: https://fontawesome.com/license
+[pipenv]: https://pipenv.pypa.io/en/latest/
+[paver]: https://pythonhosted.org/Paver/index.html
+[jsonschema]: https://json-schema.org/
+[Your IDE]: https://www.jetbrains.com/help/pycharm/json.html#ws_json_schema_add_custom
