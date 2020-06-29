@@ -92,6 +92,31 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.add_report_to_layer_metadata_pb.clicked.connect(self.add_report_to_layer_metadata)
         self.clear_checks_pb.clicked.connect(self.clear_all_checks)
         self.automate_all_checks_pb.clicked.connect(self.automate_all_checks)
+        self.file_chooser.fileChanged.connect(self.selected_file_changed)
+        self.validate_layer_rb.toggled.connect(self.respond_to_validate_layer_rb_toggled)
+        # TODO: It might be necessary to disconnect these when plugin is unloaded
+        QgsProject.instance().layersAdded.connect(self.respond_to_layers_added)
+        QgsProject.instance().layersRemoved.connect(self.respond_to_layers_removed)
+
+    def respond_to_layers_added(self, layers):
+        utils.log_message('layers added')
+        current_dataset_type = self.selected_checklist.dataset_type
+        model: QtGui.QStandardItemModel = self.layer_chooser_lv.model()
+        for layer in layers:
+            if utils.match_maplayer_type(layer.type()) == current_dataset_type:
+                item = QtGui.QStandardItem(layer.name())
+                item.setData(layer.id(), LayerChooserDataRole.LAYER_IDENTIFIER.value)
+                model.appendRow([item])
+
+    def respond_to_layers_removed(self, layers: typing.List[str]):
+        utils.log_message('layers removed')
+        model: QtGui.QStandardItemModel = self.layer_chooser_lv.model()
+        for row_idx in reversed(range(model.rowCount())):
+            index = model.index(row_idx, 0)
+            item = model.itemFromIndex(index)
+            if item.data() in layers:
+                model.removeRow(row_idx)
+
 
     def clear_all_checks(self):
         utils.log_message(f'clear_all_checks_called')
@@ -126,6 +151,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             layer = project.mapLayers()[layer_id]
             dataset = layer
         else:
+            # TODO: Implement report generation for datasets that are not layers
             dataset = None
         report = self.generate_report(dataset)
         if report:
@@ -182,7 +208,8 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
     def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
         # NOTE: This method does not get called when list item is deselected
         self.dataset = self._get_current_layer()
-        self.load_checklist_steps(current, previous)
+        if self.dataset:
+            self.load_checklist_steps(current, previous)
 
     def load_checklist_steps(
             self,
@@ -220,32 +247,70 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         model = self.checklist_checks_tv.model()
         for row in range(model.rowCount()):
             parent = model.index(row, 0)
-            for property_row in (ChecklistItemPropertyColumn.DESCRIPTION.value, ChecklistItemPropertyColumn.GUIDE.value, ChecklistItemPropertyColumn.VALIDATION_NOTES.value):
+            properties = (
+                ChecklistItemPropertyColumn.DESCRIPTION.value,
+                ChecklistItemPropertyColumn.GUIDE.value,
+                ChecklistItemPropertyColumn.VALIDATION_NOTES.value
+            )
+            for property_row in properties:
                 property_index = model.index(property_row, 1, parent)
                 model.dataChanged.emit(property_index, property_index)
+
+    def selected_file_changed(self, raw_path: str):
+        utils.log_message(f'selected_file_changed raw_path: {raw_path}')
+        if raw_path and self.validate_file_rb.isChecked():
+            self.toggle_other_pages(True)
+            self.dataset = Path(raw_path).expanduser().resolve()
+        elif not raw_path and self.validate_file_rb.isChecked():
+            self.toggle_other_pages(False)
+            self.dataset = None
+
+    def toggle_other_pages(self, enabled: bool):
+        self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, enabled)
+        self.tab_widget.setTabEnabled(TabPages.REPORT.value, enabled)
+
+    def respond_to_validate_layer_rb_toggled(self, checked: bool):
+        if checked:
+            self.layer_chooser_lv.setEnabled(True)
+            self.file_chooser.setEnabled(False)
+            try:
+                current_layer_selection: QtCore.QItemSelection = self.layer_chooser_lv.selectionModel().selection()
+            except AttributeError:
+                pass
+            else:
+                self.selected_layer_selection_changed(current_layer_selection, None)
+        else:
+            self.layer_chooser_lv.setEnabled(False)
+            self.file_chooser.setEnabled(True)
+            self.selected_file_changed(self.file_chooser.filePath())
 
     def selected_layer_selection_changed(
             self,
             selected: QtCore.QItemSelection,
             deselected: QtCore.QItemSelection
     ):
-        if len(selected.indexes()) == 0:
-            self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, False)
-            self.tab_widget.setTabEnabled(TabPages.REPORT.value, False)
-            self.dataset = None
-        else:
-            self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, True)
-            self.tab_widget.setTabEnabled(TabPages.REPORT.value, True)
+        if len(selected.indexes()) > 0 and self.validate_layer_rb.isChecked():
+            self.toggle_other_pages(True)
+            # TODO: check if self.dataset is None
             self.dataset = self._get_current_layer()
+        elif len(selected.indexes()) == 0 and self.validate_layer_rb.isChecked():
+            self.toggle_other_pages(False)
+            self.dataset = None
 
-    def _get_current_layer(self):
+    def _get_current_layer(self) -> typing.Optional[QgsMapLayer]:
         current_layer_idx = self.layer_chooser_lv.currentIndex()
-        layer_model = self.layer_chooser_lv.model()
-        layer_id = layer_model.data(
-            current_layer_idx, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
-        project = QgsProject.instance()
-        layer = project.mapLayers()[layer_id]
-        return layer
+        utils.log_message(f'current_layer_idx: {current_layer_idx}')
+        if current_layer_idx == QtCore.QModelIndex():
+            result = None
+        else:
+            layer_model = self.layer_chooser_lv.model()
+            layer_id = layer_model.data(
+                current_layer_idx, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
+            utils.log_message(f'layer_id: {layer_id}')
+            layer_model = self.layer_chooser_lv.model()
+            project = QgsProject.instance()
+            result = project.mapLayers()[layer_id]
+        return result
 
     def show_checklist_picker(self):
         self.checklist_picker_dlg = ChecklistPicker(self.iface)
@@ -368,14 +433,14 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         event.accept()
 
 
-def get_list_view_layers(dataset_type: models.DatasetType) -> QtGui.QStandardItemModel:
+def get_list_view_layers(dataset_type: DatasetType) -> QtGui.QStandardItemModel:
     project = QgsProject.instance()
     result = QtGui.QStandardItemModel()
     for index, (id_, layer) in enumerate(project.mapLayers().items()):
         if utils.match_maplayer_type(layer.type()) == dataset_type:
             item = QtGui.QStandardItem(layer.name())
             item.setData(id_, LayerChooserDataRole.LAYER_IDENTIFIER.value)
-            result.setItem(index, item)
+            result.appendRow([item])
             log_message(
                 f'retrieving layer id from the '
                 f'item: {item.data(LayerChooserDataRole.LAYER_IDENTIFIER.value)}'
