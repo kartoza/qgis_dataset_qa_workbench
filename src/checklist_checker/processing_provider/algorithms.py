@@ -28,8 +28,8 @@ class CrsCheckerAlgorithm(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
-    INPUT_LAYER = 'INPUT LAYER'
-    INPUT_CRS = 'INPUT CRS'
+    INPUT_LAYER = 'INPUT_LAYER'
+    INPUT_CRS = 'INPUT_CRS'
 
     def initAlgorithm(self, config):
         """

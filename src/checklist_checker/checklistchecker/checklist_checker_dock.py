@@ -172,7 +172,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         for head_row in range(model.rowCount()):
             head_index = model.index(head_row, 0)
             item_head: models.ChecklistItemHead = head_index.internalPointer().ref
-            if item_head.automation is not None:
+            if item_head.automation.algorithm_id is not None:
                 automation_index = model.index(ChecklistItemPropertyColumn.AUTOMATION.value, 1, head_index)
                 automation_widget = AutomationButtonsWidget(checklist_item_head_index=head_index, dataset=self.dataset)
                 self.checklist_checks_tv.setIndexWidget(automation_index, automation_widget)
