@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-  Checklist definition is more flexible with automation specification
+-  Validation report is now saved as a PDF file
+
 
 ## [0.4.0] - 2020-06-25
 

@@ -1,0 +1,6 @@
+### {check_name}
+
+-  Validated: {validated}
+-  Description: {description}
+-  Notes: {notes}
+

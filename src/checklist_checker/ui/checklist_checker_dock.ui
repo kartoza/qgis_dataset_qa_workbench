@@ -230,27 +230,13 @@
           </item>
           <item>
            <widget class="QgsFileWidget" name="save_report_fw">
+            <property name="fileWidgetButtonVisible">
+             <bool>true</bool>
+            </property>
             <property name="storageMode">
              <enum>QgsFileWidget::SaveFile</enum>
             </property>
            </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item>
            <widget class="QPushButton" name="save_report_pb">
