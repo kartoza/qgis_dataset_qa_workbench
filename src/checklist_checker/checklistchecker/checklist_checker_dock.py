@@ -1,8 +1,8 @@
 import datetime as dt
-import inspect
 import json
 import typing
 from pathlib import Path
+from sys import getfilesystemencoding
 
 from qgis.gui import (
     QgsFileWidget,
@@ -20,6 +20,7 @@ from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+from PyQt5.QtPrintSupport import QPrinter
 
 from . import models
 from . import utils
@@ -105,8 +106,8 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         else:
             dataset = None
         report = self.generate_report(dataset)
-        serialized = serialize_report(report)
-        self.report_te.setText(serialized)
+        serialized = serialize_report_to_html(report)
+        self.report_te.setDocument(serialized)
 
     def generate_report(self, dataset: typing.Union[QgsMapLayer, str]):
         checklist_model = self.checklist_checks_tv.model()
@@ -123,22 +124,37 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.save_report_pb.setDisabled(True)
 
     def save_report(self):
-        raw_output = self.save_report_fw.filePath()
-        output = Path(raw_output).resolve()
-        log_message(f'output: {raw_output}')
-        # TODO: Append the correct extension to file
-        # TODO: Use QGIS encoding
-        try:
-            output.write_text(self.report_te.toPlainText(), encoding='utf-8')
-        except OSError as exc:
-            self.iface.messageBar().pushMessage('Error', f'Could not save validation report: {exc}', level=Qgis.Critical)
+        output = get_report_path(self.save_report_fw.filePath())
+        printer = QPrinter(QPrinter.PrinterResolution)
+        printer.setOutputFormat(QPrinter.PdfFormat)
+        printer.setPaperSize(QPrinter.A4)
+        printer.setOutputFileName(str(output))
+        doc: QtGui.QTextDocument = self.report_te.document().clone()
+        page_size = printer.pageRect().size()
+        doc.setPageSize(QtCore.QSizeF(page_size.width(), page_size.height()))
+        doc.print(printer)
+        if output.is_file():
+            # `doc.print` does not return a value, so this is a hacky way to
+            # check if the file was saved correctly
+            self.iface.messageBar().pushMessage(
+                'Success',
+                'Validation report saved!',
+                level=Qgis.Info
+            )
         else:
-            self.iface.messageBar().pushMessage('Success', 'Validation report saved!', level=Qgis.Info)
+            self.iface.messageBar().pushMessage(
+                'Error',
+                f'Could not save validation report to: {output}',
+                level=Qgis.Critical
+            )
 
     def add_report_to_layer_metadata(self):
         report = self.generate_report(dataset=self.dataset)
         add_report_to_layer(report, self.dataset)
-        self.iface.messageBar().pushMessage('Success', 'Validation report added to layer metadata!', level=Qgis.Info)
+        self.iface.messageBar().pushMessage(
+            'Success', 'Validation report added to layer metadata!',
+            level=Qgis.Info
+        )
 
     def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
         # NOTE: This method does not get called when list item is deselected
@@ -394,34 +410,98 @@ def serialize_report(report: typing.Dict) -> str:
     return json.dumps(report, indent=2)
 
 
+def serialize_report_to_html(report: typing.Dict) -> QtGui.QTextDocument:
+    validation_check_template_path = ':/plugins/checklist_checker/validation-report-check-template.html'
+    check_template_fh = QtCore.QFile(validation_check_template_path)
+    check_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
+    check_template = check_template_fh.readAll().data().decode(getfilesystemencoding())
+    check_template_fh.close()
+    rendered_checks = []
+    utils.log_message('Rendering checks...')
+    for check in report.get('checks', []):
+        rendered = check_template.format(
+            check_name=check['name'],
+            validated='YES' if check['validated'] else 'NO',
+            description=check['description'],
+            notes=check['notes'].replace('{', '{{').replace('}', '}}'),
+        )
+        utils.log_message(f'check {rendered}')
+        rendered_checks.append(rendered)
+    utils.log_message('Rendering final report...')
+    validation_report_template_path = ':/plugins/checklist_checker/validation-report-template.html'
+    report_template_fh = QtCore.QFile(validation_report_template_path)
+    report_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
+    report_template = report_template_fh.readAll().data().decode(getfilesystemencoding())
+    report_template_fh.close()
+    ready_to_render = report_template.replace('{checks}', '\n'.join(rendered_checks))
+    utils.log_message(f'Replaced checks placeholder: {report_template}')
+    rendered_report = ready_to_render.format(
+        checklist_name=report['checklist'],
+        dataset_name=report['dataset'],
+        timestamp=report['generated'],
+        result=report['dataset_is_valid'],
+        author=report['validator'],
+        description=report['description'],
+    )
+    doc = QtGui.QTextDocument()
+    doc.setHtml(rendered_report)
+    return doc
+
+
+def serialize_report_to_plain_text(report: typing.Dict) -> str:
+    validation_check_template_path = ':/plugins/checklist_checker/validation-report-check-template.txt'
+    check_template_fh = QtCore.QFile(validation_check_template_path)
+    check_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
+    check_template = check_template_fh.readAll().data().decode(getfilesystemencoding())
+    check_template_fh.close()
+    rendered_checks = []
+    utils.log_message('Rendering checks...')
+    for check in report.get('checks', []):
+        rendered = check_template.format(
+            check_name=check['name'],
+            validated='YES' if check['validated'] else 'NO',
+            description=check['description'],
+            notes=check['notes'].replace('{', '{{').replace('}', '}}'),
+        )
+        utils.log_message(f'check {rendered}')
+        rendered_checks.append(rendered)
+    utils.log_message('Rendering final report...')
+    validation_report_template_path = ':/plugins/checklist_checker/validation-report-template.txt'
+    report_template_fh = QtCore.QFile(validation_report_template_path)
+    report_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
+    report_template = report_template_fh.readAll().data().decode(getfilesystemencoding())
+    report_template_fh.close()
+    ready_to_render = report_template.replace('{checks}', '\n'.join(rendered_checks))
+    utils.log_message(f'Replaced checks placeholder: {report_template}')
+    rendered_report = ready_to_render.format(
+        checklist_name=report['checklist'],
+        dataset_name=report['dataset'],
+        timestamp=report['generated'],
+        result=report['dataset_is_valid'],
+        author=report['validator'],
+        description=report['description'],
+    )
+    return rendered_report
+
+
 def add_report_to_layer(report: typing.Dict, layer: QgsMapLayer):
-    history_msg = f'{report["generated"]} - Validation report: {"Valid" if report["dataset_is_valid"] else "Invalid"}'
-    abstract_msg = f'''
-    # VALIDATION REPORT
-
-    RESULT: {"Dataset is valid" if report["dataset_is_valid"] else "Dataset is not valid"}
-    VALIDATED ON: {report["generated"]}
-    VALIDATOR: {report["validator"]}
-    CHECKLIST: {report["checklist"]}
-    CHECKLIST_DESCRIPTION: {report["description"]}
-
-    ## VALIDATION_CHECKS
-
-    '''
-    for check in report['checks']:
-        check_msg = f'''
-        ### {check["name"]}
-        RESULT: {"Check is valid" if check["validated"] else "Check is not valid"}
-        DESCRIPTION: {check["description"]}
-        VALIDATION_NOTES: {check["notes"]}
-        '''
-        abstract_msg = '\n'.join((abstract_msg, check_msg))
-    abstract_msg = inspect.cleandoc(abstract_msg)
+    history_msg = (
+        f'{report["generated"]} - Validation report: '
+        f'{"Valid" if report["dataset_is_valid"] else "Invalid"}'
+    )
+    abstract_msg = serialize_report_to_plain_text(report)
     metadata: QgsLayerMetadata = layer.metadata()
     history: typing.List = metadata.history()
     history.append(history_msg)
     abstract: str = metadata.abstract()
-    abstract = '\n'.join((abstract, abstract_msg))
+    abstract = '\n\n---\n\n'.join((abstract, abstract_msg))
     metadata.setAbstract(abstract)
     metadata.setHistory(history)
     layer.setMetadata(metadata)
+
+
+def get_report_path(raw_path: str) -> Path:
+    result = Path(raw_path).expanduser().resolve()
+    if result.suffix.lower() != '.pdf':
+        result = result.parent / f'{result.name}.pdf'
+    return result

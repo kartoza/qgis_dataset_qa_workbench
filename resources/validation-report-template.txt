@@ -1,0 +1,14 @@
+# {checklist_name}
+
+Validation report
+
+-  Dataset: {dataset_name}
+-  Validation result: {result}
+-  Generated: {timestamp}
+-  Validated by: {author}
+-  Validation description: {description}
+
+
+## Validation checks
+
+{checks}

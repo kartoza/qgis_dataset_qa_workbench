@@ -1,5 +1,9 @@
 <RCC>
-    <qresource prefix="/plugins/checklist_checker" >
-        <file>clipboard-check-solid.svg</file>
-    </qresource>
+  <qresource prefix="/plugins/checklist_checker">
+    <file>validation-report-check-template.html</file>
+    <file>validation-report-template.html</file>
+    <file>validation-report-check-template.txt</file>
+    <file>validation-report-template.txt</file>
+    <file>clipboard-check-solid.svg</file>
+  </qresource>
 </RCC>
