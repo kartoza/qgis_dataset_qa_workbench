@@ -22,6 +22,13 @@ This plugin uses [pipenv] and [paver] for development.
 An easy way to get started is to (fork and) clone this repo, install pipenv 
 and `pipenv install` it!
 
+```
+# create your virtualenv but use system site-packages too
+# this is in order to use QGIS python bindings in the venv
+pipenv --site-packages
+PIP_IGNORE_INSTALLED=1 pipenv install
+```
+
 
 ### Installing locally
 

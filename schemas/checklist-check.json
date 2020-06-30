@@ -72,7 +72,7 @@
               "artifact_parameter_name": {
                 "type": "string",
                 "title": "Name for the algorithm parameter that specifies the artifact being validated",
-                "description": "Name of the algorithm parameter that specifies which of the algorithm's paramaters represents the artifact currently being validated",
+                "description": "Name of the algorithm parameter that specifies which of the algorithm's parameters represents the artifact currently being validated",
                 "examples": ["INPUT_LAYER"]
               },
               "output_name": {

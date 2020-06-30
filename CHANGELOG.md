@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Add button to uncheck all previously checked checklist items
 -  Add json schema file with the checklist definition - This allows validation of user-created checklists
 -  Add icon to processing provider and algorithms
+-  Allow performing validation on external files
+-  Fix `clear_all_checks` button not clearing validation notes
 
 
 ## [0.4.0] - 2020-06-25
