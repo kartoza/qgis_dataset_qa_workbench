@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Add icon to processing provider and algorithms
 -  Allow performing validation on external files
 -  Fix `clear_all_checks` button not clearing validation notes
+-  Rename plugin to _Dataset QA Workbench_
 
 
 ## [0.4.0] - 2020-06-25

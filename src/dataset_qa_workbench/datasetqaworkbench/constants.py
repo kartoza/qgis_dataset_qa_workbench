@@ -2,7 +2,7 @@ from enum import Enum
 
 from PyQt5.QtCore import Qt
 
-SETTINGS_GROUP = 'PythonPlugins/checklist_checker'
+SETTINGS_GROUP = 'PythonPlugins/dataset_qa_workbench'
 
 
 class DatasetType(Enum):

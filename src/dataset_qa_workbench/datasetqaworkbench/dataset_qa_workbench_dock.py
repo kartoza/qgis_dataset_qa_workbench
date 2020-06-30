@@ -40,10 +40,10 @@ from .utils import log_message
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 UI_DIR = Path(__file__).parents[1] / "ui"
 FORM_CLASS, _ = uic.loadUiType(
-    str(UI_DIR / 'checklist_checker_dock.ui'))
+    str(UI_DIR / 'dataset_qa_workbench_dock.ui'))
 
 
-class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
+class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
     add_report_to_layer_metadata_pb: QtWidgets.QPushButton
     dataset: typing.Optional[typing.Union[QgsMapLayer, str]]
     iface: QgisInterface
@@ -69,7 +69,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
 
     def __init__(self, iface: QgisInterface, parent=None):
         """Constructor."""
-        super(ChecklistCheckerDock, self).__init__(parent)
+        super(DatasetQaWorkbenchDock, self).__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.
         # After self.setupUi() you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
@@ -511,7 +511,7 @@ def serialize_report(report: typing.Dict) -> str:
 
 
 def serialize_report_to_html(report: typing.Dict) -> QtGui.QTextDocument:
-    validation_check_template_path = ':/plugins/checklist_checker/validation-report-check-template.html'
+    validation_check_template_path = ':/plugins/dataset_qa_workbench/validation-report-check-template.html'
     check_template_fh = QtCore.QFile(validation_check_template_path)
     check_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
     check_template = check_template_fh.readAll().data().decode(getfilesystemencoding())
@@ -528,7 +528,7 @@ def serialize_report_to_html(report: typing.Dict) -> QtGui.QTextDocument:
         utils.log_message(f'check {rendered}')
         rendered_checks.append(rendered)
     utils.log_message('Rendering final report...')
-    validation_report_template_path = ':/plugins/checklist_checker/validation-report-template.html'
+    validation_report_template_path = ':/plugins/dataset_qa_workbench/validation-report-template.html'
     report_template_fh = QtCore.QFile(validation_report_template_path)
     report_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
     report_template = report_template_fh.readAll().data().decode(getfilesystemencoding())
@@ -549,7 +549,7 @@ def serialize_report_to_html(report: typing.Dict) -> QtGui.QTextDocument:
 
 
 def serialize_report_to_plain_text(report: typing.Dict) -> str:
-    validation_check_template_path = ':/plugins/checklist_checker/validation-report-check-template.txt'
+    validation_check_template_path = ':/plugins/dataset_qa_workbench/validation-report-check-template.txt'
     check_template_fh = QtCore.QFile(validation_check_template_path)
     check_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
     check_template = check_template_fh.readAll().data().decode(getfilesystemencoding())
@@ -566,7 +566,7 @@ def serialize_report_to_plain_text(report: typing.Dict) -> str:
         utils.log_message(f'check {rendered}')
         rendered_checks.append(rendered)
     utils.log_message('Rendering final report...')
-    validation_report_template_path = ':/plugins/checklist_checker/validation-report-template.txt'
+    validation_report_template_path = ':/plugins/dataset_qa_workbench/validation-report-template.txt'
     report_template_fh = QtCore.QFile(validation_report_template_path)
     report_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
     report_template = report_template_fh.readAll().data().decode(getfilesystemencoding())

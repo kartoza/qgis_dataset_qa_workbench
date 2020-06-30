@@ -20,7 +20,7 @@ from paver.easy import (
 # TODO: - Replace paver with click
 
 LOCAL_ROOT_DIR = Path(__file__).parent.resolve()
-SRC_NAME = 'checklist_checker'
+SRC_NAME = 'dataset_qa_workbench'
 PACKAGE_NAME = SRC_NAME.replace('_', '')
 
 

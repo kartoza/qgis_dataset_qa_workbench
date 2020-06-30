@@ -9,7 +9,7 @@
       "description": "Layer's Coordinate Reference System is lat-lon on WGS84 datum (i.e. EPSG code 4326)",
       "guide": "Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'CRS' field has a value of 'EPSG:4326 - WGS84 - Geographic'",
       "automation": {
-        "algorithm_id": "checklist_checker:crschecker",
+        "algorithm_id": "dataset_qa_workbench:crschecker",
         "artifact_parameter_name": "INPUT_LAYER",
         "output_name": "OUTPUT",
         "extra_parameters": {
