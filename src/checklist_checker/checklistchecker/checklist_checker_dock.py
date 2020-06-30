@@ -125,6 +125,13 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             utils.log_message(f'Unchecking row {row_index}...')
             checkbox_index = model.index(row_index, 1)
             model.setData(checkbox_index, QtCore.Qt.Unchecked, role=QtCore.Qt.CheckStateRole)
+            head_index = model.index(row_index, 0)
+            notes_index = model.index(
+                ChecklistItemPropertyColumn.VALIDATION_NOTES.value,
+                1,
+                parent=head_index
+            )
+            model.setData(notes_index, '', role=QtCore.Qt.EditRole)
 
     def automate_all_checks(self):
         utils.log_message(f'automate_all_checks_called')
@@ -220,7 +227,10 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         utils.log_message(f'selected_checklist checks: {self.selected_checklist.checks}')
         for head_check in self.selected_checklist.checks:
             head_check: models.ChecklistItemHead
-            utils.log_message(f'check {head_check.name} description: {head_check.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]}')
+            utils.log_message(
+                f'check {head_check.name} description: '
+                f'{head_check.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]}'
+            )
         checklist_checks_model = models.CheckListItemsModel(self.selected_checklist)
         self.checklist_checks_tv.setModel(checklist_checks_model)
         self.checklist_checks_tv.resized.connect(self.force_model_update)
@@ -261,6 +271,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
         if raw_path and self.validate_file_rb.isChecked():
             self.toggle_other_pages(True)
             self.dataset = Path(raw_path).expanduser().resolve()
+            self.load_checklist_steps(None, None)
         elif not raw_path and self.validate_file_rb.isChecked():
             self.toggle_other_pages(False)
             self.dataset = None
@@ -362,6 +373,7 @@ class ChecklistCheckerDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.validate_file_rb.setEnabled(True)
             self.validate_file_rb.setChecked(True)
             self.file_chooser.setEnabled(True)
+            self.selected_file_changed(self.file_chooser.filePath())
         if enable_layer_chooser:
             self.validate_layer_rb.setEnabled(True)
             self.validate_layer_rb.setChecked(True)

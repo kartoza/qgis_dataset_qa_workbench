@@ -1,4 +1,5 @@
 import typing
+from pathlib import Path
 
 from PyQt5 import (
     QtCore,
@@ -50,8 +51,13 @@ class AutomationButtonsWidget(QtWidgets.QWidget):
 
     def get_run_algorithm_parameters(self):
         automation = self.get_automation_configuration()
+        if isinstance(self.dataset, Path):
+            input_ = str(self.dataset)
+        else:
+            input_ = self.dataset
+        utils.log_message(f'input_: {input_}')
         algorithm_parameters = {
-            automation.artifact_parameter_name: self.dataset,
+            automation.artifact_parameter_name: input_,
         }
         algorithm_parameters.update(automation.extra_parameters)
         return automation.algorithm_id, algorithm_parameters
