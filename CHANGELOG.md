@@ -6,15 +6,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--  Checklist definition is more flexible with automation specification
--  Validation report is now saved as a PDF file
+
+## [0.5.0] - 2020-06-30
+
+### Added
 -  Add button to run all automatable checks at once
 -  Add button to uncheck all previously checked checklist items
 -  Add json schema file with the checklist definition - This allows validation of user-created checklists
 -  Add icon to processing provider and algorithms
 -  Allow performing validation on external files
--  Fix `clear_all_checks` button not clearing validation notes
+
+### Changed
+-  Checklist definition is more flexible with automation specification
+-  Validation report is now saved as a PDF file
 -  Rename plugin to _Dataset QA Workbench_
+
+### Fixed
+
+-  Fix `clear_all_checks` button not clearing validation notes
 
 
 ## [0.4.0] - 2020-06-25
@@ -77,8 +86,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Initial project structure
 
 
-[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.4.0...master
-[0.3.2]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.4.0
+[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.5.0...master
+[0.5.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.5.0
+[0.4.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.4.0
 [0.3.2]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.3.2
 [0.3.1]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.3.1
 [0.3.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.3.0
