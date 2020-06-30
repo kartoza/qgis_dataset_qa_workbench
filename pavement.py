@@ -1,10 +1,12 @@
 import configparser
 import datetime as dt
 import json
+import re
 import shlex
 import shutil
 import subprocess
 import tempfile
+import typing
 import zipfile
 from pathlib import Path
 
@@ -222,22 +224,37 @@ def _add_to_zip(directory: Path, zip_handler: zipfile.ZipFile, arc_path_base: Pa
             _add_to_zip(item, zip_handler, arc_path_base)
 
 
+def _parse_readme(readme: str) -> typing.Tuple[str, str]:
+    description, *about_lines = [i for i in readme.partition('##')[0].splitlines() if i][1:]
+    return description, '\n'.join(about_lines)
+
+
+def _parse_changelog(changelog: str, version: str) -> str:
+    usable_fragment = changelog.partition(f'[{version}]')[-1].partition('[unreleased]')[0]
+    no_square_brackets = re.sub(r'(\[(\d+.\d+.\d+)\])', '\g<2>', usable_fragment)
+    result = f'{version} {no_square_brackets}'.replace('# ', '').replace('#', '')
+    return result
+
+
 def _get_config() -> configparser.ConfigParser:
     readme_contents = _read_file('README.md')
+    description, about = _parse_readme(readme_contents)
+    version = _read_file('VERSION')
+    info(f'description: {description}')
     source_config = _get_plugin_config()
     source_general = source_config['general']
     config = configparser.ConfigParser()
     config['general'] = {
-        'name': SRC_NAME.replace('_', ' ').replace('-', ' ').capitalize(),
+        'name': 'Dataset QA Workbench',
         'qgisMinimumVersion': source_general.get('qgisMinimumVersion', '3.10'),
-        'description': '',  # TODO: include README's first section
-        'version': _read_file('VERSION'),
+        'description': description,
+        'version': version,
         'author': source_general.get('author', ''),  # TODO: provide author from AUTHORS
         'email': source_general.get('email', ''),  # TODO: provide email from AUTHORS
-        'about': readme_contents,
-        'tracker': '',  # TODO: get repo URL from git,
-        'repository': '',  # TODO: get repo URL from git,
-        'changelog': _read_file('CHANGELOG.md'),
+        'about': about,
+        'tracker': source_general.get('tracker', ''),
+        'repository': source_general.get('repository', ''),
+        'changelog': _parse_changelog(_read_file('CHANGELOG.md'), version),
         'tags': source_general.get('tags', ''),
         'homepage': source_general.get('homepage', ''),
         'category': source_general.get('category', ''),

@@ -150,7 +150,7 @@ class DatasetQaWorkbench:
         icon_path = ':/plugins/dataset_qa_workbench/clipboard-check-solid.svg'
         self.add_action(
             icon_path,
-            text=self.tr(u'Perform QA/QC checks'),
+            text=self.tr(u'Dataset QA Workbench'),
             callback=self.run,
             togglable=True,
             parent=self.iface.mainWindow())
