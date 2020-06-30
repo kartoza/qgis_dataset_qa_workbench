@@ -18,7 +18,7 @@ from qgis.PyQt.QtGui import QIcon
 
 
 
-class ChecklistCheckerDialogTest(unittest.TestCase):
+class DatasetQaWorkbenchTest(unittest.TestCase):
     """Test rerources work."""
 
     def setUp(self):
@@ -31,12 +31,12 @@ class ChecklistCheckerDialogTest(unittest.TestCase):
 
     def test_icon_png(self):
         """Test we can click OK."""
-        path = ':/plugins/ChecklistChecker/icon.png'
+        path = ':/plugins/dataset_qa_workbench/icon.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
 
 if __name__ == "__main__":
-    suite = unittest.makeSuite(ChecklistCheckerResourcesTest)
+    suite = unittest.makeSuite(DatasetQaWorkbenchTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
 

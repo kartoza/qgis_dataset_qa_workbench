@@ -6,8 +6,8 @@ from PyQt5 import QtGui
 from . import algorithms
 
 
-class ChecklistCheckerProvider(QgsProcessingProvider):
-    IDENTIFIER: str = 'checklist_checker'
+class DatasetQaWorkbenchProvider(QgsProcessingProvider):
+    IDENTIFIER: str = 'dataset_qa_workbench'
 
     def loadAlgorithms(self, *args, **kwargs):
         self.addAlgorithm(algorithms.CrsCheckerAlgorithm())
@@ -19,5 +19,5 @@ class ChecklistCheckerProvider(QgsProcessingProvider):
         return self.IDENTIFIER.replace('_', ' ').capitalize()
 
     def icon(self):
-        return QtGui.QIcon(':/plugins/checklist_checker/clipboard-check-solid.svg')
+        return QtGui.QIcon(':/plugins/dataset_qa_workbench/clipboard-check-solid.svg')
 

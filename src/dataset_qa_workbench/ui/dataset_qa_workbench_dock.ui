@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Checklist checker</string>
+   <string>Dataset QA Workbench</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -270,7 +270,7 @@
   <customwidget>
    <class>MyTreeView</class>
    <extends>QTreeView</extends>
-   <header>checklist_checker.checklistchecker.models.h</header>
+   <header>dataset_qa_workbench.datasetqaworkbench.models.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

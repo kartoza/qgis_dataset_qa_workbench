@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="/plugins/checklist_checker">
+  <qresource prefix="/plugins/dataset_qa_workbench">
     <file>validation-report-check-template.html</file>
     <file>validation-report-template.html</file>
     <file>validation-report-check-template.txt</file>

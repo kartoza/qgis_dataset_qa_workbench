@@ -1,18 +1,20 @@
-# QGIS Checklist checker
+# QGIS Dataset QA Workbench
 
-A QGIS3 plugin for checking checklists
+A QGIS3 plugin for assisting in dataset quality assurance workflows
 
 ## Install
 
-This plugin can be installed directly by QGIS. For now it is distributed by means of a custom plugin repository. In 
-order to install it you need to add the repository to QGIS' plugin manager 
-(_Plugins -> Manage and Install Plugins... -> Settings -> Plugin repositories -> Add..._). The
-repo's URL is:
+This plugin can be installed directly by QGIS. For now it is distributed 
+by means of a custom plugin repository. In order to install it you need 
+to add the repository to QGIS' plugin manager 
+(_Plugins -> Manage and Install Plugins... -> Settings -> Plugin repositories -> Add..._). 
+The repository URL is:
 
-https://kartoza.github.io/qgis_checklist_checker/repo/plugins.xml
+https://kartoza.github.io/qgis_dataset_qa_workbench/repo/plugins.xml
 
-After adding the plugin repo, the plugin manager will refresh its list of plugins automatically. Now search for a 
-plugin called `Checklist checker` and install it.
+After adding the plugin repo, the plugin manager will refresh its list of 
+plugins automatically. Now search for a plugin called `Dataset QA Worbench` 
+and install it.
 
 
 ## Development
@@ -20,7 +22,7 @@ plugin called `Checklist checker` and install it.
 This plugin uses [pipenv] and [paver] for development.
 
 An easy way to get started is to (fork and) clone this repo, install pipenv 
-and `pipenv install` it!
+and install it!
 
 ```
 # create your virtualenv but use system site-packages too

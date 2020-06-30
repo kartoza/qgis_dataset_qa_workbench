@@ -109,7 +109,7 @@ class CrsCheckerAlgorithm(QgsProcessingAlgorithm):
         return QtCore.QCoreApplication.translate('Processing', string)
 
     def icon(self):
-        return QtGui.QIcon(':/plugins/checklist_checker/clipboard-check-solid.svg')
+        return QtGui.QIcon(':/plugins/dataset_qa_workbench/clipboard-check-solid.svg')
 
     def createInstance(self):
         return CrsCheckerAlgorithm()

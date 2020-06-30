@@ -19,7 +19,7 @@ jobs:
       - name: Package plugin
         uses: VaultVulp/action-pipenv@v2.0.1
         with:
-          command: run paver deploy_local_repo -r https://kartoza.github.io/qgis_checklist_checker
+          command: run paver deploy_local_repo -r https://kartoza.github.io/qgis_dataset_qa_workbench
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

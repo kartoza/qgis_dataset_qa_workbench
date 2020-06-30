@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft/2019-09/schema#",
-  "$id": "https://kartoza.github.io/checklist_checker/schema.json",
+  "$id": "https://kartoza.github.io/qgis_dataset_qa_workbench/schema.json",
   "type": "object",
-  "title": "Schema for checklist definition files for the QGIS Checklist Checker plugin",
-  "description": "This schema can be used to validate new checklists created for using with the QGIS ChecklistChecker plugin",
+  "title": "Schema for checklist definition files for the QGIS Dataset QA Workbench plugin",
+  "description": "This schema can be used to validate new checklists created for using with the QGIS Dataset QA Workbench plugin",
   "properties": {
     "name": {
       "type": "string",
