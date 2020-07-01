@@ -225,7 +225,7 @@ def _add_to_zip(directory: Path, zip_handler: zipfile.ZipFile, arc_path_base: Pa
 
 
 def _parse_readme(readme: str) -> typing.Tuple[str, str]:
-    description, *about_lines = [i for i in readme.partition('##')[0].splitlines() if i][1:]
+    description, *about_lines = [i for i in readme.partition('##')[0].splitlines() if i][2:]
     return description, '\n'.join(about_lines)
 
 

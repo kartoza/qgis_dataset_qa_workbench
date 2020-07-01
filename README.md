@@ -1,3 +1,5 @@
+https://github.com/kartoza/qgis_dataset_qa_workbench/workflows/github%20pages/badge.svg
+
 # QGIS Dataset QA Workbench
 
 A QGIS3 plugin for assisting in dataset quality assurance workflows.

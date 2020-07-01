@@ -11,10 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install system dependencies
+        run: sudo apt-get install pyqt5-dev-tools
+
       - name: Install dependencies
         uses: VaultVulp/action-pipenv@v2.0.1
         with:
-          command: install --dev
+          command: install
 
       - name: Package plugin
         uses: VaultVulp/action-pipenv@v2.0.1

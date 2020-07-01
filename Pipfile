@@ -6,7 +6,6 @@ verify_ssl = true
 [packages]
 jsonschema = "*"
 paver = "*"
-jupyter = "*"
 
 [requires]
 python_version = "3.8"
