@@ -129,7 +129,7 @@ class ChecklistDownloader(QtWidgets.QDialog, FORM_CLASS):
         default_servers = [
             models.ChecklistServer(
                 'Kartoza checklists for GeoCRIS and DomiNode',
-                'https://kartoza.github.io/qgis_checklist_checker/checklists/checklists.json',
+                'https://kartoza.github.io/qgis_dataset_qa_workbench/checklists/checklists.json',
                 identifier=uuid.UUID('d95a4aa2-cb1e-442c-bce5-ff1cc8301621')
             ),
         ]
