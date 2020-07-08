@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.5.4] - 2020-07-08
+
+### Added
+
+-  Double clicking the checklist now accepts the checklist chooser dialog
+
+### Fixed
+
+-  Fix crashes when adding/removing layers and the plugin is activated
+-  Fix saved checklist contains extra properties that cause jsonschema validation errors
+-  The GUI no longer offers to put validation report on layer's metadata properties when using a non-layer resource
+
+
 ## [0.5.3] - 2020-07-01
 
 ### Fixed
@@ -111,7 +124,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Initial project structure
 
 
-[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.5.3...master
+[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.5.4...master
+[0.5.3]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.5.4
 [0.5.3]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.5.3
 [0.5.2]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.5.2
 [0.5.1]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.5.1
