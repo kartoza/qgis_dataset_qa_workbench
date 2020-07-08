@@ -115,7 +115,9 @@ class ChecklistItemHead:
         if include_notes:
             result[self._decode_notes_column_name()] = self.validation_notes
         if include_automation:
-            result[ChecklistItemPropertyColumn.AUTOMATION.name.lower()] = self.automation.to_dict()
+            serialized_automation = self.automation.to_dict()
+            if serialized_automation is not None:
+                result[ChecklistItemPropertyColumn.AUTOMATION.name.lower()] = serialized_automation
         if include_result:
             result['validated'] = bool(self.validated)
         return result
@@ -175,7 +177,6 @@ class CheckList:
         include_check_automation: bool = False
     ):
         result = {
-            'identifier': str(self.identifier),
             'name': self.name,
             'description': self.description,
             'dataset_type': self.dataset_type.value,
