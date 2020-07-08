@@ -100,22 +100,24 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
 
     def respond_to_layers_added(self, layers):
         utils.log_message('layers added')
-        current_dataset_type = self.selected_checklist.dataset_type
-        model: QtGui.QStandardItemModel = self.layer_chooser_lv.model()
-        for layer in layers:
-            if utils.match_maplayer_type(layer.type()) == current_dataset_type:
-                item = QtGui.QStandardItem(layer.name())
-                item.setData(layer.id(), LayerChooserDataRole.LAYER_IDENTIFIER.value)
-                model.appendRow([item])
+        if self.selected_checklist is not None:
+            current_dataset_type = self.selected_checklist.dataset_type
+            model: QtGui.QStandardItemModel = self.layer_chooser_lv.model()
+            for layer in layers:
+                if utils.match_maplayer_type(layer.type()) == current_dataset_type:
+                    item = QtGui.QStandardItem(layer.name())
+                    item.setData(layer.id(), LayerChooserDataRole.LAYER_IDENTIFIER.value)
+                    model.appendRow([item])
 
     def respond_to_layers_removed(self, layers: typing.List[str]):
         utils.log_message('layers removed')
         model: QtGui.QStandardItemModel = self.layer_chooser_lv.model()
-        for row_idx in reversed(range(model.rowCount())):
-            index = model.index(row_idx, 0)
-            item = model.itemFromIndex(index)
-            if item.data() in layers:
-                model.removeRow(row_idx)
+        if model is not None:
+            for row_idx in reversed(range(model.rowCount())):
+                index = model.index(row_idx, 0)
+                item = model.itemFromIndex(index)
+                if item.data() in layers:
+                    model.removeRow(row_idx)
 
 
     def clear_all_checks(self):
