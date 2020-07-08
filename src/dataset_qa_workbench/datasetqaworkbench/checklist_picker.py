@@ -48,6 +48,8 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
         self.model.setHorizontalHeaderLabels([i.name.replace('_', ' ').capitalize() for i in ChecklistModelColumn])
         self.checklists_tv.setModel(self.model)
         self.checklists_tv.selectionModel().selectionChanged.connect(self.enable_checklist_actions)
+        self.checklists_tv.doubleClicked.connect(
+            self.button_box.button(self.button_box.Ok).click)
         self.model.rowsRemoved.connect(self.toggle_delete_checklist_button)
         self.button_box.button(self.button_box.Ok).setEnabled(False)
         self.load_checklists(checklists)
