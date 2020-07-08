@@ -149,6 +149,7 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
     def update_tab_page(self, index: int):
         if index == TabPages.REPORT.value:
             self.update_report()
+            self.add_report_to_layer_metadata_pb.setEnabled(self.validate_layer_rb.isChecked())
 
     def update_report(self):
         if self.validate_layer_rb.isChecked():
