@@ -36,7 +36,6 @@ pipenv --site-packages
 PIP_IGNORE_INSTALLED=1 pipenv install
 ```
 
-
 ### Installing locally
 
 Call the `install` task:
@@ -44,6 +43,25 @@ Call the `install` task:
 ```
 pipenv run paver install
 ```
+
+
+### Running tests
+
+Be sure to install the development dependencies:
+
+```
+PIP_IGNORE_INSTALLED=1 pipenv install --dev
+```
+
+Install the plugin and then run the test suite
+
+```
+pipenv run paver install
+pipenv shell
+cd ~/.local/share/QGIS/QGIS3/profiles/default/python/plugins
+python -m pytest -v -x ~/dev/qgis_dataset_qa_workbench
+```
+
 
 ### Publishing a new version
 

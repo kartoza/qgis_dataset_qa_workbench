@@ -3,14 +3,13 @@ from pathlib import Path
 
 from PyQt5 import (
     QtCore,
-    QtGui,
     QtWidgets,
 )
 from qgis.core import (
     QgsApplication,
     QgsMapLayer,
 )
-import processing
+import qgis.processing
 
 from . import (
     models,
@@ -88,12 +87,12 @@ class AutomationButtonsWidget(QtWidgets.QWidget):
     def perform_automation(self):
         # TODO: Implement a custom processing provider and algorithm for extracting CRS from a layer
         algorithm_id, algorithm_parameters = self.get_run_algorithm_parameters()
-        result = processing.run(algorithm_id, algorithm_parameters)
+        result = qgis.processing.run(algorithm_id, algorithm_parameters)
         self.store_result(result)
         utils.log_message(f'perform_automation called result was: {result}')
 
     def configure_automation(self):
         utils.log_message(f'configure_automation called')
         algorithm_id, algorithm_parameters = self.get_run_algorithm_parameters()
-        result = processing.execAlgorithmDialog(algorithm_id, algorithm_parameters)
+        result = qgis.processing.execAlgorithmDialog(algorithm_id, algorithm_parameters)
         self.store_result(result)

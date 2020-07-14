@@ -24,9 +24,9 @@ __copyright__ = (
 )
 
 import logging
-from qgis.PyQt.QtCore import QObject, pyqtSlot, pyqtSignal
-from qgis.core import QgsMapLayerRegistry
-from qgis.gui import QgsMapCanvasLayer
+from qgis.PyQt.QtCore import QObject
+from qgis.core import QgsProject
+
 LOGGER = logging.getLogger('QGIS')
 
 
@@ -37,7 +37,6 @@ class QgisInterface(QObject):
     This class is here for enabling us to run unit tests only,
     so most methods are simply stubs.
     """
-    currentLayerChanged = pyqtSignal(QgsMapCanvasLayer)
 
     def __init__(self, canvas):
         """Constructor
@@ -45,64 +44,15 @@ class QgisInterface(QObject):
         """
         QObject.__init__(self)
         self.canvas = canvas
-        # Set up slots so we can mimic the behaviour of QGIS when layers
-        # are added.
         LOGGER.debug('Initialising canvas...')
-        # noinspection PyArgumentList
-        QgsMapLayerRegistry.instance().layersAdded.connect(self.addLayers)
-        # noinspection PyArgumentList
-        QgsMapLayerRegistry.instance().layerWasAdded.connect(self.addLayer)
-        # noinspection PyArgumentList
-        QgsMapLayerRegistry.instance().removeAll.connect(self.removeAllLayers)
 
         # For processing module
         self.destCrs = None
 
-    @pyqtSlot('QStringList')
-    def addLayers(self, layers):
-        """Handle layers being added to the registry so they show up in canvas.
-
-        :param layers: list<QgsMapLayer> list of map layers that were added
-
-        .. note:: The QgsInterface api does not include this method,
-            it is added here as a helper to facilitate testing.
-        """
-        #LOGGER.debug('addLayers called on qgis_interface')
-        #LOGGER.debug('Number of layers being added: %s' % len(layers))
-        #LOGGER.debug('Layer Count Before: %s' % len(self.canvas.layers()))
-        current_layers = self.canvas.layers()
-        final_layers = []
-        for layer in current_layers:
-            final_layers.append(QgsMapCanvasLayer(layer))
-        for layer in layers:
-            final_layers.append(QgsMapCanvasLayer(layer))
-
-        self.canvas.setLayerSet(final_layers)
-        #LOGGER.debug('Layer Count After: %s' % len(self.canvas.layers()))
-
-    @pyqtSlot('QgsMapLayer')
-    def addLayer(self, layer):
-        """Handle a layer being added to the registry so it shows up in canvas.
-
-        :param layer: list<QgsMapLayer> list of map layers that were added
-
-        .. note: The QgsInterface api does not include this method, it is added
-                 here as a helper to facilitate testing.
-
-        .. note: The addLayer method was deprecated in QGIS 1.8 so you should
-                 not need this method much.
-        """
-        pass
-
-    @pyqtSlot()
-    def removeAllLayers(self):
-        """Remove layers from the canvas before they get deleted."""
-        self.canvas.setLayerSet([])
-
     def newProject(self):
         """Create new project."""
         # noinspection PyArgumentList
-        QgsMapLayerRegistry.instance().removeAllMapLayers()
+        QgsProject.instance().removeAllMapLayers()
 
     # ---------------- API Mock for QgsInterface follows -------------------
 
@@ -150,7 +100,7 @@ class QgisInterface(QObject):
     def activeLayer(self):
         """Get pointer to the active layer (layer selected in the legend)."""
         # noinspection PyArgumentList
-        layers = QgsMapLayerRegistry.instance().mapLayers()
+        layers = QgsProject.instance().mapLayers()
         for item in layers:
             return layers[item]
 
@@ -198,6 +148,9 @@ class QgisInterface(QObject):
         :param dock_widget: A dock widget to add to the UI.
         :type dock_widget: QDockWidget
         """
+        pass
+
+    def addPluginToMenu(self, menu, action):
         pass
 
     def legendInterface(self):

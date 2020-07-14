@@ -54,6 +54,7 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
     checklist_artifacts_le: QtWidgets.QLineEdit
     checklist_types_le: QtWidgets.QLineEdit
     checklist_description_te: QtWidgets.QTextEdit
+    choose_checklist_pb: QtWidgets.QPushButton
     clear_checks_pb: QtWidgets.QPushButton
     validate_file_rb: QtWidgets.QRadioButton
     validate_layer_rb: QtWidgets.QRadioButton
