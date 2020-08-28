@@ -9,7 +9,6 @@ from PyQt5 import QtWidgets
 
 from . import models
 from . import utils
-from .checklist_downloader import ChecklistDownloader
 from .constants import (
     ChecklistModelColumn,
     CustomDataRoles,
@@ -23,11 +22,9 @@ FORM_CLASS, _ = uic.loadUiType(
 
 class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
     button_box: QtWidgets.QDialogButtonBox
-    checklist_downloader_dlg: ChecklistDownloader
     checklist_save_path_la: QtWidgets.QLabel
     checklists_tv: QtWidgets.QTreeView
     delete_checklist_pb: QtWidgets.QPushButton
-    download_checklist_pb: QtWidgets.QPushButton
 
     def __init__(self, iface, parent=None):
         """Constructor."""
@@ -39,7 +36,6 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.iface = iface
-        self.download_checklist_pb.clicked.connect(self.show_checklist_downloader)
         self.delete_checklist_pb.setEnabled(False)
         self.delete_checklist_pb.clicked.connect(self.delete_checklist)
         self.checklist_save_path_la.setText(f'Checklists are loaded from {utils.get_checklists_dir()}')
@@ -105,44 +101,6 @@ class ChecklistPicker(QtWidgets.QDialog, FORM_CLASS):
         # self.checklists_tv.setSortingEnabled(True)
         # self.checklists_tv.sortByColumn(ChecklistModelColumn.DATASET_TYPES.value, QtCore.Qt.DescendingOrder)
 
-    def show_checklist_downloader(self):
-        self.checklist_downloader_dlg = ChecklistDownloader(self.iface)
-        self.checklist_downloader_dlg.button_box.accepted.connect(self.load_checklist)
-        self.checklist_downloader_dlg.setModal(True)
-        self.checklist_downloader_dlg.show()
-        self.checklist_downloader_dlg.exec_()
-        # self.delete_checklist_pb.setEnabled(False)
-
-    def load_checklist(self):
-        utils.log_message(f'load_checklist called')
-        selected_checklist_indexes = self.checklist_downloader_dlg.downloaded_checklists_tv.selectedIndexes()
-        for idx in selected_checklist_indexes:
-            model = idx.model()
-            idx: QtCore.QModelIndex
-            identifier_idx = model.index(idx.row(), 0, idx.parent())
-            checklist = identifier_idx.data(CustomDataRoles.CHECKLIST_DOWNLOADER_IDENTIFIER.value)
-            sanitized_name = sanitize_checklist_name(checklist.name)
-            target_path = utils.get_checklists_dir() / f'{sanitized_name}.json'
-            # TODO: Add a try block
-            save_checklist(checklist, target_path)
-        existing_checklists = models.load_checklists()
-        self.load_checklists(existing_checklists)
-
 
 def sanitize_checklist_name(name: str) -> str:
     return name.replace(' ', '_').lower()
-
-
-def save_checklist(checklist: models.CheckList, target_path: Path):
-    serialized = json.dumps(
-        checklist.to_dict(
-            include_check_notes=False,
-            include_check_results=False,
-            include_check_automation=True
-        ),
-        indent=2
-    )
-    target_path.parent.mkdir(parents=True, exist_ok=True)
-    # TODO: Use QGIS native encoding
-    target_path.write_text(serialized, encoding='utf-8')
-    utils.log_message(f'saving checklist {serialized}...')
