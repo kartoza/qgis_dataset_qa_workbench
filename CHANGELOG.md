@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 -  Added some automated tests
+-  Removed support for loading checklists from remote servers. This functionality is now included in the QGIS Resource 
+   Sharing plugin
 
 
 ## [0.5.4] - 2020-07-08
