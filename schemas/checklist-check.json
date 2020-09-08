@@ -65,7 +65,7 @@
               "algorithm_id": {
                 "type": "string",
                 "title": "Processing identifier of the algorithm",
-                "description": "Identifier of the QGIS processing algorithm used to perform atomation",
+                "description": "Identifier of the QGIS processing algorithm used to perform automation",
                 "examples": ["qgis:checkvalidity"],
                 "pattern": "^[a-z_-]+:[a-z_-]+$"
               },
@@ -103,6 +103,26 @@
           "guide"
         ]
       }
+    },
+    "report": {
+      "type": "object",
+      "title": "Handler for any post-validation actions",
+      "description": "Configuration for doing post-validation actions with the generated validation report",
+      "properties": {
+        "algorithm_id": {
+          "type": "string",
+          "title": "Processing identifier of the report-handling algorithm",
+          "description": "Identifier of the QGIS Processing algorithm used to handle the checklist's validation report"
+        },
+        "extra_parameters":{
+          "type": "object",
+          "title": "Any additional parameters necessary for running the post-validation algorithm",
+          "description": "Any additional parameters necessary for running the post-validation algorithm"
+        }
+      },
+      "required": [
+        "algorithm_id"
+      ]
     }
   },
   "required": [
