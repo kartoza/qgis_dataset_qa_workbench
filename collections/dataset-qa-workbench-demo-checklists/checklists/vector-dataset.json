@@ -29,5 +29,14 @@
         }
       }
     }
-  ]
+  ],
+  "report": {
+    "algorithm_id": "dataset_qa_workbench:reportmailer",
+    "extra_parameters": {
+      "sender_address": "@dataset_qa_workbench_sender_address",
+      "sender_password": "@dataset_qa_workbench_sender_password",
+      "sender_smtp_server": "@dataset_qa_workbench_sender_smtp_server",
+      "destination_addresses": "@dataset_qa_workbench_destination_addresses"
+    }
+  }
 }
