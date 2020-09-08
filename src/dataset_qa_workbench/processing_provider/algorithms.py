@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingAlgorithm,
     QgsProcessingOutputBoolean,
     QgsProcessingParameterCrs,
+    QgsProcessingParameterExpression,
     QgsProcessingParameterMapLayer,
     QgsProcessingParameterString,
 )
@@ -64,11 +65,20 @@ class ReportMailerAlgorithm(BaseAlgorithm):
                 multiLine=True
             )
         )
+        self.addParameter(
+            QgsProcessingParameterExpression(
+                self.INPUT_SENDER_ADDRESS,
+                self.tr('Input validation report'),
+                defaultValue='@dataset_qa_workbench_sender_address',
+            )
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
         raw_report = self.parameterAsString(
             parameters, self.INPUT_REPORT, context)
         report = json.loads(raw_report)
+        sender_address = self.parameterAsExpression(
+            parameters, self.INPUT_SENDER_ADDRESS)
 
     def name(self):
         """
