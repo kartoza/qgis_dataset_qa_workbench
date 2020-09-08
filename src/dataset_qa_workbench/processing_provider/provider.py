@@ -11,6 +11,7 @@ class DatasetQaWorkbenchProvider(QgsProcessingProvider):
 
     def loadAlgorithms(self, *args, **kwargs):
         self.addAlgorithm(algorithms.CrsCheckerAlgorithm())
+        self.addAlgorithm(algorithms.ReportMailerAlgorithm())
 
     def id(self):
         return self.IDENTIFIER
