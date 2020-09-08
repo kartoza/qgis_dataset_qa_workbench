@@ -1,3 +1,5 @@
+import json
+
 from PyQt5 import (
     QtCore,
     QtGui,
@@ -9,23 +11,87 @@ from qgis.core import (
     QgsProcessingOutputBoolean,
     QgsProcessingParameterCrs,
     QgsProcessingParameterMapLayer,
+    QgsProcessingParameterString,
 )
 
 
-class CrsCheckerAlgorithm(QgsProcessingAlgorithm):
-    """
-    This is an example algorithm that takes a vector layer and
-    creates a new identical one.
+class BaseAlgorithm(QgsProcessingAlgorithm):
+    # Constants used to refer to parameters and outputs. They will be
+    # used when calling the algorithm from another algorithm, or when
+    # calling from the QGIS console.
 
-    It is meant to be used as an example of how to create your own
-    algorithms and explain methods and variables used to do it. An
-    algorithm like this will be available in all elements, and there
-    is not need for additional work.
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
 
-    All Processing algorithms should extend the QgsProcessingAlgorithm
-    class.
-    """
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Algorithms from checklist checker plugin'
 
+    def tr(self, string):
+        return QtCore.QCoreApplication.translate('Processing', string)
+
+    def icon(self):
+        return QtGui.QIcon(':/plugins/dataset_qa_workbench/clipboard-check-solid.svg')
+
+
+class ReportMailerAlgorithm(BaseAlgorithm):
+    INPUT_REPORT = 'INPUT_REPORT'
+    INPUT_SENDER_ADDRESS = 'INPUT_SENDER_ADDRESS'
+
+    def initAlgorithm(
+            self,
+            configuration,
+            p_str=None,
+            Any=None,
+            *args,
+            **kwargs
+    ):
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.INPUT_REPORT,
+                self.tr('Input validation report'),
+                defaultValue='{}',
+                multiLine=True
+            )
+        )
+
+    def processAlgorithm(self, parameters, context, feedback):
+        raw_report = self.parameterAsString(
+            parameters, self.INPUT_REPORT, context)
+        report = json.loads(raw_report)
+
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'reportmailer'
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr('Report mailer')
+
+    def createInstance(self):
+        return ReportMailerAlgorithm()
+
+
+class CrsCheckerAlgorithm(BaseAlgorithm):
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when
     # calling from the QGIS console.
@@ -87,29 +153,6 @@ class CrsCheckerAlgorithm(QgsProcessingAlgorithm):
         user-visible display of the algorithm name.
         """
         return self.tr('Crs checker')
-
-    def group(self):
-        """
-        Returns the name of the group this algorithm belongs to. This string
-        should be localised.
-        """
-        return self.tr(self.groupId())
-
-    def groupId(self):
-        """
-        Returns the unique ID of the group this algorithm belongs to. This
-        string should be fixed for the algorithm, and must not be localised.
-        The group id should be unique within each provider. Group id should
-        contain lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
-        """
-        return 'Algorithms from checklist checker plugin'
-
-    def tr(self, string):
-        return QtCore.QCoreApplication.translate('Processing', string)
-
-    def icon(self):
-        return QtGui.QIcon(':/plugins/dataset_qa_workbench/clipboard-check-solid.svg')
 
     def createInstance(self):
         return CrsCheckerAlgorithm()
