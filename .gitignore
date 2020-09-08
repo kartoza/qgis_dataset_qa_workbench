@@ -4,3 +4,4 @@
 *.pyc
 docs/repo
 docs/checklists
+.pytest_cache
