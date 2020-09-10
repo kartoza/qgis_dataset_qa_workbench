@@ -141,10 +141,15 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
         model = self.checklist_checks_tv.model()
         for row_index in range(model.rowCount()):
             item_head_index = model.index(row_index, 0)
-            automation_index = model.index(ChecklistItemPropertyColumn.AUTOMATION.value, 1, parent=item_head_index)
-            automation_widget = self.checklist_checks_tv.indexWidget(automation_index)
+            automation_index = model.index(
+                ChecklistItemPropertyColumn.AUTOMATION.value,
+                1,
+                parent=item_head_index
+            )
+            automation_widget = (
+                self.checklist_checks_tv.indexWidget(automation_index))
             if automation_widget:
-                automation_widget.perform_automation()
+                automation_widget.automator.perform_automation()
 
 
     def update_tab_page(self, index: int):
@@ -157,10 +162,15 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             current_layer_idx = self.layer_chooser_lv.currentIndex()
             layer_model = self.layer_chooser_lv.model()
             layer_id = layer_model.data(
-                current_layer_idx, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
-            project = QgsProject.instance()
-            layer = project.mapLayers()[layer_id]
-            dataset = layer
+                current_layer_idx,
+                role=LayerChooserDataRole.LAYER_IDENTIFIER.value
+            )
+            if layer_id is not None:
+                project = QgsProject.instance()
+                layer = project.mapLayers()[layer_id]
+                dataset = layer
+            else:
+                dataset = None
         else:
             # TODO: Implement report generation for datasets that are not layers
             dataset = None
@@ -315,16 +325,20 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
     def _get_current_layer(self) -> typing.Optional[QgsMapLayer]:
         current_layer_idx = self.layer_chooser_lv.currentIndex()
         utils.log_message(f'current_layer_idx: {current_layer_idx}')
-        if current_layer_idx == QtCore.QModelIndex():
-            result = None
-        else:
+        result = None
+        if current_layer_idx != QtCore.QModelIndex():
             layer_model = self.layer_chooser_lv.model()
             layer_id = layer_model.data(
-                current_layer_idx, role=LayerChooserDataRole.LAYER_IDENTIFIER.value)
+                current_layer_idx,
+                role=LayerChooserDataRole.LAYER_IDENTIFIER.value
+            )
             utils.log_message(f'layer_id: {layer_id}')
             layer_model = self.layer_chooser_lv.model()
             project = QgsProject.instance()
-            result = project.mapLayers()[layer_id]
+            try:
+                result = project.mapLayers()[layer_id]
+            except KeyError:
+                utils.log_message(f'Unable to load layer {layer_id}')
         return result
 
     def show_checklist_picker(self):

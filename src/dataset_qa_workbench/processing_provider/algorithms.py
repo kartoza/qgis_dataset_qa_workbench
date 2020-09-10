@@ -48,7 +48,8 @@ class CrsCheckerAlgorithm(QgsProcessingAlgorithm):
         )
         self.addParameter(
             QgsProcessingParameterCrs(
-                self.INPUT_CRS
+                self.INPUT_CRS,
+                self.tr('Input CRS')
             )
         )
         self.addOutput(
