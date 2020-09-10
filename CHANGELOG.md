@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    Sharing plugin
 -  Improved documentation on README
 -  Added sample checklists as a custom QGIS Resource Sharing plugin repository
+-  Run automation steps using QGIS Tasks. This makes them asynchornous and does not block main QGIS UI anymore
+-  Fix errors when exiting QGIS and switching projects due to layers having been removed
+-  Allow running QGIS processing algorithms even when they specify mandatory layer outputs
 
 
 ## [0.5.4] - 2020-07-08
