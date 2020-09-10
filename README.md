@@ -184,6 +184,8 @@ An easy way to get started is to (fork and) clone this repo, install pipenv
 and install it!
 
 ```
+sudo apt install pyqt5-dev-tools
+
 # create your virtualenv but use system site-packages too
 # this is in order to use QGIS python bindings in the venv
 pipenv --site-packages

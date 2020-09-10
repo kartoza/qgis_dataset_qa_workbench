@@ -32,7 +32,10 @@ class ReportHandler:
         self.context = context or QgsProcessingContext()
         self.feedback = feedback or QgsProcessingFeedback()
         registry = QgsApplication.processingRegistry()
-        self.algorithm = registry.createAlgorithmById(algorithm_id)
+        algorithm = registry.createAlgorithmById(algorithm_id)
+        if algorithm is None:
+            raise RuntimeError(f'Invalid algorithm_id: {algorithm_id}')
+        self.algorithm = algorithm
         self.params = dict(execution_params) if execution_params else {}
         self.params.update({REPORT_HANDLER_INPUT_NAME: json.dumps(report)})
 
@@ -54,34 +57,34 @@ class ReportHandler:
         pass
 
 
-class PostValidationButtonsWidget(QtWidgets.QWidget):
-    run_pb: QtWidgets.QPushButton
-    configure_pb: QtWidgets.QPushButton
-    report_handler: ReportHandler
-
-    def __init__(
-            self,
-            report: typing.Dict,
-            checklist_report: ChecklistReport,
-            *args,
-            **kwargs
-    ):
-        super().__init__(*args, **kwargs)
-        self.run_pb = QtWidgets.QPushButton('Handle report', parent=self)
-        self.configure_pb = QtWidgets.QPushButton(
-            'Configure and run...', parent=self)
-        layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.run_pb)
-        layout.addWidget(self.configure_pb)
-        self.setLayout(layout)
-
-        self.report_handler = ReportHandler(
-            report,
-            checklist_report.algorithm_id,
-            checklist_report.extra_parameters,
-        )
-
-        self.run_pb.clicked.connect(
-            self.report_handler.handle_report)
-        self.configure_pb.clicked.connect(
-            self.report_handler.configure_and_handle_report)
+# class PostValidationButtonsWidget(QtWidgets.QWidget):
+#     run_pb: QtWidgets.QPushButton
+#     configure_pb: QtWidgets.QPushButton
+#     report_handler: ReportHandler
+#
+#     def __init__(
+#             self,
+#             report: typing.Dict,
+#             checklist_report: ChecklistReport,
+#             *args,
+#             **kwargs
+#     ):
+#         super().__init__(*args, **kwargs)
+#         self.run_pb = QtWidgets.QPushButton('Handle report', parent=self)
+#         self.configure_pb = QtWidgets.QPushButton(
+#             'Configure and run...', parent=self)
+#         layout = QtWidgets.QHBoxLayout()
+#         layout.addWidget(self.run_pb)
+#         layout.addWidget(self.configure_pb)
+#         self.setLayout(layout)
+#
+#         self.report_handler = ReportHandler(
+#             report,
+#             checklist_report.algorithm_id,
+#             checklist_report.extra_parameters,
+#         )
+#
+#         self.run_pb.clicked.connect(
+#             self.report_handler.handle_report)
+#         self.configure_pb.clicked.connect(
+#             self.report_handler.configure_and_handle_report)

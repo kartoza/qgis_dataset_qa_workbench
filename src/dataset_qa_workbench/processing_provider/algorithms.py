@@ -1,4 +1,6 @@
 import json
+import smtplib
+from email.message import EmailMessage
 
 from PyQt5 import (
     QtCore,
@@ -79,6 +81,12 @@ class ReportMailerAlgorithm(BaseAlgorithm):
         report = json.loads(raw_report)
         sender_address = self.parameterAsExpression(
             parameters, self.INPUT_SENDER_ADDRESS)
+        mail_message = EmailMessage()
+        mail_message.set_content(raw_report)
+        mail_message['Subject'] = (
+            'QGIS Dataset QA Workbench plugin - Validation report')
+        mail_message['From'] = sender_address
+        mail_message['To'] = sender_address
 
     def name(self):
         """

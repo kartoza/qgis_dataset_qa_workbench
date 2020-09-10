@@ -36,7 +36,7 @@ from .constants import (
     TabPages,
     ValidationArtifactType,
 )
-from .report import PostValidationButtonsWidget
+from .report import ReportHandler
 from .utils import log_message
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -67,6 +67,9 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
     save_report_fw: QgsFileWidget
     save_report_pb: QtWidgets.QPushButton
     tab_widget: QtWidgets.QTabWidget
+    run_post_validation_pb: QtWidgets.QPushButton
+    configure_and_run_post_validation_pb: QtWidgets.QPushButton
+    report_handler: typing.Optional[ReportHandler]
 
     closingPlugin = QtCore.pyqtSignal()
 
@@ -97,6 +100,7 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.automate_all_checks_pb.clicked.connect(self.automate_all_checks)
         self.file_chooser.fileChanged.connect(self.selected_file_changed)
         self.validate_layer_rb.toggled.connect(self.respond_to_validate_layer_rb_toggled)
+        self.report_handler = None
         # TODO: It might be necessary to disconnect these when plugin is unloaded
         QgsProject.instance().layersAdded.connect(self.respond_to_layers_added)
         QgsProject.instance().layersRemoved.connect(self.respond_to_layers_removed)
@@ -156,10 +160,29 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
 
     def update_tab_page(self, index: int):
         if index == TabPages.REPORT.value:
-            self.update_report()
-            self.add_report_to_layer_metadata_pb.setEnabled(self.validate_layer_rb.isChecked())
+            report = self.update_report()
+            current_checklist = self.get_current_checklist()
+            if current_checklist is not None and report is not None:
+                if current_checklist.report is not None:
+                    self.report_handler = ReportHandler(
+                        report,
+                        current_checklist.report.algorithm_id,
+                        current_checklist.report.extra_parameters
+                    )
 
-    def update_report(self):
+                self.toggle_post_validation_elements(
+                    current_checklist.report is not None)
+            else:
+                self.toggle_post_validation_elements(False)
+
+            self.add_report_to_layer_metadata_pb.setEnabled(
+                self.validate_layer_rb.isChecked())
+
+    def get_current_checklist(self) -> typing.Optional[models.CheckList]:
+        model = self.checklist_checks_tv.model()
+        return getattr(model, 'checklist', None)
+
+    def update_report(self) -> typing.Optional[typing.Dict]:
         if self.validate_layer_rb.isChecked():
             current_layer_idx = self.layer_chooser_lv.currentIndex()
             layer_model = self.layer_chooser_lv.model()
@@ -180,21 +203,26 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
         if report:
             serialized = serialize_report_to_html(report)
             self.report_te.setDocument(serialized)
-        try:
-            checklist: models.CheckList = self.checklist_checks_tv.model().checklist
-            utils.log_message(f'checklist: {checklist}')
-        except AttributeError:
-            pass
-        else:
-            utils.log_message(f'checklist.report: {checklist.report}')
-            if checklist.report is not None:
-                post_validation_widget = PostValidationButtonsWidget(
-                    report,
-                    checklist.report
-                )
-                current_layout = self.tab_widget.currentWidget().layout()
-                current_layout.addWidget(post_validation_widget)
+        return report
 
+    def toggle_post_validation_elements(
+            self,
+            enabled: bool
+    ):
+        self.run_post_validation_pb.setEnabled(enabled)
+        self.configure_and_run_post_validation_pb.setEnabled(enabled)
+        if enabled:
+            self.run_post_validation_pb.clicked.connect(
+                self.report_handler.handle_report)
+            self.configure_and_run_post_validation_pb.clicked.connect(
+                self.report_handler.configure_and_handle_report)
+        else:
+            try:
+                self.run_post_validation_pb.clicked.disconnect()
+                self.configure_and_run_post_validation_pb.clicked.disconnect()
+            except TypeError:
+                # buttons were already disconnected
+                pass
 
     def generate_report(self, dataset: typing.Union[QgsMapLayer, str]):
         checklist_model = self.checklist_checks_tv.model()

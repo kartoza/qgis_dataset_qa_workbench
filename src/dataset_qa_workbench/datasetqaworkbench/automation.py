@@ -60,7 +60,10 @@ class ValidationStepAutomator:
         self.context = context or QgsProcessingContext()
         self.feedback = feedback or QgsProcessingFeedback()
         registry = QgsApplication.processingRegistry()
-        self.algorithm = registry.createAlgorithmById(algorithm_id)
+        algorithm = registry.createAlgorithmById(algorithm_id)
+        if algorithm is None:
+            raise RuntimeError(f'Invalid algorithm_id: {algorithm_id!r}')
+        self.algorithm = algorithm
         self.output_name = output_name
         self.negate_output = negate_output
         self.model = model
