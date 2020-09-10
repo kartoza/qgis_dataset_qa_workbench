@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 
 SETTINGS_GROUP = 'PythonPlugins/dataset_qa_workbench'
 
+QGIS_VARIABLE_PREFIX = 'dataset_qa_workbench'
 
 class DatasetType(Enum):
     DOCUMENT = "document"

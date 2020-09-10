@@ -32,6 +32,7 @@ from .constants import (
     CustomDataRoles,
     DatasetType,
     LayerChooserDataRole,
+    QGIS_VARIABLE_PREFIX,
     TabPages,
     ValidationArtifactType,
 )
@@ -491,14 +492,16 @@ def get_report_contents(
         checklist_items: models.CheckListItemsModel,
         dataset: typing.Union[QgsMapLayer, str]
 ) -> typing.Dict:
-    global_scope = QgsExpressionContextUtils.globalScope()
     if isinstance(dataset, QgsMapLayer):
         name = dataset.name()
     else:
         name = dataset
     result = {
         'name': 'Validation report',
-        'validator': global_scope.variable('user_full_name'),
+        'validator': utils.get_qgis_variable(
+            f'{QGIS_VARIABLE_PREFIX}_validator',
+            'user_full_name'
+        ),
         'generated': dt.datetime.now(dt.timezone.utc).isoformat(),
         'dataset': name,
         'dataset_is_valid': checklist_items.result,
