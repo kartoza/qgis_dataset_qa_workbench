@@ -2,6 +2,7 @@ import typing
 from pathlib import Path
 
 import qgis.core
+from qgis.core import QgsExpressionContextUtils
 from PyQt5 import QtCore
 from PyQt5.QtCore import QAbstractItemModel
 
@@ -10,6 +11,21 @@ from .constants import DatasetType
 
 def log_message(message, level=None):
     qgis.core.QgsMessageLog.logMessage(message)
+
+
+def get_qgis_variable(
+        name: str,
+        fallback_name: typing.Optional[str] = None
+) -> typing.Optional[str]:
+    global_scope = QgsExpressionContextUtils.globalScope()
+    value = global_scope.variable(name)
+    if value is not None:
+        result = value
+    elif fallback_name is not None:
+        result = global_scope.variable(fallback_name)
+    else:
+        result = value
+    return result
 
 
 def get_checklists_dir() -> Path:
