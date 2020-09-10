@@ -15,17 +15,6 @@ from .constants import (
 )
 
 
-class ChecklistServer:
-    identifier: uuid.UUID
-    name: str
-    url: str
-
-    def __init__(self, name: str, url: str, identifier: typing.Optional[uuid.UUID] = None):
-        self.name = name
-        self.url = url
-        self.identifier = identifier or uuid.uuid4()
-
-
 class ChecklistItemProperty:
     name: str
     value: typing.Any
@@ -148,6 +137,31 @@ class ChecklistItemHead:
         return cls(raw['name'], check_properties)
 
 
+class ChecklistReport:
+    algorithm_id: str
+    extra_parameters: typing.Dict
+
+    def __init__(
+            self,
+            algorithm_id: str,
+            extra_parameters: typing.Optional[typing.Dict] = None
+    ):
+        self.algorithm_id = algorithm_id
+        self.extra_parameters = (
+            extra_parameters.copy() if extra_parameters else {})
+
+    @classmethod
+    def from_dict(cls, raw: typing.Dict):
+        try:
+            report = cls(
+                raw['algorithm_id'],
+                raw.get('extra_parameters')
+            )
+        except KeyError:
+            raise
+        return report
+
+
 class CheckList:
     identifier: uuid.UUID
     name: str
@@ -155,13 +169,15 @@ class CheckList:
     dataset_type: DatasetType
     validation_artifact_type: ValidationArtifactType
     checks: typing.List[ChecklistItemHead]
+    report: typing.Optional[ChecklistReport]
 
     def __init__(
             self,
             name: str,
             description: str,
             dataset_type: DatasetType,
-            validation_artifact_type: ValidationArtifactType
+            validation_artifact_type: ValidationArtifactType,
+            report: typing.Optional[ChecklistReport] = None,
     ):
         self.identifier = uuid.uuid4()
         self.name = name
@@ -169,12 +185,14 @@ class CheckList:
         self.dataset_type = dataset_type
         self.validation_artifact_type = validation_artifact_type
         self.checks = []
+        self.report = report
 
     def to_dict(
-        self,
-        include_check_notes: bool = True,
-        include_check_results: bool = True,
-        include_check_automation: bool = False
+            self,
+            include_check_notes: bool = True,
+            include_check_results: bool = True,
+            include_check_automation: bool = False,
+            include_report_configuration: bool = False,
     ):
         result = {
             'name': self.name,
@@ -183,6 +201,11 @@ class CheckList:
             'validation_artifact_type': self.validation_artifact_type.value,
             'checks': []
         }
+        if include_report_configuration and self.report is not None:
+            result['report'] = {
+                'algorithm_id': self.report.algorithm_id,
+                'extra_parameters': self.report.extra_parameters,
+            }
         for check in self.checks:
             check_dict = check.to_dict(
                 include_notes=include_check_notes,
@@ -195,12 +218,16 @@ class CheckList:
 
     @classmethod
     def from_dict(cls, raw: typing.Dict):
+        raw_report = raw.get('report')
+        report = ChecklistReport.from_dict(raw_report) if raw_report else None
         try:
             instance = cls(
                 name=raw['name'],
                 description=raw.get('description', ''),
                 dataset_type=DatasetType(raw['dataset_type']),
-                validation_artifact_type=ValidationArtifactType(raw['validation_artifact_type'])
+                validation_artifact_type=ValidationArtifactType(
+                    raw['validation_artifact_type']),
+                report=report
             )
         except KeyError:
             raise

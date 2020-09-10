@@ -36,6 +36,7 @@ from .constants import (
     TabPages,
     ValidationArtifactType,
 )
+from .report import PostValidationButtonsWidget
 from .utils import log_message
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -179,6 +180,21 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
         if report:
             serialized = serialize_report_to_html(report)
             self.report_te.setDocument(serialized)
+        try:
+            checklist: models.CheckList = self.checklist_checks_tv.model().checklist
+            utils.log_message(f'checklist: {checklist}')
+        except AttributeError:
+            pass
+        else:
+            utils.log_message(f'checklist.report: {checklist.report}')
+            if checklist.report is not None:
+                post_validation_widget = PostValidationButtonsWidget(
+                    report,
+                    checklist.report
+                )
+                current_layout = self.tab_widget.currentWidget().layout()
+                current_layout.addWidget(post_validation_widget)
+
 
     def generate_report(self, dataset: typing.Union[QgsMapLayer, str]):
         checklist_model = self.checklist_checks_tv.model()
