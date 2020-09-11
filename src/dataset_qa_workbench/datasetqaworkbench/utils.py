@@ -2,11 +2,19 @@ import typing
 from pathlib import Path
 from sys import getfilesystemencoding
 
-import qgis.core
-from qgis.core import QgsExpressionContextUtils
+import processing
+from qgis.core import (
+    QgsApplication,
+    QgsExpressionContextUtils,
+    QgsMapLayerType,
+    QgsMessageLog,
+    QgsProcessingAlgorithm,
+)
+from qgis.utils import iface
 from PyQt5 import (
     QtCore,
     QtGui,
+    QtWidgets,
 )
 from PyQt5.QtCore import QAbstractItemModel
 
@@ -14,7 +22,7 @@ from .constants import DatasetType
 
 
 def log_message(message, level=None):
-    qgis.core.QgsMessageLog.logMessage(message)
+    QgsMessageLog.logMessage(message)
 
 
 def get_qgis_variable(
@@ -42,13 +50,13 @@ def get_checklists_dir() -> Path:
 
 
 def get_profile_base_path() -> Path:
-    return Path(qgis.core.QgsApplication.qgisSettingsDirPath())
+    return Path(QgsApplication.qgisSettingsDirPath())
 
 
-def match_maplayer_type(type_: qgis.core.QgsMapLayerType) -> typing.Optional[DatasetType]:
+def match_maplayer_type(type_: QgsMapLayerType) -> typing.Optional[DatasetType]:
     return {
-        qgis.core.QgsMapLayerType.VectorLayer: DatasetType.VECTOR,
-        qgis.core.QgsMapLayerType.RasterLayer: DatasetType.RASTER,
+        QgsMapLayerType.VectorLayer: DatasetType.VECTOR,
+        QgsMapLayerType.RasterLayer: DatasetType.RASTER,
     }.get(type_)
 
 
@@ -186,3 +194,37 @@ def serialize_report_to_html(report: typing.Dict) -> QtGui.QTextDocument:
     doc = QtGui.QTextDocument()
     doc.setHtml(rendered_report)
     return doc
+
+
+def execute_algorithm_dialog(
+        algorithm: QgsProcessingAlgorithm,
+        params: typing.Dict,
+) -> typing.Tuple[bool, typing.Optional[typing.Dict]]:
+    """Executes an algorithm dialog
+
+    This is a reimplementation of ``qgis.processing.execAlgorithmDialog()``
+    that also returns whether the dialog was accepted or rejected
+
+    """
+
+    dialog = processing.createAlgorithmDialog(algorithm, params)
+    if dialog is None:
+        accepted = False
+        results = None
+    else:
+        canvas = iface.mapCanvas()
+        previous_map_tool = canvas.mapTool()
+        dialog.show()
+        dialog_code = dialog.exec_()
+        if canvas.mapTool() != previous_map_tool:
+            try:
+                canvas.mapTool().reset()
+            except:
+                pass
+            canvas.setMapTool(previous_map_tool)
+
+        accepted = dialog_code == QtWidgets.QDialog.Accepted
+        results = dialog.results()
+        # make sure the dialog is destroyed and not only hidden on pressing Esc
+        dialog.close()
+    return accepted, results

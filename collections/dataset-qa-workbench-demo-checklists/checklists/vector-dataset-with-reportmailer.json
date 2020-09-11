@@ -1,6 +1,6 @@
 {
-  "name": "Sample checklist",
-  "description": "This is just a sample checklist - be sure to delete it",
+  "name": "Sample checklist with action for emailing validation report",
+  "description": "This is just a sample checklist - be sure to delete it\n\nThis also demonstrates sending emails with the report of validation",
   "dataset_type": "vector",
   "validation_artifact_type": "dataset",
   "checks": [
@@ -31,12 +31,6 @@
     }
   ],
   "report": {
-    "algorithm_id": "dataset_qa_workbench:reportmailer",
-    "extra_parameters": {
-      "sender_address": "@dataset_qa_workbench_sender_address",
-      "sender_password": "@dataset_qa_workbench_sender_password",
-      "sender_smtp_server": "@dataset_qa_workbench_sender_smtp_server",
-      "destination_addresses": "@dataset_qa_workbench_destination_addresses"
-    }
+    "algorithm_id": "dataset_qa_workbench:reportmailer"
   }
 }

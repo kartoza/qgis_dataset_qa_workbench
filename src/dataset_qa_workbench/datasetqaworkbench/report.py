@@ -54,13 +54,17 @@ class ReportHandler:
         task_manager.addTask(task)
 
     def configure_and_handle_report(self):
-        result = processing.execAlgorithmDialog(
-            self.algorithm,
-            self.params
-        )
+        accepted, result = utils.execute_algorithm_dialog(
+            self.algorithm, self.params)
+        # result = processing.execAlgorithmDialog(
+        #     self.algorithm,
+        #     self.params
+        # )
+        utils.log_message(f'accepted: {accepted}')
         utils.log_message(f'result: {result}')
-        successful = bool(result) if result is not None else False
-        self.task_finished(successful, result)
+        if accepted:
+            successful = bool(result) if result is not None else False
+            self.task_finished(successful, result)
 
     def task_finished(self, successful: bool, results: typing.Dict):
         if successful:

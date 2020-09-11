@@ -1,0 +1,48 @@
+{
+  "name": "Sample checklist with a step that has non optional layer outputs",
+  "description": "This is just a sample checklist - be sure to delete it",
+  "dataset_type": "vector",
+  "validation_artifact_type": "dataset",
+  "checks": [
+    {
+      "name": "CRS is EPSG:4326",
+      "description": "Layer's Coordinate Reference System is lat-lon on WGS84 datum (i.e. EPSG code 4326)",
+      "guide": "Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'CRS' field has a value of 'EPSG:4326 - WGS84 - Geographic'",
+      "automation": {
+        "algorithm_id": "dataset_qa_workbench:crschecker",
+        "artifact_parameter_name": "INPUT_LAYER",
+        "output_name": "OUTPUT",
+        "extra_parameters": {
+          "INPUT_CRS": "EPSG:4326"
+        }
+      }
+    },
+    {
+      "name": "geometry has the correct type",
+      "description": "Layer's geometry is of the expected type, according to the thematic content of the dataset. For example, a roads layer should not have a geometry of type 'Point'.",
+      "guide": "Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'Geometry' shows an acceptable value."
+    },
+    {
+      "name": "geometry is valid",
+      "description": "Layer's geometry does not have invalid geometries.",
+      "guide": "Navigate to Vector -> Geometry tools -> Check Validity... and run the validity analysis tool. Afterwards check that there are no features on the `invalid output` layer",
+      "automation": {
+        "algorithm_id": "qgis:checkvalidity",
+        "artifact_parameter_name": "INPUT_LAYER",
+        "output_name": "INVALID_COUNT",
+        "negate_output": true
+      }
+    },
+    {
+      "name": "there are no duplicate geometries",
+      "description": "Layer does not have duplicate geometries",
+      "guide": "Navigate to Processing Toolbox -> Vector general -> Delete duplicate geometries and run the processing algorithm. Afterwards check that there are no features on the `invalid output` layer",
+      "automation": {
+        "algorithm_id": "qgis:deleteduplicategeometries",
+        "artifact_parameter_name": "INPUT",
+        "output_name": "DUPLICATE_COUNT",
+        "negate_output": true
+      }
+    }
+  ]
+}

@@ -8,6 +8,7 @@ from PyQt5.QtCore import QUrl
 from qgis.core import (
     QgsNetworkAccessManager,
     QgsProcessingOutputBoolean,
+    QgsProcessingException,
     QgsProcessingParameterAuthConfig,
     QgsProcessingParameterExpression,
     QgsProcessingParameterString,
@@ -95,6 +96,8 @@ class ReportPosterAlgorithm(BaseAlgorithm):
             self.parameterAsExpression(
                 parameters, self.INPUT_ENDPOINT, context)
         )
+        if not endpoint:
+            raise QgsProcessingException(f'Invalid endpoint: {endpoint}')
         feedback.pushInfo(f'endpoint: {endpoint}')
         request = QNetworkRequest(QUrl(endpoint))
         request.setHeader(QNetworkRequest.ContentTypeHeader, 'application/json')
