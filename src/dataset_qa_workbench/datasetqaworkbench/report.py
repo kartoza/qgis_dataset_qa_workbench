@@ -1,17 +1,18 @@
 import json
 import typing
 
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+import processing
 from qgis.core import (
+    Qgis,
     QgsApplication,
     QgsProcessingAlgorithm,
     QgsProcessingAlgRunnerTask,
     QgsProcessingContext,
     QgsProcessingFeedback,
 )
+from qgis.gui import QgisInterface
 
-from .models import ChecklistReport
+from . import utils
 from .constants import REPORT_HANDLER_INPUT_NAME
 
 
@@ -23,12 +24,14 @@ class ReportHandler:
 
     def __init__(
             self,
+            iface: QgisInterface,
             report: typing.Dict,
             algorithm_id: str,
             execution_params: typing.Optional[typing.Dict] = None,
             context: typing.Optional[QgsProcessingContext] = None,
             feedback: typing.Optional[QgsProcessingFeedback] = None,
     ):
+        self.iface = iface
         self.context = context or QgsProcessingContext()
         self.feedback = feedback or QgsProcessingFeedback()
         registry = QgsApplication.processingRegistry()
@@ -51,40 +54,19 @@ class ReportHandler:
         task_manager.addTask(task)
 
     def configure_and_handle_report(self):
-        pass
+        result = processing.execAlgorithmDialog(
+            self.algorithm,
+            self.params
+        )
+        utils.log_message(f'result: {result}')
+        successful = bool(result) if result is not None else False
+        self.task_finished(successful, result)
 
     def task_finished(self, successful: bool, results: typing.Dict):
-        pass
-
-
-# class PostValidationButtonsWidget(QtWidgets.QWidget):
-#     run_pb: QtWidgets.QPushButton
-#     configure_pb: QtWidgets.QPushButton
-#     report_handler: ReportHandler
-#
-#     def __init__(
-#             self,
-#             report: typing.Dict,
-#             checklist_report: ChecklistReport,
-#             *args,
-#             **kwargs
-#     ):
-#         super().__init__(*args, **kwargs)
-#         self.run_pb = QtWidgets.QPushButton('Handle report', parent=self)
-#         self.configure_pb = QtWidgets.QPushButton(
-#             'Configure and run...', parent=self)
-#         layout = QtWidgets.QHBoxLayout()
-#         layout.addWidget(self.run_pb)
-#         layout.addWidget(self.configure_pb)
-#         self.setLayout(layout)
-#
-#         self.report_handler = ReportHandler(
-#             report,
-#             checklist_report.algorithm_id,
-#             checklist_report.extra_parameters,
-#         )
-#
-#         self.run_pb.clicked.connect(
-#             self.report_handler.handle_report)
-#         self.configure_pb.clicked.connect(
-#             self.report_handler.configure_and_handle_report)
+        if successful:
+            msg = f'Post validation succeeded'
+            level = Qgis.Info
+        else:
+            msg = f'Post validation failed'
+            level = Qgis.Warning
+        self.iface.messageBar().pushMessage(msg, level=level, duration=3)

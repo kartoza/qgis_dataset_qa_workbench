@@ -1,6 +1,7 @@
 import typing
 from pathlib import Path
 
+import processing
 from PyQt5 import (
     QtCore,
     QtWidgets,
@@ -18,7 +19,6 @@ from qgis.core import (
     QgsProcessingOutputLayerDefinition,
     QgsProject,
 )
-import processing
 
 from . import (
     models,
@@ -172,12 +172,15 @@ class AutomationButtonsWidget(QtWidgets.QWidget):
     ):
         super().__init__(*args, **kwargs)
         self.run_pb = QtWidgets.QPushButton('Run', parent=self)
-        self.configure_pb = QtWidgets.QPushButton('Configure and run...', parent=self)
+        self.configure_pb = QtWidgets.QPushButton(
+            'Configure and run...', parent=self)
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.run_pb)
         layout.addWidget(self.configure_pb)
         self.setLayout(layout)
 
-        self.automator = ValidationStepAutomator.from_checklist_item(checklist_item_head_index, dataset)
+        self.automator = ValidationStepAutomator.from_checklist_item(
+            checklist_item_head_index, dataset)
         self.run_pb.clicked.connect(self.automator.perform_automation)
-        self.configure_pb.clicked.connect(self.automator.configure_and_perform_automation)
+        self.configure_pb.clicked.connect(
+            self.automator.configure_and_perform_automation)

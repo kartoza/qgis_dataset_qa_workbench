@@ -1,0 +1,36 @@
+{
+  "name": "Sample checklist with report for posting to a remote server",
+  "description": "This is just a sample checklist - be sure to delete it",
+  "dataset_type": "vector",
+  "validation_artifact_type": "dataset",
+  "checks": [
+    {
+      "name": "geometry is valid",
+      "description": "Layer's geometry does not have invalid geometries.",
+      "guide": "Navigate to Vector -> Geometry tools -> Check Validity... and run the validity analysis tool. Afterwards check that there are no features on the `invalid output` layer",
+      "automation": {
+        "algorithm_id": "qgis:checkvalidity",
+        "artifact_parameter_name": "INPUT_LAYER",
+        "output_name": "INVALID_COUNT",
+        "negate_output": true
+      }
+    },
+    {
+      "name": "CRS is EPSG:4326",
+      "description": "Layer's Coordinate Reference System is lat-lon on WGS84 datum (i.e. EPSG code 4326)",
+      "guide": "Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'CRS' field has a value of 'EPSG:4326 - WGS84 - Geographic'",
+      "automation": {
+        "algorithm_id": "dataset_qa_workbench:crschecker",
+        "artifact_parameter_name": "INPUT_LAYER",
+        "output_name": "OUTPUT",
+        "negate_output": false,
+        "extra_parameters": {
+          "INPUT_CRS": "EPSG:4326"
+        }
+      }
+    }
+  ],
+  "report": {
+    "algorithm_id": "dataset_qa_workbench:reportposter"
+  }
+}
