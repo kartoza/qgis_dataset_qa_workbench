@@ -4,6 +4,7 @@ from sys import getfilesystemencoding
 
 import processing
 from qgis.core import (
+    Qgis,
     QgsApplication,
     QgsExpressionContextUtils,
     QgsMapLayerType,
@@ -21,8 +22,12 @@ from PyQt5.QtCore import QAbstractItemModel
 from .constants import DatasetType
 
 
-def log_message(message, level=None):
-    QgsMessageLog.logMessage(message)
+def log_message(message: str, level: typing.Optional[str] = None):
+    msg_level = {
+        'warning': Qgis.Warning,
+        'critical': Qgis.Critical,
+    }.get(level, Qgis.Info)
+    QgsMessageLog.logMessage(message, 'dataset_qa_workbench', level=msg_level)
 
 
 def get_qgis_variable(
