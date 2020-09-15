@@ -5,6 +5,7 @@ from PyQt5 import QtGui
 
 from .algorithms import (
     crschecker,
+    qmlchecker,
     reportmailer,
     reportposter,
 )
@@ -17,6 +18,7 @@ class DatasetQaWorkbenchProvider(QgsProcessingProvider):
         self.addAlgorithm(crschecker.CrsCheckerAlgorithm())
         self.addAlgorithm(reportmailer.ReportMailerAlgorithm())
         self.addAlgorithm(reportposter.ReportPosterAlgorithm())
+        self.addAlgorithm(qmlchecker.QmlCheckerAlgorithm())
 
     def id(self):
         return self.IDENTIFIER
