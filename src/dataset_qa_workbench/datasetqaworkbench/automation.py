@@ -78,9 +78,8 @@ class ValidationStepAutomator:
 
         for param_def in self.algorithm.parameterDefinitions():
             if isinstance(param_def, self._OUTPUT_TYPES):
-                existing_sink: str = self.params.get(param_def.name(), '')
                 out_layer_definition = QgsProcessingOutputLayerDefinition(
-                    existing_sink)
+                    'memory:')
                 out_layer_definition.createOptions = {
                     'fileEncoding': 'utf-8'
                 }
