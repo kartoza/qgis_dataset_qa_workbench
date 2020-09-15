@@ -56,10 +56,6 @@ class ReportHandler:
     def configure_and_handle_report(self):
         accepted, result = utils.execute_algorithm_dialog(
             self.algorithm, self.params)
-        # result = processing.execAlgorithmDialog(
-        #     self.algorithm,
-        #     self.params
-        # )
         utils.log_message(f'accepted: {accepted}')
         utils.log_message(f'result: {result}')
         if accepted:
@@ -68,7 +64,7 @@ class ReportHandler:
 
     def task_finished(self, successful: bool, results: typing.Dict):
         if successful:
-            msg = f'Post validation succeeded'
+            msg = f'Post validation succeeded - results: {results}'
             level = Qgis.Info
         else:
             msg = f'Post validation failed'
