@@ -50,7 +50,25 @@ class ReportMailerAlgorithm(BaseAlgorithm):
     def shortHelpString(self):
         return self.tr(
             "This algorithm will email the generated validation report to a "
-            "set of designated recipients"
+            "set of designated recipients.\n\n"
+            "In order to be easily automatable, the algorithm can be "
+            "configured by setting the following QGIS global variables "
+            "(go to Settings -> Options... -> Variables): "
+            "\n\n"
+            "- dataset_qa_workbench_sender_address: email address of the "
+            "sender\n"
+            "- dataset_qa_workbench_sender_password: password of the sender\n"
+            "- dataset_qa_workbench_recipients: email addresses that will "
+            "receive the validation report. Supply a space-separated list of "
+            "addresses\n"
+            "- dataset_qa_workbench_smtp_host: SMTP host. If not specified, "
+            "this defaults to `smtp.gmail.com`\n"
+            "- dataset_qa_workbench_smtp_port: SMTP port. If not specified, "
+            "this defaults to `587`\n"
+            "- dataset_qa_workbench_smtp_secure_connection: Connection "
+            "security options. Acceptable values are: `starttls`, `ssl`, or "
+            "just omit this in order to use no security. If not specified, "
+            "this defaults to `starttls`"
         )
 
     def initAlgorithm(

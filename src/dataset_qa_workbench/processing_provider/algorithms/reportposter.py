@@ -8,6 +8,8 @@ from PyQt5.QtCore import QUrl
 from qgis.core import (
     QgsNetworkAccessManager,
     QgsProcessingOutputBoolean,
+    QgsProcessingOutputNumber,
+    QgsProcessingOutputString,
     QgsProcessingException,
     QgsProcessingParameterAuthConfig,
     QgsProcessingParameterExpression,
@@ -29,6 +31,7 @@ class ReportPosterAlgorithm(BaseAlgorithm):
     INPUT_AUTH_CONFIG = 'INPUT_AUTH_CONFIG'
     INPUT_ENDPOINT = 'INPUT_ENDPOINT'
     OUTPUT_REQUEST_ACCEPTED = 'OUTPUT_REQUEST_ACCEPTED'
+    OUTPUT_RESPONSE_STATUS_CODE = 'OUTPUT_RESPONSE_STATUS_CODE'
 
     def name(self):
         return 'reportposter'
@@ -42,7 +45,14 @@ class ReportPosterAlgorithm(BaseAlgorithm):
     def shortHelpString(self):
         return self.tr(
             "This algorithm will post the generated validation report to a "
-            "remote host."
+            "remote host.\n\n"
+            "In order to be easily automatable, the algorithm can be "
+            "configured by setting the following QGIS global variables "
+            "(go to Settings -> Options... -> Variables): "
+            "\n\n"
+            "- dataset_qa_workbench_auth_config_id: auth config id of the "
+            "credentials to use to authenticate with the remote API\n"
+            "- dataset_qa_workbench_endpoint: Enpoint of the remote API"
         )
 
     def initAlgorithm(
@@ -80,6 +90,10 @@ class ReportPosterAlgorithm(BaseAlgorithm):
             QgsProcessingOutputBoolean(
                 self.OUTPUT_REQUEST_ACCEPTED, 'Was the request accepted or not')
         )
+        self.addOutput(
+            QgsProcessingOutputNumber(
+                self.OUTPUT_RESPONSE_STATUS_CODE, 'status code of the response')
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
         raw_report = self.parameterAsString(
@@ -90,7 +104,6 @@ class ReportPosterAlgorithm(BaseAlgorithm):
             self.parameterAsExpression(
                 parameters, self.INPUT_AUTH_CONFIG, context)
         )
-        feedback.pushInfo(f'auth_config: {auth_config}')
 
         endpoint = parse_as_expression(
             self.parameterAsExpression(
@@ -98,7 +111,6 @@ class ReportPosterAlgorithm(BaseAlgorithm):
         )
         if not endpoint:
             raise QgsProcessingException(f'Invalid endpoint: {endpoint}')
-        feedback.pushInfo(f'endpoint: {endpoint}')
         request = QNetworkRequest(QUrl(endpoint))
         request.setHeader(QNetworkRequest.ContentTypeHeader, 'application/json')
 
@@ -112,7 +124,6 @@ class ReportPosterAlgorithm(BaseAlgorithm):
         )
         status_code = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
         feedback.pushInfo(f'status_code: {status_code}')
-
         return {
-            self.OUTPUT_REQUEST_ACCEPTED: False
+            self.OUTPUT_RESPONSE_STATUS_CODE: status_code
         }
