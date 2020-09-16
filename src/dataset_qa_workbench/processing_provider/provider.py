@@ -5,10 +5,12 @@ from PyQt5 import QtGui
 
 from .algorithms import (
     crschecker,
-    qmlchecker,
+    xmlchecker,
     reportmailer,
     reportposter,
 )
+
+_ALGORITHM_CLASSES = set()
 
 
 class DatasetQaWorkbenchProvider(QgsProcessingProvider):
@@ -18,7 +20,7 @@ class DatasetQaWorkbenchProvider(QgsProcessingProvider):
         self.addAlgorithm(crschecker.CrsCheckerAlgorithm())
         self.addAlgorithm(reportmailer.ReportMailerAlgorithm())
         self.addAlgorithm(reportposter.ReportPosterAlgorithm())
-        self.addAlgorithm(qmlchecker.QmlCheckerAlgorithm())
+        self.addAlgorithm(xmlchecker.XmlCheckerAlgorithm())
 
     def id(self):
         return self.IDENTIFIER
@@ -29,4 +31,3 @@ class DatasetQaWorkbenchProvider(QgsProcessingProvider):
     def icon(self):
         return QtGui.QIcon(
             ':/plugins/dataset_qa_workbench/clipboard-check-solid.svg')
-
