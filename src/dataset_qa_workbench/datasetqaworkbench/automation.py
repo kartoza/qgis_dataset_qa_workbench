@@ -1,6 +1,7 @@
 import typing
 from pathlib import Path
 
+import processing
 from PyQt5 import (
     QtCore,
     QtWidgets,
@@ -18,7 +19,6 @@ from qgis.core import (
     QgsProcessingOutputLayerDefinition,
     QgsProject,
 )
-import processing
 
 from . import (
     models,
@@ -60,7 +60,10 @@ class ValidationStepAutomator:
         self.context = context or QgsProcessingContext()
         self.feedback = feedback or QgsProcessingFeedback()
         registry = QgsApplication.processingRegistry()
-        self.algorithm = registry.createAlgorithmById(algorithm_id)
+        algorithm = registry.createAlgorithmById(algorithm_id)
+        if algorithm is None:
+            raise RuntimeError(f'Invalid algorithm_id: {algorithm_id!r}')
+        self.algorithm = algorithm
         self.output_name = output_name
         self.negate_output = negate_output
         self.model = model
@@ -75,9 +78,8 @@ class ValidationStepAutomator:
 
         for param_def in self.algorithm.parameterDefinitions():
             if isinstance(param_def, self._OUTPUT_TYPES):
-                existing_sink: str = self.params.get(param_def.name(), '')
                 out_layer_definition = QgsProcessingOutputLayerDefinition(
-                    existing_sink)
+                    'memory:')
                 out_layer_definition.createOptions = {
                     'fileEncoding': 'utf-8'
                 }
@@ -119,22 +121,34 @@ class ValidationStepAutomator:
             self.context,
             self.feedback
         )
+        utils.log_message(f'self.algorithm: {self.algorithm}')
+        utils.log_message(f'self.params: {self.params}')
+        utils.log_message(f'self.params types: {[(k, type(v)) for k,v in self.params.items()]}')
+        utils.log_message(f'self.params values: {[(k, v) for k,v in self.params.items()]}')
         task.executed.connect(self.task_finished)
         task_manager = QgsApplication.taskManager()
         task_manager.addTask(task)
 
     def configure_and_perform_automation(self):
         utils.log_message(f'configure_automation called')
-        result = processing.execAlgorithmDialog(
-            self.algorithm,
-            self.params
-        )
-        utils.log_message(f'result: {result}')
-        successful = bool(result) if result is not None else False
-        self.task_finished(successful, result)
+        utils.log_message(f'self.algorithm: {self.algorithm}')
+        utils.log_message(f'self.params: {self.params}')
+        utils.log_message(f'self.params types: {[(k, type(v)) for k,v in self.params.items()]}')
+        utils.log_message(f'self.params values: {[(k, v) for k,v in self.params.items()]}')
+        accepted, result = utils.execute_algorithm_dialog(
+            self.algorithm, self.params)
+        # result = processing.execAlgorithmDialog(
+        #     self.algorithm,
+        #     self.params
+        # )
+        if accepted:
+            utils.log_message(f'result: {result}')
+            successful = bool(result) if result is not None else False
+            self.task_finished(successful, result)
 
     def task_finished(self, successful: bool, results: typing.Dict):
         utils.log_message(f'successful: {successful}')
+        utils.log_message(f'results: {results}')
         if successful:
             _raw = results.get(self.output_name, False)
             utils.log_message(f'raw_result: {_raw}')
@@ -169,12 +183,15 @@ class AutomationButtonsWidget(QtWidgets.QWidget):
     ):
         super().__init__(*args, **kwargs)
         self.run_pb = QtWidgets.QPushButton('Run', parent=self)
-        self.configure_pb = QtWidgets.QPushButton('Configure and run...', parent=self)
+        self.configure_pb = QtWidgets.QPushButton(
+            'Configure and run...', parent=self)
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.run_pb)
         layout.addWidget(self.configure_pb)
         self.setLayout(layout)
 
-        self.automator = ValidationStepAutomator.from_checklist_item(checklist_item_head_index, dataset)
+        self.automator = ValidationStepAutomator.from_checklist_item(
+            checklist_item_head_index, dataset)
         self.run_pb.clicked.connect(self.automator.perform_automation)
-        self.configure_pb.clicked.connect(self.automator.configure_and_perform_automation)
+        self.configure_pb.clicked.connect(
+            self.automator.configure_and_perform_automation)

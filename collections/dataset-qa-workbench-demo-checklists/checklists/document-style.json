@@ -1,0 +1,36 @@
+{
+  "name": "Sample checklist for validating styles",
+  "description": "This is just a sample checklist - be sure to delete it",
+  "dataset_type": "document",
+  "validation_artifact_type": "style",
+  "checks": [
+    {
+      "name": "style is identifiable",
+      "description": "The style is identifiable",
+      "guide": "Open the style file with an external text editor then look for the qgis/flags/Identifiable element. Check that its text equals '1'.",
+      "automation": {
+        "algorithm_id": "dataset_qa_workbench:xmlchecker",
+        "artifact_parameter_name": "INPUT",
+        "extra_parameters": {
+          "INPUT_XPATH_EXPRESSIONS": [
+            "flags/Identifiable[.='1']"
+          ]
+        }
+      }
+    },
+    {
+      "name": "uses the SOVEREIGNT attribute to render symbology",
+      "description": "The style document uses the QGIS QML style format",
+      "guide": "Open the style file with an external text editor and then look to the qgis/renderer-v2 element. Check that its 'attr' attribute equals 'SOVEREIGNT'",
+      "automation": {
+        "algorithm_id": "dataset_qa_workbench:xmlchecker",
+        "artifact_parameter_name": "INPUT",
+        "extra_parameters": {
+          "INPUT_XPATH_EXPRESSIONS": [
+            "renderer-v2[@attr='SOVEREIGNT']"
+          ]
+        }
+      }
+    }
+  ]
+}

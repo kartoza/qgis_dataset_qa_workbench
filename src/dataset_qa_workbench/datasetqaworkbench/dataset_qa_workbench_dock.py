@@ -36,6 +36,7 @@ from .constants import (
     TabPages,
     ValidationArtifactType,
 )
+from .report import ReportHandler
 from .utils import log_message
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -66,6 +67,9 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
     save_report_fw: QgsFileWidget
     save_report_pb: QtWidgets.QPushButton
     tab_widget: QtWidgets.QTabWidget
+    run_post_validation_pb: QtWidgets.QPushButton
+    configure_and_run_post_validation_pb: QtWidgets.QPushButton
+    report_handler: typing.Optional[ReportHandler]
 
     closingPlugin = QtCore.pyqtSignal()
 
@@ -96,6 +100,7 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.automate_all_checks_pb.clicked.connect(self.automate_all_checks)
         self.file_chooser.fileChanged.connect(self.selected_file_changed)
         self.validate_layer_rb.toggled.connect(self.respond_to_validate_layer_rb_toggled)
+        self.report_handler = None
         # TODO: It might be necessary to disconnect these when plugin is unloaded
         QgsProject.instance().layersAdded.connect(self.respond_to_layers_added)
         QgsProject.instance().layersRemoved.connect(self.respond_to_layers_removed)
@@ -155,10 +160,30 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
 
     def update_tab_page(self, index: int):
         if index == TabPages.REPORT.value:
-            self.update_report()
-            self.add_report_to_layer_metadata_pb.setEnabled(self.validate_layer_rb.isChecked())
+            report = self.update_report()
+            current_checklist = self.get_current_checklist()
+            if current_checklist is not None and report is not None:
+                if current_checklist.report is not None:
+                    self.report_handler = ReportHandler(
+                        self.iface,
+                        report,
+                        current_checklist.report.algorithm_id,
+                        current_checklist.report.extra_parameters
+                    )
 
-    def update_report(self):
+                self.toggle_post_validation_elements(
+                    current_checklist.report is not None)
+            else:
+                self.toggle_post_validation_elements(False)
+
+            self.add_report_to_layer_metadata_pb.setEnabled(
+                self.validate_layer_rb.isChecked())
+
+    def get_current_checklist(self) -> typing.Optional[models.CheckList]:
+        model = self.checklist_checks_tv.model()
+        return getattr(model, 'checklist', None)
+
+    def update_report(self) -> typing.Optional[typing.Dict]:
         if self.validate_layer_rb.isChecked():
             current_layer_idx = self.layer_chooser_lv.currentIndex()
             layer_model = self.layer_chooser_lv.model()
@@ -173,12 +198,31 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             else:
                 dataset = None
         else:
-            # TODO: Implement report generation for datasets that are not layers
-            dataset = None
+            dataset = Path(self.file_chooser.filePath()).name
         report = self.generate_report(dataset)
         if report:
-            serialized = serialize_report_to_html(report)
+            serialized = utils.serialize_report_to_html(report)
             self.report_te.setDocument(serialized)
+        return report
+
+    def toggle_post_validation_elements(
+            self,
+            enabled: bool
+    ):
+        self.run_post_validation_pb.setEnabled(enabled)
+        self.configure_and_run_post_validation_pb.setEnabled(enabled)
+        if enabled:
+            self.run_post_validation_pb.clicked.connect(
+                self.report_handler.handle_report)
+            self.configure_and_run_post_validation_pb.clicked.connect(
+                self.report_handler.configure_and_handle_report)
+        else:
+            try:
+                self.run_post_validation_pb.clicked.disconnect()
+                self.configure_and_run_post_validation_pb.clicked.disconnect()
+            except TypeError:
+                # buttons were already disconnected
+                pass
 
     def generate_report(self, dataset: typing.Union[QgsMapLayer, str]):
         checklist_model = self.checklist_checks_tv.model()
@@ -531,86 +575,12 @@ def serialize_report(report: typing.Dict) -> str:
     return json.dumps(report, indent=2)
 
 
-def serialize_report_to_html(report: typing.Dict) -> QtGui.QTextDocument:
-    validation_check_template_path = ':/plugins/dataset_qa_workbench/validation-report-check-template.html'
-    check_template_fh = QtCore.QFile(validation_check_template_path)
-    check_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-    check_template = check_template_fh.readAll().data().decode(getfilesystemencoding())
-    check_template_fh.close()
-    rendered_checks = []
-    utils.log_message('Rendering checks...')
-    for check in report.get('checks', []):
-        rendered = check_template.format(
-            check_name=check['name'],
-            validated='YES' if check['validated'] else 'NO',
-            description=check['description'],
-            notes=check['notes'].replace('{', '{{').replace('}', '}}'),
-        )
-        utils.log_message(f'check {rendered}')
-        rendered_checks.append(rendered)
-    utils.log_message('Rendering final report...')
-    validation_report_template_path = ':/plugins/dataset_qa_workbench/validation-report-template.html'
-    report_template_fh = QtCore.QFile(validation_report_template_path)
-    report_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-    report_template = report_template_fh.readAll().data().decode(getfilesystemencoding())
-    report_template_fh.close()
-    ready_to_render = report_template.replace('{checks}', '\n'.join(rendered_checks))
-    utils.log_message(f'Replaced checks placeholder: {report_template}')
-    rendered_report = ready_to_render.format(
-        checklist_name=report['checklist'],
-        dataset_name=report['dataset'],
-        timestamp=report['generated'],
-        result=report['dataset_is_valid'],
-        author=report['validator'],
-        description=report['description'],
-    )
-    doc = QtGui.QTextDocument()
-    doc.setHtml(rendered_report)
-    return doc
-
-
-def serialize_report_to_plain_text(report: typing.Dict) -> str:
-    validation_check_template_path = ':/plugins/dataset_qa_workbench/validation-report-check-template.txt'
-    check_template_fh = QtCore.QFile(validation_check_template_path)
-    check_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-    check_template = check_template_fh.readAll().data().decode(getfilesystemencoding())
-    check_template_fh.close()
-    rendered_checks = []
-    utils.log_message('Rendering checks...')
-    for check in report.get('checks', []):
-        rendered = check_template.format(
-            check_name=check['name'],
-            validated='YES' if check['validated'] else 'NO',
-            description=check['description'],
-            notes=check['notes'].replace('{', '{{').replace('}', '}}'),
-        )
-        utils.log_message(f'check {rendered}')
-        rendered_checks.append(rendered)
-    utils.log_message('Rendering final report...')
-    validation_report_template_path = ':/plugins/dataset_qa_workbench/validation-report-template.txt'
-    report_template_fh = QtCore.QFile(validation_report_template_path)
-    report_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-    report_template = report_template_fh.readAll().data().decode(getfilesystemencoding())
-    report_template_fh.close()
-    ready_to_render = report_template.replace('{checks}', '\n'.join(rendered_checks))
-    utils.log_message(f'Replaced checks placeholder: {report_template}')
-    rendered_report = ready_to_render.format(
-        checklist_name=report['checklist'],
-        dataset_name=report['dataset'],
-        timestamp=report['generated'],
-        result=report['dataset_is_valid'],
-        author=report['validator'],
-        description=report['description'],
-    )
-    return rendered_report
-
-
 def add_report_to_layer(report: typing.Dict, layer: QgsMapLayer):
     history_msg = (
         f'{report["generated"]} - Validation report: '
         f'{"Valid" if report["dataset_is_valid"] else "Invalid"}'
     )
-    abstract_msg = serialize_report_to_plain_text(report)
+    abstract_msg = utils.serialize_report_to_plain_text(report)
     metadata: QgsLayerMetadata = layer.metadata()
     history: typing.List = metadata.history()
     history.append(history_msg)

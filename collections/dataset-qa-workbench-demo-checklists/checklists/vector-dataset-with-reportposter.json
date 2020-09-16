@@ -1,5 +1,5 @@
 {
-  "name": "Sample checklist",
+  "name": "Sample checklist with report for posting to a remote server",
   "description": "This is just a sample checklist - be sure to delete it",
   "dataset_type": "vector",
   "validation_artifact_type": "dataset",
@@ -29,5 +29,8 @@
         }
       }
     }
-  ]
+  ],
+  "report": {
+    "algorithm_id": "dataset_qa_workbench:reportposter"
+  }
 }
