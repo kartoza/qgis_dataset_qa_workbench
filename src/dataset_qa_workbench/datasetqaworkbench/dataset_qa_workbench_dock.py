@@ -198,8 +198,7 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             else:
                 dataset = None
         else:
-            # TODO: Implement report generation for datasets that are not layers
-            dataset = None
+            dataset = Path(self.file_chooser.filePath()).name
         report = self.generate_report(dataset)
         if report:
             serialized = utils.serialize_report_to_html(report)
