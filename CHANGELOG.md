@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.7.1] - 2020-09-18
+
+### Fixed
+- Fix invalid author name in metadata.txt file
+
+
 ## [0.7.0] - 2020-09-18
 
 ### Changed
@@ -154,7 +160,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Initial project structure
 
 
-[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.7.0...master
+[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.7.1...master
+[0.7.1]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.7.1
 [0.7.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.7.0
 [0.6.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.6.0
 [0.5.3]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.5.3

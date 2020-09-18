@@ -7,8 +7,8 @@ import typing
 import zipfile
 from pathlib import Path
 
+import toml
 import typer
-import yaml
 
 LOCAL_ROOT_DIR = Path(__file__).parent.resolve()
 SRC_NAME = 'dataset_qa_workbench'
@@ -135,16 +135,29 @@ def _get_metadata(
     readme_contents = _read_file('README.md')
     description, about = _parse_readme(readme_contents)
     version = _get_version()
-    conf = _get_plugin_config(context)
-    metadata = conf['metadata'].copy()
+    conf = _parse_pyproject()
+    poetry_conf = conf['tool']['poetry']
+    raw_author_list = poetry_conf['authors'][0].split('<')
+    author = raw_author_list[0].strip()
+    email = raw_author_list[-1].replace('>', '')
+    metadata = conf['tool']['qgis-plugin']['metadata'].copy()
     metadata.update({
+        'author': author,
+        'email': email,
+        'description': poetry_conf['description'],
+        'version': poetry_conf['version'],
         'tags': ', '.join(metadata.get('tags', [])),
-        'description': description,
-        'version': version,
         'about': about,
         'changelog': _parse_changelog(_read_file('CHANGELOG.md'), version),
     })
     return metadata
+
+
+def _parse_pyproject():
+    pyproject_path = LOCAL_ROOT_DIR / 'pyproject.toml'
+    with pyproject_path.open('r') as fh:
+        return toml.load(fh)
+
 
 
 def _parse_readme(readme: str) -> typing.Tuple[str, str]:
@@ -203,17 +216,10 @@ def _log(
         typer.echo(msg, *args, **kwargs)
 
 
-def _get_plugin_config(context: typing.Optional[typer.Context] = None):
-    config_path = LOCAL_ROOT_DIR / 'plugin-config.yml'
-    _log(f'config_path: {config_path}', context=context)
-    with config_path.open('r') as fh:
-        return yaml.safe_load(fh)
-
-
 def _get_qgis_root_dir(context: typing.Optional[typer.Context] = None) -> Path:
-    conf = _get_plugin_config(context)
+    conf = _parse_pyproject()
     try:
-        profile = conf['dev']['profile']
+        profile = conf['tool']['qgis-plugin']['dev']['profile']
     except KeyError:
         profile = 'default'
     return Path.home() / f'.local/share/QGIS/QGIS3/profiles/{profile}'
