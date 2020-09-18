@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Replaced paver with typer as the runner for dev-oriented tasks.
+- Replaced pipenv with poetry as the package manager for plugin dev work
+- Fix invalid metadata.txt file
+
 
 ## [0.6.0] - 2020-09-16
 
