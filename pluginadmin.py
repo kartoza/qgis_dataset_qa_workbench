@@ -134,7 +134,7 @@ def _get_metadata(
 ) -> typing.Dict:
     readme_contents = _read_file('README.md')
     description, about = _parse_readme(readme_contents)
-    version = _read_file('VERSION')
+    version = _get_version()
     conf = _get_plugin_config(context)
     metadata = conf['metadata'].copy()
     metadata.update({
@@ -160,6 +160,11 @@ def _parse_changelog(changelog: str, version: str) -> str:
     no_square_brackets = re.sub(r'(\[(\d+.\d+.\d+)\])', '\g<2>', usable_fragment)
     result = f'{version} {no_square_brackets}'.replace('# ', '').replace('#', '')
     return result
+
+
+def _get_version() -> str:
+    raw_version = subprocess.check_output(shlex.split('poetry version'))
+    return raw_version.split()[-1].decode('utf-8')
 
 
 def _read_file(relative_path: str):

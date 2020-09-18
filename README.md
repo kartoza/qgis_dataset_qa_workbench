@@ -432,18 +432,15 @@ the [QGIS Resource Sharing] plugin for further information on this.
 
 ## Development
 
-This plugin uses [pipenv] and [typer] for development.
+This plugin uses [poetry] and [typer] for development.
 
-An easy way to get started is to (fork and) clone this repo, install pipenv 
+An easy way to get started is to (fork and) clone this repo, install poetry 
 and install it!
 
 ```
 sudo apt install pyqt5-dev-tools
 
-# create your virtualenv but use system site-packages too
-# this is in order to use QGIS python bindings in the venv
-pipenv --site-packages
-PIP_IGNORE_INSTALLED=1 pipenv install
+poetry install
 ```
 
 ### Installing locally
@@ -451,15 +448,14 @@ PIP_IGNORE_INSTALLED=1 pipenv install
 Call the `install` task:
 
 ```
-pipenv run python plugin-admin.py install
+poetry run python pluginadmin.py install
 ```
 
 
 ### Running tests
 
 ```
-pipenv run python plugin-admin.py install
-pipenv shell
+poetry shell
 cd ~/.local/share/QGIS/QGIS3/profiles/default/python/plugins
 python -m pytest -v -x ~/dev/qgis_dataset_qa_workbench
 ```
@@ -478,7 +474,7 @@ without any modification, in accordance with their [license].
 [collection of sample checklists]: https://github.com/kartoza/qgis_dataset_qa_workbench/tree/master/collections/dataset-qa-workbench-demo-checklists/checklists
 [Font Awesome]: https://fontawesome.com/
 [license]: https://fontawesome.com/license
-[pipenv]: https://pipenv.pypa.io/en/latest/
+[poetry]: https://python-poetry.org/
 [typer]: https://typer.tiangolo.com/
 [jsonschema]: https://json-schema.org/
 [Your IDE]: https://www.jetbrains.com/help/pycharm/json.html#ws_json_schema_add_custom
