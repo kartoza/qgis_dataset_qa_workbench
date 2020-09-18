@@ -6,8 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.7.0] - 2020-09-18
+
+### Changed
 - Replaced paver with typer as the runner for dev-oriented tasks.
 - Replaced pipenv with poetry as the package manager for plugin dev work
+
+### Fixed
 - Fix invalid metadata.txt file
 
 
@@ -148,7 +154,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Initial project structure
 
 
-[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.6.0...master
+[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.7.0...master
+[0.7.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.7.0
 [0.6.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.6.0
 [0.5.3]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.5.3
 [0.5.2]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.5.2
