@@ -1,0 +1,29 @@
+dev:
+  profile: default
+
+metadata:
+  name: Dataset QA Workbench
+  # description: dynamically pulled from the README.md
+  # about: dynamically pulled from the README.md file
+  # changelog: dynamically pulled from the README.md file
+  # version: dynamically pulled from the VERSION file
+  qgisMinimumVersion: "3.10"
+  icon: clipboard-check-solid.svg
+  experimental: "True"
+  deprecated: "False"
+  homepage: https://github.com/kartoza/qgis_dataset_qa_workbench
+  tracker: https://github.com/kartoza/qgis_dataset_qa_workbench/issues
+  repository: https://github.com/kartoza/qgis_dataset_qa_workbench
+  tags:
+    - qa
+    - qc
+    - quality
+    - assurance
+    - control
+    - checklist
+    - check
+    - validate
+  category: plugins
+  author: Ricardo Garcia Silva / Kartoza
+  email: ricardo@kartoza.com
+  hasProcessingProvider: yes

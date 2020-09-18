@@ -8,6 +8,7 @@ This plugin allows loading checklists with steps that should be verified
 when doing dataset quality assurance (QA). Checklist items can be automated 
 by using QGIS Processing algorithms
 
+## Table of contents
 
 1. [Installation](#installation)
 1. [Quickstart](#quickstart)
@@ -431,7 +432,7 @@ the [QGIS Resource Sharing] plugin for further information on this.
 
 ## Development
 
-This plugin uses [pipenv] and [paver] for development.
+This plugin uses [pipenv] and [typer] for development.
 
 An easy way to get started is to (fork and) clone this repo, install pipenv 
 and install it!
@@ -450,22 +451,14 @@ PIP_IGNORE_INSTALLED=1 pipenv install
 Call the `install` task:
 
 ```
-pipenv run paver install
+pipenv run python plugin-admin.py install
 ```
 
 
 ### Running tests
 
-Be sure to install the development dependencies:
-
 ```
-PIP_IGNORE_INSTALLED=1 pipenv install --dev
-```
-
-Install the plugin and then run the test suite
-
-```
-pipenv run paver install
+pipenv run python plugin-admin.py install
 pipenv shell
 cd ~/.local/share/QGIS/QGIS3/profiles/default/python/plugins
 python -m pytest -v -x ~/dev/qgis_dataset_qa_workbench
@@ -486,6 +479,6 @@ without any modification, in accordance with their [license].
 [Font Awesome]: https://fontawesome.com/
 [license]: https://fontawesome.com/license
 [pipenv]: https://pipenv.pypa.io/en/latest/
-[paver]: https://pythonhosted.org/Paver/index.html
+[typer]: https://typer.tiangolo.com/
 [jsonschema]: https://json-schema.org/
 [Your IDE]: https://www.jetbrains.com/help/pycharm/json.html#ws_json_schema_add_custom

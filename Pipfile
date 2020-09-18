@@ -6,11 +6,13 @@ verify_ssl = true
 [packages]
 jsonschema = "*"
 paver = "*"
+pyyaml = "*"
+typer = "*"
+pytest = "*"
+pytest-qt = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.8"
 
 [dev-packages]
-pytest = "*"
-pytest-qt = "*"
-ipython = "*"

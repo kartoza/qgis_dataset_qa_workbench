@@ -5,3 +5,5 @@
 docs/repo
 docs/checklists
 .pytest_cache
+build
+dist
