@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qgis_dataset_qa_workbench"
-version = "0.7.0"
+version = "0.7.1"
 description = "A QGIS3 plugin for assisting in dataset quality assurance workflows"
 authors = ["Ricardo Garcia Silva <ricardo@kartoza.com>"]
 readme = "README.md"
