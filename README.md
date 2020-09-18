@@ -13,12 +13,12 @@ by using QGIS Processing algorithms
 1. [Installation](#installation)
 1. [Quickstart](#quickstart)
 
-   1. [Add sample checklist repository](#0-add-sample-checklist-repository)
-   1. [Choose checklist](#1-choose-checklist-to-perform-validation-with)
-   1. [Perform validation](#2-perform-validation-of-a-resource)
-   1. [Generate report](#3-generate-validation-report)
+   1. [Add sample checklist repository](#add-sample-checklist-repository)
+   1. [Choose checklist](#choose-checklist-to-perform-validation-with)
+   1. [Perform validation](#perform-validation-of-a-resource)
+   1. [Generate report](#generate-validation-report)
    
-1. [Creating a new checklist](#creating-a-new-checklist)
+1. [Creating new checklists](#creating-new-checklists)
 1. [Sharing checklists and Processing algorithms with other users](#sharing-checklists-and-processing-algorithms-with-other-users)
 1. [Development](#development)
 1. [Attribution](#attribution)
