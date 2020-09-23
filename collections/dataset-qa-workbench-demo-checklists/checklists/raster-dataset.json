@@ -1,0 +1,31 @@
+{
+  "name": "Sample checklist for raster layer I.",
+  "description": "This is a sample checklist for raster layers.",
+  "dataset_type": "raster",
+  "validation_artifact_type": "dataset",
+  "checks": [
+    {
+      "name": "CRS is EPSG:4326",
+      "description": "Layer's Coordinate Reference System is lat-lon on WGS84 datum (i.e. EPSG code 4326)",
+      "guide": "Open the layer properties dialog, then navigate to the 'Information' tab (should be the first one) and in the section called 'Information from provider' check if the 'CRS' field has a value of 'EPSG:4326 - WGS84 - Geographic'",
+      "automation": {
+        "algorithm_id": "dataset_qa_workbench:crschecker",
+        "artifact_parameter_name": "INPUT_LAYER",
+        "output_name": "OUTPUT",
+        "extra_parameters": {
+          "INPUT_CRS": "EPSG:4326"
+        }
+      }
+    },
+    {
+      "name": "Extents cover region of interest",
+      "description": "Layer's extent provides coverage of the whole region",
+      "guide": "Open the layer properties dialog, then navigate to the 'Information' tab (should be the first one) and in the section named 'Information from provider' check if the value shown in the 'Extent' field covers the region of interest"
+    },
+    {
+      "name": "Layer has 3 bands",
+      "description": "Layer has the expected number of bands",
+      "guide": "Open the layer properties dialog, then navigate to the 'Information' tab (should be the first one) and in the section named 'Bands' check if the value shown in the 'Band count' field is equal to 3"
+    }
+  ]
+}
