@@ -158,31 +158,31 @@ with information related to:
    additional variables must be configured within QGIS in order for the 
    reports to be shared effectively, outlined as follows:
   
-  - Report poster: Sends the report to a remote host using an http POST
+    - Report poster: Sends the report to a remote host using an http POST
 
-    - `dataset_qa_workbench_auth_config_id` (optional): the QGIS AuthID, 
-      as configured with the QGIS authentication manager and linked to the 
-      current user profile, represented as a string value, e.g. `'qauth01'`, 
-      and used to authenticate with the remote host (where required). 
-    - `dataset_qa_workbench_endpoint`: the REST endpoint URL, represented 
-      as a string value, e.g. `'https://service.example.com/REST'`. 
+      - `dataset_qa_workbench_auth_config_id` (optional): the QGIS AuthID, 
+        as configured with the QGIS authentication manager and linked to the 
+        current user profile, represented as a string value, e.g. `'qauth01'`, 
+        and used to authenticate with the remote host (where required). 
+      - `dataset_qa_workbench_endpoint`: the REST endpoint URL, represented 
+        as a string value, e.g. `'https://service.example.com/REST'`. 
 
-  - Report mailer: Sends the report to a recipient via email
+    - Report mailer: Sends the report to recipients via email
 
-    - `dataset_qa_workbench_sender_address`: email address of the sender, used to
-      authenticate with the mail server and given as a string value, e.g. `'noreplay@example.com'`
-    - `dataset_qa_workbench_sender_password`: sender address password for mailserver, 
-      used to authenticate with the mail server and given as a string value, e.g. `'S3cret'`
-    - `dataset_qa_workbench_recipients`: list of intended recipients, given as a single 
-      comma separated string, e.g. `'user01@example.com,user02@example.com,user03@example.com'`
-    - `dataset_qa_workbench_smtp_host`: SMTP mailserver host address, default `'smtp.gmail.com'`
-    - `dataset_qa_workbench_smtp_port`: SMTP port number as an integer, default `587`
-    - `dataset_qa_workbench_smtp_secure_connection`: a string value which describes the mail 
-      server connection security type. Valid values are `'starttls'` (default) and `'ssl'`. 
-      Use a blank string, `''`, to enforce no security policy (i.e. connect over http)
+      - `dataset_qa_workbench_sender_address`: email address of the sender, used to
+        authenticate with the mail server and given as a string value, e.g. `'noreply@example.com'`
+      - `dataset_qa_workbench_sender_password`: sender address password for mailserver, 
+        used to authenticate with the mail server and given as a string value, e.g. `'S3cret'`
+      - `dataset_qa_workbench_recipients`: list of intended recipients, given as a single 
+        comma separated string, e.g. `'user01@example.com,user02@example.com,user03@example.com'`
+      - `dataset_qa_workbench_smtp_host`: SMTP mailserver host address, default `'smtp.gmail.com'`
+      - `dataset_qa_workbench_smtp_port`: SMTP port number as an integer, default `587`
+      - `dataset_qa_workbench_smtp_secure_connection`: a string value which describes the mail 
+        server connection security type. Valid values are `'starttls'` (default) and `'ssl'`. 
+        Use a blank string, `''`, to enforce no security policy (i.e. connect over http)
 
-   Note that all of these elements may be configured globally for the current QGIS 
-   user profile under the menu item for _Settings -> Options... -> Variables_.
+     Note that all of these elements may be configured globally for the current QGIS 
+     user profile under the menu item for _Settings -> Options... -> Variables_.
 
 1. If you are validating a loaded layer, the _Add validation report to layer 
    metadata_ button will be enabled. In this case you have the option to 
