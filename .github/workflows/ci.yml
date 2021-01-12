@@ -27,7 +27,7 @@ jobs:
         run: poetry install
 
       - name: Check formatting
-        run: poetry run black --check src/qgis_dataset_qa_workbench
+        run: poetry run black --check src/dataset_qa_workbench
 
       - name: Rebuild docs
         run: poetry run mkdocs build
