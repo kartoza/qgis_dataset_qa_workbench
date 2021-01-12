@@ -10,15 +10,15 @@ from .base import BaseAlgorithm
 
 
 class XmlCheckerAlgorithm(BaseAlgorithm):
-    INPUT = 'INPUT'
-    INPUT_XPATH_EXPRESSIONS = 'INPUT_XPATH_EXPRESSIONS'
-    OUTPUT = 'OUTPUT'
+    INPUT = "INPUT"
+    INPUT_XPATH_EXPRESSIONS = "INPUT_XPATH_EXPRESSIONS"
+    OUTPUT = "OUTPUT"
 
     def name(self):
-        return 'xmlchecker'
+        return "xmlchecker"
 
     def displayName(self):
-        return self.tr('XML checker')
+        return self.tr("XML checker")
 
     def createInstance(self):
         return self.__class__()
@@ -36,39 +36,33 @@ class XmlCheckerAlgorithm(BaseAlgorithm):
         self.addParameter(
             QgsProcessingParameterFile(
                 self.INPUT,
-                self.tr('Input file'),
+                self.tr("Input file"),
             )
         )
         self.addParameter(
             QgsProcessingParameterMatrix(
                 self.INPUT_XPATH_EXPRESSIONS,
-                self.tr('Xpath expressions to check'),
-                headers=['XPath expression']
+                self.tr("Xpath expressions to check"),
+                headers=["XPath expression"],
             )
         )
-        self.addOutput(
-            QgsProcessingOutputBoolean(
-                self.OUTPUT,
-                self.tr('result')
-            )
-        )
+        self.addOutput(QgsProcessingOutputBoolean(self.OUTPUT, self.tr("result")))
 
     def processAlgorithm(self, parameters, context, feedback):
         file_ = self.parameterAsFile(parameters, self.INPUT, context)
         tree = etree.parse(file_)
         root = tree.getroot()
         items_to_check = self.parameterAsMatrix(
-            parameters, self.INPUT_XPATH_EXPRESSIONS, context)
-        feedback.pushInfo(f'file_: {file_}')
-        feedback.pushInfo(f'items_to_check: {items_to_check}')
+            parameters, self.INPUT_XPATH_EXPRESSIONS, context
+        )
+        feedback.pushInfo(f"file_: {file_}")
+        feedback.pushInfo(f"items_to_check: {items_to_check}")
         result = False
         for xpath in items_to_check:
             item = root.find(xpath)
             if item is None:
-                feedback.reportError(f'Did not find {xpath!r}')
+                feedback.reportError(f"Did not find {xpath!r}")
                 break
         else:
             result = True
-        return {
-            self.OUTPUT: result
-        }
+        return {self.OUTPUT: result}

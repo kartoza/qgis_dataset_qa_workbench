@@ -41,8 +41,7 @@ from .utils import log_message
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 UI_DIR = Path(__file__).parents[1] / "ui"
-FORM_CLASS, _ = uic.loadUiType(
-    str(UI_DIR / 'dataset_qa_workbench_dock.ui'))
+FORM_CLASS, _ = uic.loadUiType(str(UI_DIR / "dataset_qa_workbench_dock.ui"))
 
 
 class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
@@ -95,29 +94,35 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
         self.choose_checklist_pb.clicked.connect(self.show_checklist_picker)
         self.save_report_fw.fileChanged.connect(self.toggle_save_report_button)
         self.save_report_pb.clicked.connect(self.save_report)
-        self.add_report_to_layer_metadata_pb.clicked.connect(self.add_report_to_layer_metadata)
+        self.add_report_to_layer_metadata_pb.clicked.connect(
+            self.add_report_to_layer_metadata
+        )
         self.clear_checks_pb.clicked.connect(self.clear_all_checks)
         self.automate_all_checks_pb.clicked.connect(self.automate_all_checks)
         self.file_chooser.fileChanged.connect(self.selected_file_changed)
-        self.validate_layer_rb.toggled.connect(self.respond_to_validate_layer_rb_toggled)
+        self.validate_layer_rb.toggled.connect(
+            self.respond_to_validate_layer_rb_toggled
+        )
         self.report_handler = None
         # TODO: It might be necessary to disconnect these when plugin is unloaded
         QgsProject.instance().layersAdded.connect(self.respond_to_layers_added)
         QgsProject.instance().layersRemoved.connect(self.respond_to_layers_removed)
 
     def respond_to_layers_added(self, layers):
-        utils.log_message('layers added')
+        utils.log_message("layers added")
         if self.selected_checklist is not None:
             current_dataset_type = self.selected_checklist.dataset_type
             model: QtGui.QStandardItemModel = self.layer_chooser_lv.model()
             for layer in layers:
                 if utils.match_maplayer_type(layer.type()) == current_dataset_type:
                     item = QtGui.QStandardItem(layer.name())
-                    item.setData(layer.id(), LayerChooserDataRole.LAYER_IDENTIFIER.value)
+                    item.setData(
+                        layer.id(), LayerChooserDataRole.LAYER_IDENTIFIER.value
+                    )
                     model.appendRow([item])
 
     def respond_to_layers_removed(self, layers: typing.List[str]):
-        utils.log_message('layers removed')
+        utils.log_message("layers removed")
         model: QtGui.QStandardItemModel = self.layer_chooser_lv.model()
         if model is not None:
             for row_idx in reversed(range(model.rowCount())):
@@ -126,37 +131,32 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
                 if item.data() in layers:
                     model.removeRow(row_idx)
 
-
     def clear_all_checks(self):
-        utils.log_message(f'clear_all_checks_called')
+        utils.log_message(f"clear_all_checks_called")
         model = self.checklist_checks_tv.model()
         for row_index in range(model.rowCount()):
-            utils.log_message(f'Unchecking row {row_index}...')
+            utils.log_message(f"Unchecking row {row_index}...")
             checkbox_index = model.index(row_index, 1)
-            model.setData(checkbox_index, QtCore.Qt.Unchecked, role=QtCore.Qt.CheckStateRole)
+            model.setData(
+                checkbox_index, QtCore.Qt.Unchecked, role=QtCore.Qt.CheckStateRole
+            )
             head_index = model.index(row_index, 0)
             notes_index = model.index(
-                ChecklistItemPropertyColumn.VALIDATION_NOTES.value,
-                1,
-                parent=head_index
+                ChecklistItemPropertyColumn.VALIDATION_NOTES.value, 1, parent=head_index
             )
-            model.setData(notes_index, '', role=QtCore.Qt.EditRole)
+            model.setData(notes_index, "", role=QtCore.Qt.EditRole)
 
     def automate_all_checks(self):
-        utils.log_message(f'automate_all_checks_called')
+        utils.log_message(f"automate_all_checks_called")
         model = self.checklist_checks_tv.model()
         for row_index in range(model.rowCount()):
             item_head_index = model.index(row_index, 0)
             automation_index = model.index(
-                ChecklistItemPropertyColumn.AUTOMATION.value,
-                1,
-                parent=item_head_index
+                ChecklistItemPropertyColumn.AUTOMATION.value, 1, parent=item_head_index
             )
-            automation_widget = (
-                self.checklist_checks_tv.indexWidget(automation_index))
+            automation_widget = self.checklist_checks_tv.indexWidget(automation_index)
             if automation_widget:
                 automation_widget.automator.perform_automation()
-
 
     def update_tab_page(self, index: int):
         if index == TabPages.REPORT.value:
@@ -168,28 +168,29 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
                         self.iface,
                         report,
                         current_checklist.report.algorithm_id,
-                        current_checklist.report.extra_parameters
+                        current_checklist.report.extra_parameters,
                     )
 
                 self.toggle_post_validation_elements(
-                    current_checklist.report is not None)
+                    current_checklist.report is not None
+                )
             else:
                 self.toggle_post_validation_elements(False)
 
             self.add_report_to_layer_metadata_pb.setEnabled(
-                self.validate_layer_rb.isChecked())
+                self.validate_layer_rb.isChecked()
+            )
 
     def get_current_checklist(self) -> typing.Optional[models.CheckList]:
         model = self.checklist_checks_tv.model()
-        return getattr(model, 'checklist', None)
+        return getattr(model, "checklist", None)
 
     def update_report(self) -> typing.Optional[typing.Dict]:
         if self.validate_layer_rb.isChecked():
             current_layer_idx = self.layer_chooser_lv.currentIndex()
             layer_model = self.layer_chooser_lv.model()
             layer_id = layer_model.data(
-                current_layer_idx,
-                role=LayerChooserDataRole.LAYER_IDENTIFIER.value
+                current_layer_idx, role=LayerChooserDataRole.LAYER_IDENTIFIER.value
             )
             if layer_id is not None:
                 project = QgsProject.instance()
@@ -205,17 +206,16 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.report_te.setDocument(serialized)
         return report
 
-    def toggle_post_validation_elements(
-            self,
-            enabled: bool
-    ):
+    def toggle_post_validation_elements(self, enabled: bool):
         self.run_post_validation_pb.setEnabled(enabled)
         self.configure_and_run_post_validation_pb.setEnabled(enabled)
         if enabled:
             self.run_post_validation_pb.clicked.connect(
-                self.report_handler.handle_report)
+                self.report_handler.handle_report
+            )
             self.configure_and_run_post_validation_pb.clicked.connect(
-                self.report_handler.configure_and_handle_report)
+                self.report_handler.configure_and_handle_report
+            )
         else:
             try:
                 self.run_post_validation_pb.clicked.disconnect()
@@ -252,43 +252,44 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             # `doc.print` does not return a value, so this is a hacky way to
             # check if the file was saved correctly
             self.iface.messageBar().pushMessage(
-                'Success',
-                'Validation report saved!',
-                level=Qgis.Info
+                "Success", "Validation report saved!", level=Qgis.Info
             )
         else:
             self.iface.messageBar().pushMessage(
-                'Error',
-                f'Could not save validation report to: {output}',
-                level=Qgis.Critical
+                "Error",
+                f"Could not save validation report to: {output}",
+                level=Qgis.Critical,
             )
 
     def add_report_to_layer_metadata(self):
         report = self.generate_report(dataset=self.dataset)
         add_report_to_layer(report, self.dataset)
         self.iface.messageBar().pushMessage(
-            'Success', 'Validation report added to layer metadata!',
-            level=Qgis.Info
+            "Success", "Validation report added to layer metadata!", level=Qgis.Info
         )
 
-    def selected_layer_changed(self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex):
+    def selected_layer_changed(
+        self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex
+    ):
         # NOTE: This method does not get called when list item is deselected
         self.dataset = self._get_current_layer()
         if self.dataset:
             self.load_checklist_steps(current, previous)
 
     def load_checklist_steps(
-            self,
-            current: QtCore.QModelIndex,
-            previous: QtCore.QModelIndex
+        self, current: QtCore.QModelIndex, previous: QtCore.QModelIndex
     ):
-        utils.log_message(f'inside load_checklist_steps selected_checklist: {self.selected_checklist}')
-        utils.log_message(f'selected_checklist checks: {self.selected_checklist.checks}')
+        utils.log_message(
+            f"inside load_checklist_steps selected_checklist: {self.selected_checklist}"
+        )
+        utils.log_message(
+            f"selected_checklist checks: {self.selected_checklist.checks}"
+        )
         for head_check in self.selected_checklist.checks:
             head_check: models.ChecklistItemHead
             utils.log_message(
-                f'check {head_check.name} description: '
-                f'{head_check.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]}'
+                f"check {head_check.name} description: "
+                f"{head_check.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]}"
             )
         checklist_checks_model = models.CheckListItemsModel(self.selected_checklist)
         self.checklist_checks_tv.setModel(checklist_checks_model)
@@ -308,9 +309,15 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             head_index = model.index(head_row, 0)
             item_head: models.ChecklistItemHead = head_index.internalPointer().ref
             if item_head.automation.algorithm_id is not None:
-                automation_index = model.index(ChecklistItemPropertyColumn.AUTOMATION.value, 1, head_index)
-                automation_widget = AutomationButtonsWidget(checklist_item_head_index=head_index, dataset=self.dataset)
-                self.checklist_checks_tv.setIndexWidget(automation_index, automation_widget)
+                automation_index = model.index(
+                    ChecklistItemPropertyColumn.AUTOMATION.value, 1, head_index
+                )
+                automation_widget = AutomationButtonsWidget(
+                    checklist_item_head_index=head_index, dataset=self.dataset
+                )
+                self.checklist_checks_tv.setIndexWidget(
+                    automation_index, automation_widget
+                )
 
     def force_model_update(self):
         model = self.checklist_checks_tv.model()
@@ -319,14 +326,14 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             properties = (
                 ChecklistItemPropertyColumn.DESCRIPTION.value,
                 ChecklistItemPropertyColumn.GUIDE.value,
-                ChecklistItemPropertyColumn.VALIDATION_NOTES.value
+                ChecklistItemPropertyColumn.VALIDATION_NOTES.value,
             )
             for property_row in properties:
                 property_index = model.index(property_row, 1, parent)
                 model.dataChanged.emit(property_index, property_index)
 
     def selected_file_changed(self, raw_path: str):
-        utils.log_message(f'selected_file_changed raw_path: {raw_path}')
+        utils.log_message(f"selected_file_changed raw_path: {raw_path}")
         if raw_path and self.validate_file_rb.isChecked():
             self.toggle_other_pages(True)
             self.dataset = Path(raw_path).expanduser().resolve()
@@ -344,7 +351,9 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.layer_chooser_lv.setEnabled(True)
             self.file_chooser.setEnabled(False)
             try:
-                current_layer_selection: QtCore.QItemSelection = self.layer_chooser_lv.selectionModel().selection()
+                current_layer_selection: QtCore.QItemSelection = (
+                    self.layer_chooser_lv.selectionModel().selection()
+                )
             except AttributeError:
                 pass
             else:
@@ -355,9 +364,7 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.selected_file_changed(self.file_chooser.filePath())
 
     def selected_layer_selection_changed(
-            self,
-            selected: QtCore.QItemSelection,
-            deselected: QtCore.QItemSelection
+        self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection
     ):
         if len(selected.indexes()) > 0 and self.validate_layer_rb.isChecked():
             self.toggle_other_pages(True)
@@ -369,21 +376,20 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
 
     def _get_current_layer(self) -> typing.Optional[QgsMapLayer]:
         current_layer_idx = self.layer_chooser_lv.currentIndex()
-        utils.log_message(f'current_layer_idx: {current_layer_idx}')
+        utils.log_message(f"current_layer_idx: {current_layer_idx}")
         result = None
         if current_layer_idx != QtCore.QModelIndex():
             layer_model = self.layer_chooser_lv.model()
             layer_id = layer_model.data(
-                current_layer_idx,
-                role=LayerChooserDataRole.LAYER_IDENTIFIER.value
+                current_layer_idx, role=LayerChooserDataRole.LAYER_IDENTIFIER.value
             )
-            utils.log_message(f'layer_id: {layer_id}')
+            utils.log_message(f"layer_id: {layer_id}")
             layer_model = self.layer_chooser_lv.model()
             project = QgsProject.instance()
             try:
                 result = project.mapLayers()[layer_id]
             except KeyError:
-                utils.log_message(f'Unable to load layer {layer_id}')
+                utils.log_message(f"Unable to load layer {layer_id}")
         return result
 
     def show_checklist_picker(self):
@@ -396,18 +402,19 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
     def load_checklist(self):
         selected_indexes = self.checklist_picker_dlg.checklists_tv.selectedIndexes()
         if any(selected_indexes):
-            self.selected_checklist = self.get_selected_checklist(
-                selected_indexes[0])
-            log_message(f'the selected checklist is: {self.selected_checklist.name}')
+            self.selected_checklist = self.get_selected_checklist(selected_indexes[0])
+            log_message(f"the selected checklist is: {self.selected_checklist.name}")
             self.reset_loaded_checklist()
             self.load_checklist_elements(self.selected_checklist)
         else:
-            log_message('no checklist was selected')
+            log_message("no checklist was selected")
 
     def get_selected_checklist(self, index: QtCore.QModelIndex) -> models.CheckList:
         model = index.model()
         identifier_item = model.item(index.row(), ChecklistModelColumn.IDENTIFIER.value)
-        result = identifier_item.data(role=CustomDataRoles.CHECKLIST_DOWNLOADER_IDENTIFIER.value)
+        result = identifier_item.data(
+            role=CustomDataRoles.CHECKLIST_DOWNLOADER_IDENTIFIER.value
+        )
         return result
 
     def load_checklist_elements(self, checklist: models.CheckList):
@@ -443,15 +450,19 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.layer_chooser_lv.setEnabled(True)
             model = get_list_view_layers(checklist.dataset_type)
             self.layer_chooser_lv.setModel(model)
-            selection_model: QtCore.QItemSelectionModel = self.layer_chooser_lv.selectionModel()
-            log_message(f'selection_model: {selection_model}')
+            selection_model: QtCore.QItemSelectionModel = (
+                self.layer_chooser_lv.selectionModel()
+            )
+            log_message(f"selection_model: {selection_model}")
             selection_model.currentChanged.connect(self.selected_layer_changed)
-            selection_model.selectionChanged.connect(self.selected_layer_selection_changed)
+            selection_model.selectionChanged.connect(
+                self.selected_layer_selection_changed
+            )
 
     def enable_dataset_chooser_elements(
-            self,
-            dataset_type: DatasetType,
-            validation_artifact_type: ValidationArtifactType
+        self,
+        dataset_type: DatasetType,
+        validation_artifact_type: ValidationArtifactType,
     ):
         enable_layer_chooser = False
         enable_file_chooser = False
@@ -475,10 +486,14 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
             self.layer_chooser_lv.setEnabled(True)
             model = get_list_view_layers(dataset_type)
             self.layer_chooser_lv.setModel(model)
-            selection_model: QtCore.QItemSelectionModel = self.layer_chooser_lv.selectionModel()
-            log_message(f'selection_model: {selection_model}')
+            selection_model: QtCore.QItemSelectionModel = (
+                self.layer_chooser_lv.selectionModel()
+            )
+            log_message(f"selection_model: {selection_model}")
             selection_model.currentChanged.connect(self.selected_layer_changed)
-            selection_model.selectionChanged.connect(self.selected_layer_selection_changed)
+            selection_model.selectionChanged.connect(
+                self.selected_layer_selection_changed
+            )
 
     def reset_loaded_checklist(self):
         self.tab_widget.setTabEnabled(TabPages.VALIDATE.value, False)
@@ -502,7 +517,6 @@ class DatasetQaWorkbenchDock(QtWidgets.QDockWidget, FORM_CLASS):
         # TODO: clear loaded layers list view
         # TODO: clear file chooser
 
-
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         self.closingPlugin.emit()
         event.accept()
@@ -517,8 +531,8 @@ def get_list_view_layers(dataset_type: DatasetType) -> QtGui.QStandardItemModel:
             item.setData(id_, LayerChooserDataRole.LAYER_IDENTIFIER.value)
             result.appendRow([item])
             log_message(
-                f'retrieving layer id from the '
-                f'item: {item.data(LayerChooserDataRole.LAYER_IDENTIFIER.value)}'
+                f"retrieving layer id from the "
+                f"item: {item.data(LayerChooserDataRole.LAYER_IDENTIFIER.value)}"
             )
     return result
 
@@ -533,41 +547,47 @@ def get_legal_layers(dataset_type: models.DatasetType) -> typing.Dict[str, QgsMa
 
 
 def get_report_contents(
-        checklist_items: models.CheckListItemsModel,
-        dataset: typing.Union[QgsMapLayer, str]
+    checklist_items: models.CheckListItemsModel, dataset: typing.Union[QgsMapLayer, str]
 ) -> typing.Dict:
     if isinstance(dataset, QgsMapLayer):
         name = dataset.name()
     else:
         name = dataset
     result = {
-        'name': 'Validation report',
-        'validator': utils.get_qgis_variable(
-            f'{QGIS_VARIABLE_PREFIX}_validator',
-            'user_full_name'
+        "name": "Validation report",
+        "validator": utils.get_qgis_variable(
+            f"{QGIS_VARIABLE_PREFIX}_validator", "user_full_name"
         ),
-        'generated': dt.datetime.now(dt.timezone.utc).isoformat(),
-        'dataset': name,
-        'dataset_is_valid': checklist_items.result,
-        'checklist': checklist_items.checklist.name,
-        'dataset_type': checklist_items.checklist.dataset_type.value,
-        'artifact_type': checklist_items.checklist.validation_artifact_type.value,
-        'description': checklist_items.checklist.description,
-        'checks': []
+        "generated": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "dataset": name,
+        "dataset_is_valid": checklist_items.result,
+        "checklist": checklist_items.checklist.name,
+        "dataset_type": checklist_items.checklist.dataset_type.value,
+        "artifact_type": checklist_items.checklist.validation_artifact_type.value,
+        "description": checklist_items.checklist.description,
+        "checks": [],
     }
     for row in range(checklist_items.rowCount()):
         name_idx = checklist_items.index(row, 0)
         node = name_idx.internalPointer()
         checklist_head: models.ChecklistItemHead = node.ref
-        description_prop: models.ChecklistItemProperty = checklist_head.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]
-        notes_prop: models.ChecklistItemProperty = checklist_head.check_properties[ChecklistItemPropertyColumn.VALIDATION_NOTES.value]
+        description_prop: models.ChecklistItemProperty = (
+            checklist_head.check_properties[
+                ChecklistItemPropertyColumn.DESCRIPTION.value
+            ]
+        )
+        notes_prop: models.ChecklistItemProperty = checklist_head.check_properties[
+            ChecklistItemPropertyColumn.VALIDATION_NOTES.value
+        ]
         check = {
-            'name': checklist_head.name,
-            'validated': True if checklist_head.validated == QtCore.Qt.Checked else False,
-            'description': checklist_head.description,
-            'notes': checklist_head.validation_notes,
+            "name": checklist_head.name,
+            "validated": True
+            if checklist_head.validated == QtCore.Qt.Checked
+            else False,
+            "description": checklist_head.description,
+            "notes": checklist_head.validation_notes,
         }
-        result['checks'].append(check)
+        result["checks"].append(check)
     return result
 
 
@@ -585,7 +605,7 @@ def add_report_to_layer(report: typing.Dict, layer: QgsMapLayer):
     history: typing.List = metadata.history()
     history.append(history_msg)
     abstract: str = metadata.abstract()
-    abstract = '\n\n---\n\n'.join((abstract, abstract_msg))
+    abstract = "\n\n---\n\n".join((abstract, abstract_msg))
     metadata.setAbstract(abstract)
     metadata.setHistory(history)
     layer.setMetadata(metadata)
@@ -593,6 +613,6 @@ def add_report_to_layer(report: typing.Dict, layer: QgsMapLayer):
 
 def get_report_path(raw_path: str) -> Path:
     result = Path(raw_path).expanduser().resolve()
-    if result.suffix.lower() != '.pdf':
-        result = result.parent / f'{result.name}.pdf'
+    if result.suffix.lower() != ".pdf":
+        result = result.parent / f"{result.name}.pdf"
     return result

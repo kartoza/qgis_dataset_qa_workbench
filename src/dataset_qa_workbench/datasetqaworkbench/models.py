@@ -32,27 +32,28 @@ class ChecklistAutomationProperty(ChecklistItemProperty):
     negate_output: bool
 
     def __init__(
-            self,
-            name: str,
-            value: typing.Optional[typing.Dict] = None,
+        self,
+        name: str,
+        value: typing.Optional[typing.Dict] = None,
     ):
         super().__init__(name, value)
         automation_info = dict(value) if value is not None else {}
-        self.algorithm_id = automation_info.get('algorithm_id')
+        self.algorithm_id = automation_info.get("algorithm_id")
         self.artifact_parameter_name = automation_info.get(
-            'artifact_parameter_name', 'INPUT_LAYER')
-        self.output_name = automation_info.get('output_name', 'OUTPUT')
-        self.negate_output = automation_info.get('negate_output', False)
-        self.extra_parameters = automation_info.get('extra_parameters', {})
+            "artifact_parameter_name", "INPUT_LAYER"
+        )
+        self.output_name = automation_info.get("output_name", "OUTPUT")
+        self.negate_output = automation_info.get("negate_output", False)
+        self.extra_parameters = automation_info.get("extra_parameters", {})
 
     def to_dict(self):
         if self.algorithm_id is not None:
             result = {
-                'algorithm_id': self.algorithm_id,
-                'artifact_parameter_name': self.artifact_parameter_name,
-                'output_name': self.output_name,
-                'negate_output': self.negate_output,
-                'extra_parameters': self.extra_parameters
+                "algorithm_id": self.algorithm_id,
+                "artifact_parameter_name": self.artifact_parameter_name,
+                "output_name": self.output_name,
+                "negate_output": self.negate_output,
+                "extra_parameters": self.extra_parameters,
             }
         else:
             result = None
@@ -75,16 +76,24 @@ class ChecklistItemHead:
         # description, rather than having to call
         # ``check.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value].value``
         if item == ChecklistItemPropertyColumn.DESCRIPTION.name.lower():
-            prop: ChecklistItemProperty = self.check_properties[ChecklistItemPropertyColumn.DESCRIPTION.value]
+            prop: ChecklistItemProperty = self.check_properties[
+                ChecklistItemPropertyColumn.DESCRIPTION.value
+            ]
             result = prop.value
         elif item == ChecklistItemPropertyColumn.GUIDE.name.lower():
-            prop: ChecklistItemProperty = self.check_properties[ChecklistItemPropertyColumn.GUIDE.value]
+            prop: ChecklistItemProperty = self.check_properties[
+                ChecklistItemPropertyColumn.GUIDE.value
+            ]
             result = prop.value
         elif item == ChecklistItemPropertyColumn.AUTOMATION.name.lower():
-            prop: ChecklistAutomationProperty = self.check_properties[ChecklistItemPropertyColumn.AUTOMATION.value]
+            prop: ChecklistAutomationProperty = self.check_properties[
+                ChecklistItemPropertyColumn.AUTOMATION.value
+            ]
             result = prop
         elif item == ChecklistItemPropertyColumn.VALIDATION_NOTES.name.lower():
-            prop: ChecklistItemProperty = self.check_properties[ChecklistItemPropertyColumn.VALIDATION_NOTES.value]
+            prop: ChecklistItemProperty = self.check_properties[
+                ChecklistItemPropertyColumn.VALIDATION_NOTES.value
+            ]
             result = prop.value
         else:
             raise AttributeError
@@ -94,10 +103,10 @@ class ChecklistItemHead:
         self,
         include_notes: bool = True,
         include_result: bool = True,
-        include_automation: bool = False
+        include_automation: bool = False,
     ):
         result = {
-            'name': self.name,
+            "name": self.name,
             ChecklistItemPropertyColumn.DESCRIPTION.name.lower(): self.description,
             ChecklistItemPropertyColumn.GUIDE.name.lower(): self.guide,
         }
@@ -106,24 +115,30 @@ class ChecklistItemHead:
         if include_automation:
             serialized_automation = self.automation.to_dict()
             if serialized_automation is not None:
-                result[ChecklistItemPropertyColumn.AUTOMATION.name.lower()] = serialized_automation
+                result[
+                    ChecklistItemPropertyColumn.AUTOMATION.name.lower()
+                ] = serialized_automation
         if include_result:
-            result['validated'] = bool(self.validated)
+            result["validated"] = bool(self.validated)
         return result
 
     @staticmethod
     def _decode_notes_column_name():
-        return ChecklistItemPropertyColumn.VALIDATION_NOTES.name.replace('_', ' ').capitalize()
+        return ChecklistItemPropertyColumn.VALIDATION_NOTES.name.replace(
+            "_", " "
+        ).capitalize()
 
     @classmethod
     def from_dict(cls, raw: typing.Dict):
         check_properties = []
-        for item in sorted(ChecklistItemPropertyColumn.__members__.values(), key=lambda m: m.value):
+        for item in sorted(
+            ChecklistItemPropertyColumn.__members__.values(), key=lambda m: m.value
+        ):
             name = item.name.lower()
             if item == ChecklistItemPropertyColumn.AUTOMATION:
                 prop = ChecklistAutomationProperty(name, raw.get(name))
             elif item == ChecklistItemPropertyColumn.VALIDATION_NOTES:
-                prop = ChecklistItemProperty(cls._decode_notes_column_name(), '')
+                prop = ChecklistItemProperty(cls._decode_notes_column_name(), "")
             else:
                 prop = ChecklistItemProperty(name, raw.get(name))
             check_properties.append(prop)
@@ -134,7 +149,7 @@ class ChecklistItemHead:
         #     ChecklistAutomationProperty(ChecklistItemPropertyColumn.AUTOMATION.name.lower(), raw.get('automation')),
         #     ChecklistItemProperty(cls._decode_notes_column_name(), ''),
         # ]
-        return cls(raw['name'], check_properties)
+        return cls(raw["name"], check_properties)
 
 
 class ChecklistReport:
@@ -142,21 +157,15 @@ class ChecklistReport:
     extra_parameters: typing.Dict
 
     def __init__(
-            self,
-            algorithm_id: str,
-            extra_parameters: typing.Optional[typing.Dict] = None
+        self, algorithm_id: str, extra_parameters: typing.Optional[typing.Dict] = None
     ):
         self.algorithm_id = algorithm_id
-        self.extra_parameters = (
-            extra_parameters.copy() if extra_parameters else {})
+        self.extra_parameters = extra_parameters.copy() if extra_parameters else {}
 
     @classmethod
     def from_dict(cls, raw: typing.Dict):
         try:
-            report = cls(
-                raw['algorithm_id'],
-                raw.get('extra_parameters')
-            )
+            report = cls(raw["algorithm_id"], raw.get("extra_parameters"))
         except KeyError:
             raise
         return report
@@ -172,12 +181,12 @@ class CheckList:
     report: typing.Optional[ChecklistReport]
 
     def __init__(
-            self,
-            name: str,
-            description: str,
-            dataset_type: DatasetType,
-            validation_artifact_type: ValidationArtifactType,
-            report: typing.Optional[ChecklistReport] = None,
+        self,
+        name: str,
+        description: str,
+        dataset_type: DatasetType,
+        validation_artifact_type: ValidationArtifactType,
+        report: typing.Optional[ChecklistReport] = None,
     ):
         self.identifier = uuid.uuid4()
         self.name = name
@@ -188,50 +197,50 @@ class CheckList:
         self.report = report
 
     def to_dict(
-            self,
-            include_check_notes: bool = True,
-            include_check_results: bool = True,
-            include_check_automation: bool = False,
-            include_report_configuration: bool = False,
+        self,
+        include_check_notes: bool = True,
+        include_check_results: bool = True,
+        include_check_automation: bool = False,
+        include_report_configuration: bool = False,
     ):
         result = {
-            'name': self.name,
-            'description': self.description,
-            'dataset_type': self.dataset_type.value,
-            'validation_artifact_type': self.validation_artifact_type.value,
-            'checks': []
+            "name": self.name,
+            "description": self.description,
+            "dataset_type": self.dataset_type.value,
+            "validation_artifact_type": self.validation_artifact_type.value,
+            "checks": [],
         }
         if include_report_configuration and self.report is not None:
-            result['report'] = {
-                'algorithm_id': self.report.algorithm_id,
-                'extra_parameters': self.report.extra_parameters,
+            result["report"] = {
+                "algorithm_id": self.report.algorithm_id,
+                "extra_parameters": self.report.extra_parameters,
             }
         for check in self.checks:
             check_dict = check.to_dict(
                 include_notes=include_check_notes,
                 include_result=include_check_results,
-                include_automation=include_check_automation
+                include_automation=include_check_automation,
             )
-            result['checks'].append(check_dict)
+            result["checks"].append(check_dict)
         return result
-
 
     @classmethod
     def from_dict(cls, raw: typing.Dict):
-        raw_report = raw.get('report')
+        raw_report = raw.get("report")
         report = ChecklistReport.from_dict(raw_report) if raw_report else None
         try:
             instance = cls(
-                name=raw['name'],
-                description=raw.get('description', ''),
-                dataset_type=DatasetType(raw['dataset_type']),
+                name=raw["name"],
+                description=raw.get("description", ""),
+                dataset_type=DatasetType(raw["dataset_type"]),
                 validation_artifact_type=ValidationArtifactType(
-                    raw['validation_artifact_type']),
-                report=report
+                    raw["validation_artifact_type"]
+                ),
+                report=report,
             )
         except KeyError:
             raise
-        for raw_check in raw.get('checks', []):
+        for raw_check in raw.get("checks", []):
             try:
                 checklist_head = ChecklistItemHead.from_dict(raw_check)
             except KeyError:
@@ -301,10 +310,14 @@ class CheckListItemsModel(utils.TreeModel):
                     elif index.column() == 1:
                         pass
                     else:
-                        raise RuntimeError(f'Invalid column: {index.column()}')
+                        raise RuntimeError(f"Invalid column: {index.column()}")
                 elif role == Qt.CheckStateRole and index.column() == 1:
                     result = check_head.validated
-                elif role == Qt.BackgroundRole and index.column() == 1 and check_head.validated == Qt.Checked:
+                elif (
+                    role == Qt.BackgroundRole
+                    and index.column() == 1
+                    and check_head.validated == Qt.Checked
+                ):
                     result = QtGui.QColor(Qt.green)
             else:  # it is a checklist property
                 check_head: ChecklistItemHead = index.parent().internalPointer().ref
@@ -315,22 +328,24 @@ class CheckListItemsModel(utils.TreeModel):
                     elif index.column() == 1:
                         if index.row() == ChecklistItemPropertyColumn.AUTOMATION.value:
                             if check_head.automation is None:
-                                result = 'Not enabled'
+                                result = "Not enabled"
                             else:
                                 pass
                         else:
                             result = check_property.value
                     else:
-                        raise RuntimeError(f'Invalid column: {index.column()}')
+                        raise RuntimeError(f"Invalid column: {index.column()}")
         return result
 
-    def headerData(self, section: int, orientation: Qt.Orientation, role: Qt = Qt.DisplayRole) -> typing.Any:
+    def headerData(
+        self, section: int, orientation: Qt.Orientation, role: Qt = Qt.DisplayRole
+    ) -> typing.Any:
         result = None
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             if section == 0:
-                result = 'Check'
+                result = "Check"
             elif section == 1:
-                result = 'Validated'
+                result = "Validated"
         return result
 
     def flags(self, index: QtCore.QModelIndex) -> QtCore.Qt.ItemFlags:
@@ -340,7 +355,10 @@ class CheckListItemsModel(utils.TreeModel):
                 if index.column() == 1:
                     result = result | Qt.ItemIsEditable | Qt.ItemIsUserCheckable
             else:
-                if index.row() == ChecklistItemPropertyColumn.VALIDATION_NOTES.value and index.column() == 1:
+                if (
+                    index.row() == ChecklistItemPropertyColumn.VALIDATION_NOTES.value
+                    and index.column() == 1
+                ):
                     result = result | Qt.ItemIsEditable
         return result
 
@@ -348,7 +366,7 @@ class CheckListItemsModel(utils.TreeModel):
         self,
         index: QtCore.QModelIndex,
         value: typing.Any,
-        role: Qt.UserRole = Qt.EditRole
+        role: Qt.UserRole = Qt.EditRole,
     ) -> bool:
         result = False
         if index.isValid():
@@ -376,9 +394,7 @@ class ChecklistItemsModelDelegate(QtWidgets.QStyledItemDelegate):
         super().__init__(*args, **kwargs)
 
     def sizeHint(
-            self,
-            option: QtWidgets.QStyleOptionViewItem,
-            index: QtCore.QModelIndex
+        self, option: QtWidgets.QStyleOptionViewItem, index: QtCore.QModelIndex
     ) -> QtCore.QSize:
         is_first_level = index.parent() == QtCore.QModelIndex()
         multiline_columns = (
@@ -398,7 +414,7 @@ class ChecklistItemsModelDelegate(QtWidgets.QStyledItemDelegate):
             out_rect: QtCore.QRect = metrics.boundingRect(
                 QtCore.QRect(QtCore.QPoint(0, 0), base_size),
                 Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap,
-                text_to_draw
+                text_to_draw,
             )
             base_size.setHeight(out_rect.height())
             result = base_size
@@ -420,13 +436,17 @@ def load_checklists() -> typing.List[CheckList]:
     directory = utils.get_checklists_dir()
     result = []
     for item in directory.iterdir():
-        utils.log_message(f'loading file {item}...')
+        utils.log_message(f"loading file {item}...")
         if item.is_file():
-            with item.open(encoding="utf-8") as fh:  # TODO: use the same encoding used by QGIS
+            with item.open(
+                encoding="utf-8"
+            ) as fh:  # TODO: use the same encoding used by QGIS
                 try:
                     raw_data = json.load(fh)
                     checklist = CheckList.from_dict(raw_data)
                     result.append(checklist)
                 except (UnicodeDecodeError, ValueError, KeyError) as exc:
-                    utils.log_message(f'Could not generate checklist from {str(item)!r} because: {exc}')
+                    utils.log_message(
+                        f"Could not generate checklist from {str(item)!r} because: {exc}"
+                    )
     return result

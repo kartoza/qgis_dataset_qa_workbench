@@ -6,8 +6,10 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction
 
 from ..processing_provider.provider import DatasetQaWorkbenchProvider
+
 # Initialize Qt resources from file resources.py
 from .resources import *
+
 # Import the code for the dialog
 from .dataset_qa_workbench_dock import DatasetQaWorkbenchDock
 from .utils import log_message
@@ -21,14 +23,13 @@ class DatasetQaWorkbench:
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
         try:
-            locale = QSettings().value('locale/userLocale')[0:2]
+            locale = QSettings().value("locale/userLocale")[0:2]
         except TypeError:
             pass  # ignore translation stuff
         else:
             locale_path = os.path.join(
-                self.plugin_dir,
-                'i18n',
-                'DatasetQaWorkbench_{}.qm'.format(locale))
+                self.plugin_dir, "i18n", "DatasetQaWorkbench_{}.qm".format(locale)
+            )
 
             if os.path.exists(locale_path):
                 self.translator = QTranslator()
@@ -37,7 +38,7 @@ class DatasetQaWorkbench:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&Dataset QA Workbench')
+        self.menu = self.tr("&Dataset QA Workbench")
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -58,8 +59,7 @@ class DatasetQaWorkbench:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('DatasetQaWorkbench', message)
-
+        return QCoreApplication.translate("DatasetQaWorkbench", message)
 
     def add_action(
         self,
@@ -72,7 +72,7 @@ class DatasetQaWorkbench:
         status_tip=None,
         whats_this=None,
         togglable=False,
-        parent=None
+        parent=None,
     ):
         """Add a toolbar icon to the toolbar.
 
@@ -133,9 +133,7 @@ class DatasetQaWorkbench:
             self.iface.addToolBarIcon(action)
 
         if add_to_menu:
-            self.iface.addPluginToMenu(
-                self.menu,
-                action)
+            self.iface.addPluginToMenu(self.menu, action)
 
         self.actions.append(action)
 
@@ -149,15 +147,16 @@ class DatasetQaWorkbench:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        log_message('inside initGui...')
+        log_message("inside initGui...")
         self.initProcessing()
-        icon_path = ':/plugins/dataset_qa_workbench/clipboard-check-solid.svg'
+        icon_path = ":/plugins/dataset_qa_workbench/clipboard-check-solid.svg"
         self.add_action(
             icon_path,
-            text=self.tr(u'Dataset QA Workbench'),
+            text=self.tr("Dataset QA Workbench"),
             callback=self.run,
             togglable=True,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow(),
+        )
 
         # will be set False in run()
         self.first_start = True
@@ -171,16 +170,13 @@ class DatasetQaWorkbench:
         processing_registry = QgsApplication.processingRegistry()
         processing_registry.removeProvider(self.processing_provider)
         for action in self.actions:
-            self.iface.removePluginMenu(
-                self.tr(u'&Dataset QA Workbench'),
-                action)
+            self.iface.removePluginMenu(self.tr("&Dataset QA Workbench"), action)
             self.iface.removeToolBarIcon(action)
-
 
     def run(self, checked: bool):
         """Run method that performs all the real work"""
 
-        log_message(f'inside run method - checked: {checked}')
+        log_message(f"inside run method - checked: {checked}")
         if checked:
             self.plugin_is_active = True
             if self.dock_widget is None:
