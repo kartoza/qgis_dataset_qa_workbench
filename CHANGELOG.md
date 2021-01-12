@@ -6,7 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [0.8.0] - 2021-01-12
+
+### Added
 - Added new sample checklist for raster files
+- Added mkdocs as the base for plugin documentation
+- Added github actions based workflows for CI, releases and docs
+
+### Changed
+- Reinstated the custom plugin repository, to serve as a testbed before uploading 
+  plugins to the official QGIS repo. It can be found at 
+  https://kartoza.github.io/qgis_dataset_qa_workbench/repo/plugins.xml
 
 
 ## [0.7.1] - 2020-09-18
@@ -162,7 +174,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Initial project structure
 
 
-[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.7.1...master
+[unreleased]: https://github.com/kartoza/qgis_checklist_checker/compare/v0.8.0...master
+[0.8.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.8.0
 [0.7.1]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.7.1
 [0.7.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.7.0
 [0.6.0]: https://github.com/kartoza/qgis_checklist_checker/-/tags/v0.6.0

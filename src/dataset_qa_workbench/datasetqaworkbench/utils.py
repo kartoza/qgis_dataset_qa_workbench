@@ -2,7 +2,7 @@ import typing
 from pathlib import Path
 from sys import getfilesystemencoding
 
-import processing
+from qgis import processing
 from qgis.core import (
     Qgis,
     QgsApplication,
@@ -24,15 +24,14 @@ from .constants import DatasetType
 
 def log_message(message: str, level: typing.Optional[str] = None):
     msg_level = {
-        'warning': Qgis.Warning,
-        'critical': Qgis.Critical,
+        "warning": Qgis.Warning,
+        "critical": Qgis.Critical,
     }.get(level, Qgis.Info)
-    QgsMessageLog.logMessage(message, 'dataset_qa_workbench', level=msg_level)
+    QgsMessageLog.logMessage(message, "dataset_qa_workbench", level=msg_level)
 
 
 def get_qgis_variable(
-        name: str,
-        fallback_name: typing.Optional[str] = None
+    name: str, fallback_name: typing.Optional[str] = None
 ) -> typing.Optional[str]:
     global_scope = QgsExpressionContextUtils.globalScope()
     value = global_scope.variable(name)
@@ -47,9 +46,9 @@ def get_qgis_variable(
 
 def get_checklists_dir() -> Path:
     base_dir = get_profile_base_path()
-    checklists_dir = base_dir / 'checklists'
+    checklists_dir = base_dir / "checklists"
     if not checklists_dir.is_dir():
-        log_message(f'Creating checklists directory at {checklists_dir}...')
+        log_message(f"Creating checklists directory at {checklists_dir}...")
         checklists_dir.mkdir(parents=True, exist_ok=True)
     return checklists_dir
 
@@ -66,7 +65,6 @@ def match_maplayer_type(type_: QgsMapLayerType) -> typing.Optional[DatasetType]:
 
 
 class TreeNode:
-
     def __init__(self, parent, row):
         self.parent = parent
         self.row = row
@@ -77,7 +75,6 @@ class TreeNode:
 
 
 class TreeModel(QAbstractItemModel):
-
     def __init__(self):
         super().__init__()
         self.root_nodes = self._get_root_nodes()
@@ -85,7 +82,12 @@ class TreeModel(QAbstractItemModel):
     def _get_root_nodes(self):
         raise NotImplementedError
 
-    def index(self, row: int, column: int, parent: typing.Optional[QtCore.QModelIndex] = QtCore.QModelIndex()):
+    def index(
+        self,
+        row: int,
+        column: int,
+        parent: typing.Optional[QtCore.QModelIndex] = QtCore.QModelIndex(),
+    ):
         if not parent.isValid():
             result = self.createIndex(row, column, self.root_nodes[row])
         else:
@@ -119,82 +121,84 @@ class TreeModel(QAbstractItemModel):
 
 def serialize_report_to_plain_text(report: typing.Dict) -> str:
     validation_check_template_path = (
-        ':/plugins/dataset_qa_workbench/validation-report-check-template.txt')
+        ":/plugins/dataset_qa_workbench/validation-report-check-template.txt"
+    )
     check_template_fh = QtCore.QFile(validation_check_template_path)
     check_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-    check_template = check_template_fh.readAll().data().decode(
-        getfilesystemencoding())
+    check_template = check_template_fh.readAll().data().decode(getfilesystemencoding())
     check_template_fh.close()
     rendered_checks = []
-    log_message('Rendering checks...')
-    for check in report.get('checks', []):
+    log_message("Rendering checks...")
+    for check in report.get("checks", []):
         rendered = check_template.format(
-            check_name=check['name'],
-            validated='YES' if check['validated'] else 'NO',
-            description=check['description'],
-            notes=check['notes'].replace('{', '{{').replace('}', '}}'),
+            check_name=check["name"],
+            validated="YES" if check["validated"] else "NO",
+            description=check["description"],
+            notes=check["notes"].replace("{", "{{").replace("}", "}}"),
         )
-        log_message(f'check {rendered}')
+        log_message(f"check {rendered}")
         rendered_checks.append(rendered)
-    log_message('Rendering final report...')
+    log_message("Rendering final report...")
     validation_report_template_path = (
-        ':/plugins/dataset_qa_workbench/validation-report-template.txt')
+        ":/plugins/dataset_qa_workbench/validation-report-template.txt"
+    )
     report_template_fh = QtCore.QFile(validation_report_template_path)
     report_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-    report_template = report_template_fh.readAll().data().decode(
-        getfilesystemencoding())
+    report_template = (
+        report_template_fh.readAll().data().decode(getfilesystemencoding())
+    )
     report_template_fh.close()
-    ready_to_render = report_template.replace(
-        '{checks}', '\n'.join(rendered_checks))
-    log_message(f'Replaced checks placeholder: {report_template}')
+    ready_to_render = report_template.replace("{checks}", "\n".join(rendered_checks))
+    log_message(f"Replaced checks placeholder: {report_template}")
     rendered_report = ready_to_render.format(
-        checklist_name=report['checklist'],
-        dataset_name=report['dataset'],
-        timestamp=report['generated'],
-        result=report['dataset_is_valid'],
-        author=report['validator'],
-        description=report['description'],
+        checklist_name=report["checklist"],
+        dataset_name=report["dataset"],
+        timestamp=report["generated"],
+        result=report["dataset_is_valid"],
+        author=report["validator"],
+        description=report["description"],
     )
     return rendered_report
 
 
 def serialize_report_to_html(report: typing.Dict) -> QtGui.QTextDocument:
     validation_check_template_path = (
-        ':/plugins/dataset_qa_workbench/validation-report-check-template.html')
+        ":/plugins/dataset_qa_workbench/validation-report-check-template.html"
+    )
     check_template_fh = QtCore.QFile(validation_check_template_path)
     check_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-    check_template = check_template_fh.readAll().data().decode(
-        getfilesystemencoding())
+    check_template = check_template_fh.readAll().data().decode(getfilesystemencoding())
     check_template_fh.close()
     rendered_checks = []
-    log_message('Rendering checks...')
-    for check in report.get('checks', []):
+    log_message("Rendering checks...")
+    for check in report.get("checks", []):
         rendered = check_template.format(
-            check_name=check['name'],
-            validated='YES' if check['validated'] else 'NO',
-            description=check['description'],
-            notes=check['notes'].replace('{', '{{').replace('}', '}}'),
+            check_name=check["name"],
+            validated="YES" if check["validated"] else "NO",
+            description=check["description"],
+            notes=check["notes"].replace("{", "{{").replace("}", "}}"),
         )
-        log_message(f'check {rendered}')
+        log_message(f"check {rendered}")
         rendered_checks.append(rendered)
-    log_message('Rendering final report...')
+    log_message("Rendering final report...")
     validation_report_template_path = (
-        ':/plugins/dataset_qa_workbench/validation-report-template.html')
+        ":/plugins/dataset_qa_workbench/validation-report-template.html"
+    )
     report_template_fh = QtCore.QFile(validation_report_template_path)
     report_template_fh.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-    report_template = report_template_fh.readAll().data().decode(
-        getfilesystemencoding())
+    report_template = (
+        report_template_fh.readAll().data().decode(getfilesystemencoding())
+    )
     report_template_fh.close()
-    ready_to_render = report_template.replace(
-        '{checks}', '\n'.join(rendered_checks))
-    log_message(f'Replaced checks placeholder: {report_template}')
+    ready_to_render = report_template.replace("{checks}", "\n".join(rendered_checks))
+    log_message(f"Replaced checks placeholder: {report_template}")
     rendered_report = ready_to_render.format(
-        checklist_name=report['checklist'],
-        dataset_name=report['dataset'],
-        timestamp=report['generated'],
-        result=report['dataset_is_valid'],
-        author=report['validator'],
-        description=report['description'],
+        checklist_name=report["checklist"],
+        dataset_name=report["dataset"],
+        timestamp=report["generated"],
+        result=report["dataset_is_valid"],
+        author=report["validator"],
+        description=report["description"],
     )
     doc = QtGui.QTextDocument()
     doc.setHtml(rendered_report)
@@ -202,8 +206,8 @@ def serialize_report_to_html(report: typing.Dict) -> QtGui.QTextDocument:
 
 
 def execute_algorithm_dialog(
-        algorithm: QgsProcessingAlgorithm,
-        params: typing.Dict,
+    algorithm: QgsProcessingAlgorithm,
+    params: typing.Dict,
 ) -> typing.Tuple[bool, typing.Optional[typing.Dict]]:
     """Executes an algorithm dialog
 

@@ -35,23 +35,22 @@ class BaseAlgorithm(QgsProcessingAlgorithm):
         return None
 
     def tr(self, string):
-        return QtCore.QCoreApplication.translate('Processing', string)
+        return QtCore.QCoreApplication.translate("Processing", string)
 
     def icon(self):
-        return QtGui.QIcon(
-            ':/plugins/dataset_qa_workbench/clipboard-check-solid.svg')
+        return QtGui.QIcon(":/plugins/dataset_qa_workbench/clipboard-check-solid.svg")
 
 
 def parse_as_expression(
-        raw_expression: str,
-        context: typing.Optional[QgsExpressionContext] = None,
-        default: typing.Optional[typing.Any] = None
+    raw_expression: str,
+    context: typing.Optional[QgsExpressionContext] = None,
+    default: typing.Optional[typing.Any] = None,
 ):
     expression = QgsExpression(raw_expression)
     if expression.hasParserError():
         raise RuntimeError(
-            f'Encountered error while parsing {raw_expression!r}: '
-            f'{expression.parserErrorString()}'
+            f"Encountered error while parsing {raw_expression!r}: "
+            f"{expression.parserErrorString()}"
         )
     if context is None:
         ctx = QgsExpressionContext()
@@ -61,7 +60,7 @@ def parse_as_expression(
     result = expression.evaluate(ctx)
     if expression.hasEvalError():
         raise ValueError(
-            f'Encountered error while evaluating {raw_expression!r}: '
-            f'{expression.evalErrorString()}'
+            f"Encountered error while evaluating {raw_expression!r}: "
+            f"{expression.evalErrorString()}"
         )
     return result if result is not None else default

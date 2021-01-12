@@ -2,11 +2,12 @@ from enum import Enum
 
 from PyQt5.QtCore import Qt
 
-SETTINGS_GROUP = 'PythonPlugins/dataset_qa_workbench'
+SETTINGS_GROUP = "PythonPlugins/dataset_qa_workbench"
 
-QGIS_VARIABLE_PREFIX = 'dataset_qa_workbench'
+QGIS_VARIABLE_PREFIX = "dataset_qa_workbench"
 
-REPORT_HANDLER_INPUT_NAME = 'INPUTREPORT'
+REPORT_HANDLER_INPUT_NAME = "INPUTREPORT"
+
 
 class DatasetType(Enum):
     DOCUMENT = "document"

@@ -14,7 +14,7 @@ _ALGORITHM_CLASSES = set()
 
 
 class DatasetQaWorkbenchProvider(QgsProcessingProvider):
-    IDENTIFIER: str = 'dataset_qa_workbench'
+    IDENTIFIER: str = "dataset_qa_workbench"
 
     def loadAlgorithms(self, *args, **kwargs):
         self.addAlgorithm(crschecker.CrsCheckerAlgorithm())
@@ -26,8 +26,7 @@ class DatasetQaWorkbenchProvider(QgsProcessingProvider):
         return self.IDENTIFIER
 
     def name(self):
-        return self.IDENTIFIER.replace('_', ' ').capitalize()
+        return self.IDENTIFIER.replace("_", " ").capitalize()
 
     def icon(self):
-        return QtGui.QIcon(
-            ':/plugins/dataset_qa_workbench/clipboard-check-solid.svg')
+        return QtGui.QIcon(":/plugins/dataset_qa_workbench/clipboard-check-solid.svg")
