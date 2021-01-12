@@ -7,3 +7,4 @@ docs/checklists
 .pytest_cache
 build
 dist
+*.egg-info

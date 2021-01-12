@@ -1,0 +1,68 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ci:
+    runs-on: ubuntu-20.04
+    container:
+      image: qgis/qgis:release-3_16
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: fix Python command
+        run: apt-get install python-is-python3
+
+      - name: Install poetry
+        uses: Gr1N/setup-poetry@v4
+
+      - name: Install pluginadmin dependencies
+        run: poetry install
+
+      - name: Check formatting
+        run: poetry run black --check src/qgis_dataset_qa_workbench
+
+      - name: Rebuild docs
+        run: poetry run mkdocs build
+
+      - name: Regenerate plugin repo XML
+        run: poetry run python pluginadmin.py --verbose generate-plugin-repo-xml
+
+# need to fix tests before uncommenting this
+#      - name: Install QGIS Python bindings inside virtualenv
+#        run: poetry run python pluginadmin.py --verbose install-qgis-into-venv
+#
+#      - name: Run tests
+#        run: poetry run pytest
+
+  publish-docs:
+    needs: ci
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-20.04
+    container:
+      image: qgis/qgis:release-3_16
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: fix Python command
+        run: apt-get install python-is-python3
+
+      - name: Install poetry
+        uses: Gr1N/setup-poetry@v4
+
+      - name: Install pluginadmin dependencies
+        run: poetry install
+
+      - name: generate plugin repo XML
+        run: poetry run python pluginadmin.py --verbose generate-plugin-repo-xml
+
+      - name: update docs
+        run: poetry run mkdocs gh-deploy --force

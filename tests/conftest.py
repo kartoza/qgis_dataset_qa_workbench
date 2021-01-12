@@ -3,9 +3,7 @@ from pathlib import Path
 import pytest
 import qgis.core
 
-from dataset_qa_workbench.datasetqaworkbench import dataset_qa_workbench_dock
-
-from .qgis_interface import QgisInterface
+from qgis_interface import QgisInterface
 
 
 @pytest.fixture(scope='session')

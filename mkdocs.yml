@@ -1,0 +1,33 @@
+site_name: QGIS Dataset QA Workbench Plugin
+
+repo_url: https://github.com/kartoza/qgis_dataset_qa_workbench
+repo_name: qgis_dataset_qa_workbench
+
+site_description: QGIS Dataset QA Workbench Plugin
+
+site_author: Kartoza
+
+nav:
+  - Home: 'index.md'
+  - About: 'about.md'
+  - User guide: 'user-guide.md'
+  - Development: 'development.md'
+  - QGIS Repo: 'repo/plugins.xml'
+
+theme:
+  name: material
+  palette:
+    primary: red
+    accent: purple
+    scheme: preference
+  icon:
+    logo: material/book-open
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+
+plugins:
+  - search

@@ -2,7 +2,7 @@ import typing
 from pathlib import Path
 from sys import getfilesystemencoding
 
-import processing
+from qgis import processing
 from qgis.core import (
     Qgis,
     QgsApplication,

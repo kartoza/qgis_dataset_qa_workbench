@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "qgis_dataset_qa_workbench"
-version = "0.7.1"
+name = "dataset_qa_workbench"
+version = "0.8.0"
 description = "A QGIS3 plugin for assisting in dataset quality assurance workflows"
-authors = ["Ricardo Garcia Silva <ricardo@kartoza.com>"]
+authors = ["Kartoza <info@kartoza.com>"]
 readme = "README.md"
 license = "GPL-3.0-only"
 
@@ -12,13 +12,17 @@ jsonschema = "^3.2.0"
 typer = "^0.3.2"
 pytest = "^6.0.2"
 pytest-qt = "^3.3.0"
-ipython = "^7.18.1"
 toml = "^0.10.1"
+httpx = "^0.16.1"
+mkdocs = "^1.1.2"
+pytest-xvfb = "^2.0.0"
+mkdocs-material = "^6.2.4"
+black = {version = "^20.8b1", allow-prereleases = true, python = "^3.8"}
 
 [tool.poetry.dev-dependencies]
 
-[tool.qgis-plugin.dev]
-profile = "default"
+[tool.pytest.ini_options]
+addopts = "--verbose --exitfirst"
 
 [tool.qgis-plugin.metadata]
 name = "Dataset QA Workbench"
@@ -41,8 +45,12 @@ tags = [
 ]
 category = "plugins"
 hasProcessingProvider = "yes"
-# about: dynamically pulled from the README.md file
-# changelog: dynamically pulled from the README.md file
+about = """\
+    This plugin allows loading checklists with steps that should be verified \
+    when doing dataset quality assurance (QA). Checklist items can be automated \
+    by using QGIS Processing algorithms\
+"""
+# changelog: dynamically pulled from the CHANGELOG.md file
 # description: dynamically pulled from the tool.poetry.description section
 # version: dynamically pulled from the tool.poetry.version section
 # author: dynamically pulled from the tool.poetry.authors section
@@ -50,5 +58,3 @@ hasProcessingProvider = "yes"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
-
-
