@@ -1,0 +1,1032 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="QGIS Dataset QA Workbench Plugin">
+      
+      
+      
+        <meta name="author" content="Kartoza">
+      
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.2.4">
+    
+    
+      
+        <title>User guide - QGIS Dataset QA Workbench Plugin</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.15aa0b43.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.75751829.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#ef5552">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="preference" data-md-color-primary="red" data-md-color-accent="purple">
+      
+        <script>matchMedia("(prefers-color-scheme: dark)").matches&&document.body.setAttribute("data-md-color-scheme","slate")</script>
+      
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#user-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href=".." title="QGIS Dataset QA Workbench Plugin" class="md-header-nav__button md-logo" aria-label="QGIS Dataset QA Workbench Plugin">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 12h7v1.5h-7m0-4h7V11h-7m0 3.5h7V16h-7m8-12H3a2 2 0 00-2 2v13a2 2 0 002 2h18a2 2 0 002-2V6a2 2 0 00-2-2m0 15h-9V6h9"/></svg>
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      <div class="md-header-nav__ellipsis">
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
+            QGIS Dataset QA Workbench Plugin
+          </span>
+        </div>
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
+            
+              User guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/kartoza/qgis_dataset_qa_workbench/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    qgis_dataset_qa_workbench
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="QGIS Dataset QA Workbench Plugin" class="md-nav__button md-logo" aria-label="QGIS Dataset QA Workbench Plugin">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 12h7v1.5h-7m0-4h7V11h-7m0 3.5h7V16h-7m8-12H3a2 2 0 00-2 2v13a2 2 0 002 2h18a2 2 0 002-2V6a2 2 0 00-2-2m0 15h-9V6h9"/></svg>
+
+    </a>
+    QGIS Dataset QA Workbench Plugin
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/kartoza/qgis_dataset_qa_workbench/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    qgis_dataset_qa_workbench
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+
+  <li class="md-nav__item">
+    <a href=".." class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+
+  <li class="md-nav__item">
+    <a href="../about/" class="md-nav__link">
+      About
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        User guide
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      User guide
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+    <nav class="md-nav" aria-label="Quickstart">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-sample-checklist-repository" class="md-nav__link">
+    Add sample checklist repository
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choose-checklist-to-perform-validation-with" class="md-nav__link">
+    Choose checklist to perform validation with
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#perform-validation-of-a-resource" class="md-nav__link">
+    Perform validation of a resource
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate-validation-report" class="md-nav__link">
+    Generate validation report
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-new-checklists" class="md-nav__link">
+    Creating new checklists
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating new checklists">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processing-algorithms-suitable-for-use-in-checklist-steps" class="md-nav__link">
+    Processing algorithms suitable for use in checklist steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-algorithms-suitable-for-use-in-post-validation-actions" class="md-nav__link">
+    Processing algorithms suitable for use in post validation actions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-custom-checklists" class="md-nav__link">
+    Validating custom checklists
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sharing-checklists-and-processing-algorithms-with-other-users" class="md-nav__link">
+    Sharing checklists and Processing algorithms with other users
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+
+  <li class="md-nav__item">
+    <a href="../development/" class="md-nav__link">
+      Development
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+
+  <li class="md-nav__item">
+    <a href="../repo/plugins.xml" class="md-nav__link">
+      QGIS Repo
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+    <nav class="md-nav" aria-label="Quickstart">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-sample-checklist-repository" class="md-nav__link">
+    Add sample checklist repository
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choose-checklist-to-perform-validation-with" class="md-nav__link">
+    Choose checklist to perform validation with
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#perform-validation-of-a-resource" class="md-nav__link">
+    Perform validation of a resource
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate-validation-report" class="md-nav__link">
+    Generate validation report
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-new-checklists" class="md-nav__link">
+    Creating new checklists
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating new checklists">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processing-algorithms-suitable-for-use-in-checklist-steps" class="md-nav__link">
+    Processing algorithms suitable for use in checklist steps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-algorithms-suitable-for-use-in-post-validation-actions" class="md-nav__link">
+    Processing algorithms suitable for use in post validation actions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-custom-checklists" class="md-nav__link">
+    Validating custom checklists
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sharing-checklists-and-processing-algorithms-with-other-users" class="md-nav__link">
+    Sharing checklists and Processing algorithms with other users
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/kartoza/qgis_dataset_qa_workbench/edit/master/docs/user-guide.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="user-guide">User guide<a class="headerlink" href="#user-guide" title="Permanent link">&para;</a></h1>
+<h2 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h2>
+<h3 id="add-sample-checklist-repository">Add sample checklist repository<a class="headerlink" href="#add-sample-checklist-repository" title="Permanent link">&para;</a></h3>
+<p>After having <a href="..#installation">installed</a> both this plugin and 
+the <a href="https://github.com/QGIS-Contribution/QGIS-ResourceSharing">QGIS Resource Sharing</a> plugin, add a new repo to QGIS Resource Sharing:</p>
+<ol>
+<li>
+<p>Navigate to <em>Plugins -&gt; Resource Sharing -&gt; Resource Sharing</em></p>
+</li>
+<li>
+<p>On the QGIS Resource Sharing dialog, go to <em>Settings -&gt; Add repository...</em></p>
+</li>
+<li>
+<p>Add the following repository:</p>
+<ul>
+<li>Name: QGIS Dataset QA Workbench demo</li>
+<li>URL: https://github.com/kartoza/qgis_dataset_qa_workbench.git</li>
+<li>Authentication: (Leave it blank)</li>
+</ul>
+</li>
+<li>
+<p>The new <em>QGIS Dataset QA Workbench demo</em> repository shall now be
+   displayed by the Resource Sharing plugin</p>
+</li>
+<li>
+<p>Navigate to the  <em>All collections</em> section and look for an entry named
+   <em>QGIS Dataset QA Workbench demo</em></p>
+</li>
+<li>
+<p>Press the <em>Install</em> button. The Resource Sharing plugin proceeds to
+   download and install some sample checklists to the
+   <code>{qgis-user-profile-dir}/checklists</code> directory.</p>
+</li>
+</ol>
+<h3 id="choose-checklist-to-perform-validation-with">Choose checklist to perform validation with<a class="headerlink" href="#choose-checklist-to-perform-validation-with" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>Open the QGIS Dataset QA Workbench dock (navigate to
+   <em>Plugins -&gt; Dataset QA Workbench -&gt; Dataset QA Workbench</em> or click the
+   plugin's icon <img src="resources/clipboard-check-solid.svg" width="20" />) and
+   navigate to the <em>Choose Checklist</em> tab</p>
+</li>
+<li>
+<p>Inside the plugin dock, navigate to <em>Choose Checklist -&gt; Choose...</em>.</p>
+</li>
+</ol>
+<p>In the dialog that opens, select one of the existing checklists. Take into
+   account the dataset type that it is applicable to (<em>document</em>, <em>vector</em> or
+   <em>raster</em>) and the artifact that it applies to (<em>dataset</em>, <em>metadata</em> or
+   <em>style</em>). Click the <em>OK</em> button to close this dialog. The checklist is loaded
+   and is ready to use.</p>
+<ol>
+<li>
+<p>Depending on the loaded checklist and its dataset and artifact types, select
+   if you want to:</p>
+<ul>
+<li>
+<p>a) Validate one of the currently loaded layers. If so, be sure to select
+  it on the list of layers shown in the plugin dock</p>
+</li>
+<li>
+<p>b) Validate an external file, by indicating its path on the local filesystem</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>Upon selecting one of these options, both the <em>Perform Validation</em> and
+   <em>Generate Report</em> tabs become selectable</p>
+<h3 id="perform-validation-of-a-resource">Perform validation of a resource<a class="headerlink" href="#perform-validation-of-a-resource" title="Permanent link">&para;</a></h3>
+<p>Move over to the <em>Perform Validation</em> tab where you are presented with a list
+of checklist steps to be validated. For each of these checks:</p>
+<ol>
+<li>
+<p>Read the <em>description</em> in order to understand what the current check is
+   about</p>
+</li>
+<li>
+<p>A checklist check can be validated in one of two ways:</p>
+<ul>
+<li>Manually - Follow the instructions provided by the <em>guide</em> section.
+  These should be detailed and practical enough in order to allow you to
+  properly validate the current checklist check.</li>
+</ul>
+</li>
+<li>
+<p>Automatically - If applicable, the validation may be performed by
+  pressing one of the two buttons present on the <em>automation</em> section.</p>
+<ul>
+<li>
+<p><em>Run</em> - Perform validation by using whatever predefined parameters have
+   been used by the checklist's designer</p>
+</li>
+<li>
+<p><em>Configure and run...</em> - Configure the check's validation parameters
+   and then run the validation procedure</p>
+</li>
+</ul>
+</li>
+<li>
+<p>After performing validation, you may optionally click the
+   <em>Validation notes</em> section and type down any relevant notes about the
+   process.</p>
+</li>
+</ol>
+<h3 id="generate-validation-report">Generate validation report<a class="headerlink" href="#generate-validation-report" title="Permanent link">&para;</a></h3>
+<p>After having validated all of the checklist's checks, move over to the
+<em>Generate Report</em> tab. This tab displays a summary of the validation process,
+with information related to:</p>
+<ul>
+<li>the dataset being validated</li>
+<li>the overall validation result</li>
+<li>
+<p>result of each check</p>
+</li>
+<li>
+<p>Customize the report's <em>Validated by</em> field</p>
+</li>
+</ul>
+<p>By default, the report uses whatever value is automatically generated by
+   QGIS in its global <code>user_full_name</code> variable. If you wish to provide a
+   different name:</p>
+<pre><code>1. Navigate to _Settings -&gt; Options... -&gt; Variables_
+
+2. Define a new variable named `dataset_qa_workbench`
+
+3. Set an appropriate value. The plugin will use it as the author of
+   validation reports
+</code></pre>
+<ol>
+<li>If applicable, the checklist may specify a post-validation action. In this
+   case, the <em>Run post validation</em> and <em>Configure and run post validation...</em>
+   buttons will be enabled.</li>
+</ol>
+<p>Post validation actions may be used for providing confirmation of the
+   validation procedure to some third-party. Some examples include emailing the
+   validation report to a list of recipients or POSTing the report to some
+   centralized host by using a suitable REST API</p>
+<ol>
+<li>
+<p>When checklists are designed to automatically share output reports,
+   additional variables must be configured within QGIS in order for the
+   reports to be shared effectively, outlined as follows:</p>
+<ul>
+<li>
+<p>Report poster: Sends the report to a remote host using an http POST</p>
+<ul>
+<li><code>dataset_qa_workbench_auth_config_id</code> (optional): the QGIS AuthID,
+  as configured with the QGIS authentication manager and linked to the
+  current user profile, represented as a string value, e.g. <code>'qauth01'</code>,
+  and used to authenticate with the remote host (where required).</li>
+<li><code>dataset_qa_workbench_endpoint</code>: the REST endpoint URL, represented
+  as a string value, e.g. <code>'https://service.example.com/REST'</code>.</li>
+</ul>
+</li>
+<li>
+<p>Report mailer: Sends the report to recipients via email</p>
+<ul>
+<li><code>dataset_qa_workbench_sender_address</code>: email address of the sender, used to
+  authenticate with the mail server and given as a string value, e.g. <code>'noreply@example.com'</code></li>
+<li><code>dataset_qa_workbench_sender_password</code>: sender address password for mailserver,
+  used to authenticate with the mail server and given as a string value, e.g. <code>'S3cret'</code></li>
+<li><code>dataset_qa_workbench_recipients</code>: list of intended recipients, given as a single
+  comma separated string, e.g. <code>'user01@example.com,user02@example.com,user03@example.com'</code></li>
+<li><code>dataset_qa_workbench_smtp_host</code>: SMTP mailserver host address, default <code>'smtp.gmail.com'</code></li>
+<li><code>dataset_qa_workbench_smtp_port</code>: SMTP port number as an integer, default <code>587</code></li>
+<li><code>dataset_qa_workbench_smtp_secure_connection</code>: a string value which describes the mail
+  server connection security type. Valid values are <code>'starttls'</code> (default) and <code>'ssl'</code>.
+  Use a blank string, <code>''</code>, to enforce no security policy (i.e. connect over http)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>Note that all of these elements may be configured globally for the current QGIS
+   user profile under the menu item for <em>Settings -&gt; Options... -&gt; Variables</em>.</p>
+<ol>
+<li>
+<p>If you are validating a loaded layer, the <em>Add validation report to layer
+   metadata</em> button will be enabled. In this case you have the option to
+   include the validation report in the layer's metadata. This modifies
+   existing layer metadata in two ways:</p>
+<ul>
+<li>
+<p>The full validation report is appended to the end of the metadata's
+  <em>Abstract</em>
+  field. Note that additional presses of the <em>Add validation report to
+  layer metadata</em> button cause the new report to be appended to whatever
+  was already written on the Abstract field (including any previous
+  validation reports that might be there)</p>
+</li>
+<li>
+<p>A new line is also appended to the metadata's <em>History</em> section. This
+  include's the validation report's generation timestamp and the overall
+  validation result</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Finally, the report may also be saved as a PDF file by selecting an
+   appropriate destination path in the <em>Save validation report to</em> text box
+   and then pressing the <em>Save</em> button</p>
+</li>
+</ol>
+<h2 id="creating-new-checklists">Creating new checklists<a class="headerlink" href="#creating-new-checklists" title="Permanent link">&para;</a></h2>
+<p>Checklists are stored locally on the QGIS user profile directory (accessible
+from QGIS by navigating to <em>Settings -&gt; User Profiles -&gt;
+Open Active Profile Folder...</em>) under the <em>checklists</em> directory.</p>
+<p>Installing a new checklist is simply a matter of placing a suitable file in
+this directory.</p>
+<p>Checklists are stored in <a href="https://www.json.org/json-en.html">json</a> format. They are defined as JSON objects and
+must conform to a predefined <a href="https://raw.githubusercontent.com/kartoza/qgis_dataset_qa_workbench/master/schemas/checklist-check.json">checklist schema</a>. Example checklist definition:</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;Sample checklist with action for emailing validation report&quot;,
+  &quot;description&quot;: &quot;This is just a sample checklist - be sure to delete it\n\nThis also demonstrates sending emails with the report of validation&quot;,
+  &quot;dataset_type&quot;: &quot;vector&quot;,
+  &quot;validation_artifact_type&quot;: &quot;dataset&quot;,
+  &quot;checks&quot;: [
+    {
+      &quot;name&quot;: &quot;geometry is valid&quot;,
+      &quot;description&quot;: &quot;Layer's geometry does not have invalid geometries.&quot;,
+      &quot;guide&quot;: &quot;Navigate to Vector -&gt; Geometry tools -&gt; Check Validity... and run the validity analysis tool. Afterwards check that there are no features on the `invalid output` layer&quot;,
+      &quot;automation&quot;: {
+        &quot;algorithm_id&quot;: &quot;qgis:checkvalidity&quot;,
+        &quot;artifact_parameter_name&quot;: &quot;INPUT_LAYER&quot;,
+        &quot;output_name&quot;: &quot;INVALID_COUNT&quot;,
+        &quot;negate_output&quot;: true
+      }
+    },
+    {
+      &quot;name&quot;: &quot;CRS is EPSG:4326&quot;,
+      &quot;description&quot;: &quot;Layer's Coordinate Reference System is lat-lon on WGS84 datum (i.e. EPSG code 4326)&quot;,
+      &quot;guide&quot;: &quot;Open the layer properties dialog, then navigate to the 'information' tab (should be the first one) and in the section called 'Information from provider' check if the 'CRS' field has a value of 'EPSG:4326 - WGS84 - Geographic'&quot;,
+      &quot;automation&quot;: {
+        &quot;algorithm_id&quot;: &quot;dataset_qa_workbench:crschecker&quot;,
+        &quot;artifact_parameter_name&quot;: &quot;INPUT_LAYER&quot;,
+        &quot;output_name&quot;: &quot;OUTPUT&quot;,
+        &quot;negate_output&quot;: false,
+        &quot;extra_parameters&quot;: {
+          &quot;INPUT_CRS&quot;: &quot;EPSG:4326&quot;
+        }
+      }
+    }
+  ],
+  &quot;report&quot;: {
+    &quot;algorithm_id&quot;: &quot;dataset_qa_workbench:reportmailer&quot;
+  }
+}
+</code></pre>
+<p>This plugin's code repository also features a
+<a href="https://github.com/kartoza/qgis_dataset_qa_workbench/tree/master/collections/dataset-qa-workbench-demo-checklists/checklists">collection of sample checklists</a> that may be studied in order to get a better
+grasp on how to define new checklists.</p>
+<p>Each checklist has the following mandatory properties:</p>
+<ul>
+<li>
+<p><code>name</code> - Name of the checklist. This is used as the checklist identifier in
+  the QGIS UI, therefore a checklist's name must be unique;</p>
+</li>
+<li>
+<p><code>description</code> - A short text explaining what the checklist is about;</p>
+</li>
+<li>
+<p><code>dataset_type</code> - The type of dataset that this checklist operates on. It
+  must be one of:</p>
+<ul>
+<li><code>document</code>;</li>
+<li><code>raster</code>;</li>
+<li><code>vector</code>.</li>
+</ul>
+</li>
+<li>
+<p><code>validation_artifact_type</code> - The type of artifact that this checklist
+  operates on. It must be one of:</p>
+<ul>
+<li><code>dataset</code>;</li>
+<li><code>metadata</code>;</li>
+<li><code>style</code>.</li>
+</ul>
+</li>
+</ul>
+<p>A checklist may also have the following optional properties:</p>
+<ul>
+<li>
+<p><code>checks</code> - A checklist may have a list of checks, that describe each
+  individual validation step.</p>
+<ul>
+<li>
+<p>Each checklist check is defined as a JSON object. It has the following
+  mandatory properties:</p>
+<ul>
+<li><code>name</code> - Name of the checklist step;</li>
+<li><code>description</code> - A short description explaining what the check is about;</li>
+<li><code>guide</code> - Small text specifying how a human operator might go ahead and
+  validate this check.</li>
+</ul>
+</li>
+<li>
+<p>A checklist check may also have the following optional properties:</p>
+<ul>
+<li><code>automation</code> - A JSON object that contains the configuration for the
+  automated execution of this validation check.</li>
+</ul>
+<p>The <code>automation</code> object has the following mandatory properties:</p>
+<pre><code>- `algorithm_id` - Identifier of the QGIS Processing algorithm used to
+  perform automation. It takes the form `provider:algorithm` (e.g.
+  `qgis:checkvalidity`). It can be retrieved from the QGIS Processing
+  toolbox by resting the mouse pointer on top of the desired algorithm
+</code></pre>
+<p>The <code>automation</code> object may have the following optional properties:</p>
+<pre><code>- `artifact_parameter_name` - Name of the algorithm parameter that
+  specifies which of the algorithm's parameters represents the artifact
+  currently being validated (e.g. `INPUT`, `INPUT_LAYER`). If not
+  specified, it will default to `INPUT_LAYER` - This value may be
+  retrieved from the Processing algorithm by opening up the algorithm’s
+  dialog and resting the mouse pointer on the relevant input;
+
+- `output_name` - Name of the algorithm parameter that specifies which
+  one of the algorithm's outputs holds the result of the validation. If
+  not specified, it will default to `OUTPUT`. This value may also be
+  retrieved from the algorithms dialog, in a similar
+  fashion as the `artifact_parameter_name` property;
+
+- `negate_output` - Whether to interpret a falsy result coming
+  from the processing algorithm as a sign of success in the validation.
+  This is sometimes desirable. Example: the `qgis:checkvalidity`
+  algorithm will return zero invalid features if a layer does not have
+  any invalid geometries. In this case, the zero must be interpreted as
+  a successful validation;
+
+- `extra_parameters` - Any additional parameters necessary for running
+  the processing algorithm. These may be used for configuring other
+  stuff related to the algorithm, such as the geometry validity
+  method (in the case of the `qgis:checkvalidity` algorithm). They are
+  passed straight to Processing. This property must be a JSON object.
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>report</code> - A JSON object with configuration of for a post validation action.
+  This action is implemented by means of an additional Processing algorithm,
+  which is fed the generated validation report as an input, was well as any
+  other parameters that may be needed. A <code>report</code> has the following mandatory
+  properties:</p>
+<ul>
+<li><code>algorithm_id</code> - Identifier of the QGIS Processing algorithm (or model)
+  used to perform the post validation. It is specified in a similar way as
+  the <code>check.algorithm_id</code> property, specified above</li>
+</ul>
+</li>
+</ul>
+<p>A <code>report</code> may also have the following optional properties:</p>
+<pre><code>- `extra_parameters` - Any additional parameters necessary for running
+  the processing algorithm. These may be used for configuring other
+  stuff related to the algorithm and have a similar description as the one
+  mentioned above for the `check.extra_parameters` property
+</code></pre>
+<h3 id="processing-algorithms-suitable-for-use-in-checklist-steps">Processing algorithms suitable for use in checklist steps<a class="headerlink" href="#processing-algorithms-suitable-for-use-in-checklist-steps" title="Permanent link">&para;</a></h3>
+<p>In order to be suitable for use as an automated validation step, a Processing
+algorithm must define some output that can be used for attesting whether
+the step succeeds or not. This means that it must be possible to convert the
+output to a <code>True/False</code> value.</p>
+<p>Most default QGIS Processing algorithms simply output a map layer with their
+results. These are not suitable for use in automated checklist validation
+steps as there is no clear way to determine the success condition for the
+validation. Other algorithms, like the <code>qgis:checkvalidity</code> algorithm, output
+both map layers and suitable numeric output results. These are suitable for
+using for automated validation.</p>
+<p>The QGIS Dataset QA Workbench algorithm provides some custom Processing
+algorithms that are specifically tailored for automated validation. These
+are also likely to increase in number in the future, as new version of the
+plugin are released. The current list of algorithms is:</p>
+<ul>
+<li>
+<p><code>dataset_qa_workbench:crschecker</code> - Allows checking if a layer's CRS
+  matches an expected value</p>
+</li>
+<li>
+<p><code>dataset_qa_workbench:xmlchecker</code> - Allows checking if an XML file has the
+  specified elements/attributes/values</p>
+</li>
+</ul>
+<p>You may also design your own custom Processing algorithms and then distribute
+them via the <a href="https://github.com/QGIS-Contribution/QGIS-ResourceSharing">QGIS Resource Sharing</a> plugin so that users can use them together
+with checklists from QGIS Dataset QA Workbench plugin.</p>
+<h3 id="processing-algorithms-suitable-for-use-in-post-validation-actions">Processing algorithms suitable for use in post validation actions<a class="headerlink" href="#processing-algorithms-suitable-for-use-in-post-validation-actions" title="Permanent link">&para;</a></h3>
+<p>In a similar fashion to the algorithms used for automating validation, the
+Processing algorithms that can be used to execute post validation actions also
+have specific requirements. It is not possible to reuse the standard QGIS
+Processing algorithms for this purpose. This plugin also ships with some
+suitable post validation algorithms, and it is also likely that future releases
+will expand on the list. Current algorithms suitable for post validation
+actions:</p>
+<ul>
+<li>
+<p><code>qa_dataset_workbench:reportmailer</code> - Allows sending a copy of the
+  validation report via email</p>
+</li>
+<li>
+<p><code>qa_dataset_workbench:reportposter</code> - Allows posting the validation report
+  to an online server that implements a suitable REST API.</p>
+</li>
+</ul>
+<h3 id="validating-custom-checklists">Validating custom checklists<a class="headerlink" href="#validating-custom-checklists" title="Permanent link">&para;</a></h3>
+<p>The structure of checklists is formally defined in a <a href="https://json-schema.org/">JSON Schema</a> file that is
+part of the plugin’s source code. This file can be inspected at:</p>
+<p>https://raw.githubusercontent.com/kartoza/qgis_dataset_qa_workbench/master/schemas/checklist-check.json</p>
+<p>JSON Schema files can be used to validate that a specific json object
+validates the schema. As such, it is desirable that every custom checklist be
+validated against the schema in order to ensure it works with the
+QGIS Dataset QA Workbench plugin.</p>
+<p>This validation may be done by either:</p>
+<ul>
+<li>using the <code>jsonschema</code> python package. Example:</li>
+</ul>
+<p><code># validating checklist with local jsonschema package
+  pipenv run jsonschema -i checklist-file.json schemas/checklist-check.json</code></p>
+<ul>
+<li>using any online json schema validator, such as the one available at:</li>
+</ul>
+<p>https://www.jsonschemavalidator.net/</p>
+<ul>
+<li><a href="https://www.jetbrains.com/help/pycharm/json.html#ws_json_schema_add_custom">Your IDE</a> might also support validating json files with a json schema.</li>
+</ul>
+<h2 id="sharing-checklists-and-processing-algorithms-with-other-users">Sharing checklists and Processing algorithms with other users<a class="headerlink" href="#sharing-checklists-and-processing-algorithms-with-other-users" title="Permanent link">&para;</a></h2>
+<p>This plugin leans on the capabilities provided by the <a href="https://github.com/QGIS-Contribution/QGIS-ResourceSharing">QGIS Resource Sharing</a>
+plugin and thus users are able to leverage that to share:</p>
+<ul>
+<li>Checklists</li>
+<li>Processing algorithms</li>
+<li>Processing models</li>
+</ul>
+<p>We recommend setting up a git repository with the following structure:</p>
+<pre><code>my-shareable-qgis-resources/
+  metadata.ini
+  collections/
+    my-shareable-collection/
+      checklists/
+        checklist1.json
+        checklist2.json
+      processing/
+        algorithm1.py
+        algorithm2.py
+      models/
+        model1.model3
+        model2.model3
+</code></pre>
+<p>Then put all checklists, algorithms, etc that are to be shared in there and
+simply provide the git repo's URL to your users. Consult the documentation of
+the <a href="https://github.com/QGIS-Contribution/QGIS-ResourceSharing">QGIS Resource Sharing</a> plugin for further information on this.</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../about/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                About
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../development/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Development
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/vendor.93c04032.min.js"></script>
+      <script src="../assets/javascripts/bundle.83e5331e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
+        app = initialize({
+          base: "..",
+          features: [],
+          search: Object.assign({
+            worker: "../assets/javascripts/worker/search.8c7e0a7e.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+    
+  </body>
+</html>

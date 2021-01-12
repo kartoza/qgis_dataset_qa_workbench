@@ -1,0 +1,21 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<plugins>
+<pyqgis_plugin name="Dataset QA Workbench" version="0.0.9">
+                <description><![CDATA[A QGIS3 plugin for assisting in dataset quality assurance workflows]]></description>
+                <about><![CDATA[This plugin allows loading checklists with steps that should be verified when doing dataset quality assurance (QA). Checklist items can be automated by using QGIS Processing algorithms]]></about>
+                <version>0.0.9</version>
+                <qgis_minimum_version>3.10</qgis_minimum_version>
+                <homepage><![CDATA[https://github.com/kartoza/qgis_dataset_qa_workbench]]></homepage>
+                <file_name>qgis_geonode.0.0.9.zip</file_name>
+                <icon>clipboard-check-solid.svg</icon>
+                <author_name><![CDATA[Kartoza]]></author_name>
+                <download_url>https://github.com/kartoza/qgis_geonode/releases/download/v0.0.9/qgis_geonode.0.0.9.zip</download_url>
+                <update_date>2021-01-12 14:29:28.494543+00:00</update_date>
+                <experimental>True</experimental>
+                <deprecated>False</deprecated>
+                <tracker><![CDATA[https://github.com/kartoza/qgis_dataset_qa_workbench/issues]]></tracker>
+                <repository><![CDATA[https://github.com/kartoza/qgis_dataset_qa_workbench]]></repository>
+                <tags><![CDATA[qa, qc, quality, assurance, control, checklist, check, validate]]></tags>
+                <server>False</server>
+            </pyqgis_plugin>
+</plugins>
