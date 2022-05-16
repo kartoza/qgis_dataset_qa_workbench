@@ -14,7 +14,7 @@ pytest = "^6.0.2"
 pytest-qt = "^3.3.0"
 toml = "^0.10.1"
 httpx = "^0.16.1"
-mkdocs = "^1.1.2"
+mkdocs = "^1.2.3"
 pytest-xvfb = "^2.0.0"
 mkdocs-material = "^6.2.4"
 black = {version = "^20.8b1", allow-prereleases = true, python = "^3.8"}
